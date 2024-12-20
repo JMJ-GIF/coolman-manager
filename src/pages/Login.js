@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Login.css';
+import './Login.scss';
 import LoginInputBox from '../components/LoginInputBox';
 import ArrowIcon from '../assets/icons/chevron-right.svg';
 import CoolmanIcon from '../assets/icons/coolman.svg';
@@ -24,7 +24,7 @@ function LoginPage() {
       <div className="login-frame">        
         <div className="login-container">
           <div className="login-header">            
-            <img src={CoolmanIcon} alt="로고" className="logo-team mobile-only" />            
+            <img src={CoolmanIcon} alt="로고" className="mobile-logo-team" />            
           </div>
           <div className="login-info">
             <form onSubmit={handleSubmit}>

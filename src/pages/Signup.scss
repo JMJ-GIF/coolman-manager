@@ -1,4 +1,4 @@
-@import '../assets/styles/variables.css';
+@import '../assets/styles/variables.scss';
 
 .signup-frame {
     width: 90%; 
@@ -21,11 +21,11 @@
 
 .signup-header {
     margin-bottom: 20px;
-}
 
-.signup-header h2 {    
-    margin-top: 20px; 
-    margin-bottom: 0; 
+    h2 {    
+        margin-top: 20px; 
+        margin-bottom: 0; 
+    }
 }
 
 .login-prompt {
@@ -40,10 +40,10 @@
     color: #808080;
     cursor: pointer;
     transition: color 0.3s ease, text-decoration-color 0.3s ease;
-}
 
-.login-link:hover {
-    color: #0d5bbf; 
-    text-decoration-color: #0d5bbf; 
-    text-decoration-thickness: 2px;
+    &:hover {
+        color: #0d5bbf; 
+        text-decoration-color: #0d5bbf; 
+        text-decoration-thickness: 2px;
+    }
 }

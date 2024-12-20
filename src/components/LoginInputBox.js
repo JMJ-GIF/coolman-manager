@@ -1,5 +1,5 @@
 import React from 'react';
-import './LoginInputBox.css';
+import './LoginInputBox.scss';
 
 function LoginInputBox() {
   return (    
