@@ -6,16 +6,7 @@
     --primary-color: #0d5bbf;
     --secondary-color: #D9D9D9;
     --text-color: #333;
-  }
-  
-  /* 화면 크기 */
-  .desktop-only {
-    display: none;
-  }
-  
-  .mobile-only {
-    display: none;
-  }
+}
   
   /* 배경 이미지 스타일링 */
   .img-background {
@@ -39,3 +30,8 @@
       z-index: 1;
     }
   }
+  .gray-background {
+    width: 100vw;
+    height: 100vh;
+    background-color: #F5F5F5;
+}
