@@ -1,8 +1,9 @@
 @import '../assets/styles/variables.scss';
 
 .signup-frame {
-    width: 90%; 
+    width: 60%; 
     height: 90%; 
+    max-width: 600px;
     position: absolute;
     top: 50%; 
     left: 50%;  
@@ -10,6 +11,7 @@
     background-color: white; 
     z-index: 2; 
     display: flex; 
+    justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
     border-radius: 10px; 
 }
@@ -17,33 +19,115 @@
 .signup-container {
     width: 100%;
     padding: clamp(30px, 2vw, 60px); 
-}
 
-.signup-header {
-    margin-bottom: 20px;
+    // 상위 Header를 정의
+    .signup-header {
+        margin-bottom: 20px;
 
-    h2 {    
-        margin-top: 20px; 
-        margin-bottom: 0; 
+        h2 {    
+            margin-top: 20px; 
+            margin-bottom: 0;                         
+        }
+
+        .login-prompt {                
+            display: flex;
+            justify-content: left;
+            align-items: left; 
+            gap: 5px; 
+
+            p {
+                font-size: var(--font-small);
+            }
+
+            .login-link {
+                text-decoration: underline;
+                color: #808080;
+                cursor: pointer;
+                transition: color 0.3s ease, text-decoration-color 0.3s ease;
+            
+                &:hover {
+                    color: #0d5bbf; 
+                    text-decoration-color: #0d5bbf; 
+                    text-decoration-thickness: 2px;
+                }
+            }
+        }        
+    }
+
+    // 중간 INFO를 정의
+    .signup-info {
+        margin-bottom: 20px;
+    }
+
+    // 하단 Footer를 정의함
+    .signup-footer {
+        margin-bottom: 0px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    
+        button {
+            width: 100%;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: var(--font-medium);
+            cursor: not-allowed;
+            background-color: #ccc;
+            color: white;
+            transition: background-color 0.3s ease, cursor 0.3s ease;
+        
+            &:not(:disabled) {
+              background-color: #007bff;
+              cursor: pointer;
+            }
+        }
+        
+        .role-selection {
+            width: 100%;
+            margin-bottom: 20px;
+        
+            p {
+                margin-bottom: 10px;
+                font-size: var(--font-small);
+                color: #333;
+            }
+    
+            .radio-group {
+                display: flex;
+                gap: 20px;
+        
+                label {
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+            
+                    input[type="radio"] {
+                        margin-right: 10px;
+                        accent-color: #0d5bbf;
+                    }
+                }
+            }
+        }
+    
+        .confirmation-message {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        
+            &.visible {
+                display: block;
+            }
+        
+            p {
+                font-size: var(--font-small);
+                color: #666;
+            }
+        }
     }
 }
 
-.login-prompt {
-    display: flex;
-    justify-content: left;
-    align-items: left; 
-    gap: 5px; 
-}
-
-.login-link {
-    text-decoration: underline;
-    color: #808080;
-    cursor: pointer;
-    transition: color 0.3s ease, text-decoration-color 0.3s ease;
-
-    &:hover {
-        color: #0d5bbf; 
-        text-decoration-color: #0d5bbf; 
-        text-decoration-thickness: 2px;
-    }
-}
+  

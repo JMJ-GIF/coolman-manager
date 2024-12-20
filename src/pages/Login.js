@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import './Login.scss';
 import LoginInputBox from '../components/LoginInputBox';
@@ -7,17 +7,30 @@ import CoolmanIcon from '../assets/icons/coolman.svg';
 import BandLogo from '../assets/icons/bandlogo.svg';
 
 function LoginPage() {
+  const [formData, setFormData] = useState({ username: "", password: "" });   
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault(); 
-    navigate('/home');    
+    if (formData.username && formData.password) {
+        navigate('/home');
+    }
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSignup = (e) => {
     e.preventDefault(); 
     navigate('/signup');
   };
+
+  const handleDemoNavigate = (e) => {
+    e.preventDefault(); 
+    navigate('/home');
+  };
+  const isFormValid = formData.username && formData.password;
 
   return (
     <div className="img-background">
@@ -28,15 +41,21 @@ function LoginPage() {
           </div>
           <div className="login-info">
             <form onSubmit={handleSubmit}>
-              <LoginInputBox />
-              <button type="submit">확인 
+              <LoginInputBox
+                      formData={formData} 
+                      handleInputChange={handleInputChange} 
+              /> 
+              <button type="submit" onClick={handleSubmit} disabled={!isFormValid}>확인 
                 <img src={ArrowIcon} alt="화살표 아이콘" className="icon" />
               </button>              
             </form>
           </div>          
           <div className="login-footer">
             <hr /> 
-            <p className="signup-link" onClick={handleSignup}> 회원가입하기</p>
+            <div className="footer-actions">
+              <p className="demo-link" onClick={handleDemoNavigate}>데모버전으로 이용하기</p>
+              <p className="signup-link" onClick={handleSignup}>회원가입하기</p>
+            </div>                        
           </div>
         </div>        
       </div>

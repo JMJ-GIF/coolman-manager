@@ -1,53 +1,5 @@
 @import '../assets/styles/variables.scss';
 
-.signup-frame {
-    width: 90%; 
-    height: 90%; 
-    position: absolute;
-    top: 50%; 
-    left: 50%;  
-    transform: translate(-50%, -50%);
-    background-color: white; 
-    z-index: 2; 
-    display: flex; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-    border-radius: 10px; 
-}
-
-.signup-container {
-    width: 100%;
-    padding: clamp(30px, 2vw, 60px); 
-}
-
-.signup-header {
-    margin-bottom: 20px;
-
-    h2 {    
-        margin-top: 20px; 
-        margin-bottom: 0; 
-    }
-}
-
-.login-prompt {
-    display: flex;
-    justify-content: left;
-    align-items: left; 
-    gap: 5px; 
-}
-
-.login-link {
-    text-decoration: underline;
-    color: #808080;
-    cursor: pointer;
-    transition: color 0.3s ease, text-decoration-color 0.3s ease;
-
-    &:hover {
-        color: #0d5bbf; 
-        text-decoration-color: #0d5bbf; 
-        text-decoration-thickness: 2px;
-    }
-}
-
 p {
     font-size: var(--font-medium);
 }
@@ -82,13 +34,13 @@ p {
     text-align: left; 
     margin-bottom: 40px;
 
-    button {
+    button {        
         width: 30%;
         display: flex;
-        font-size: var(--font-medium);
+        font-size: var(--font-small);
         align-items: center;
         justify-content: center; 
-        background-color: #1570EF;
+        background-color: #ccc;        
         color: #FFFFFF;
         border: none;
         border-radius: 5px;
@@ -103,6 +55,11 @@ p {
             transition: all 0.2s ease-in-out;
         }
 
+        &:not(:disabled) {
+            background-color: #1570EF;
+            cursor: pointer;
+        }
+
         img {
             width: 20px; 
             height: 20px;
@@ -110,16 +67,33 @@ p {
     }
 }
 
-.signup-link {
-    &:hover {
-        color: #0d5bbf; 
-        text-decoration: underline; 
-    }
-}
-
 .login-footer {
     text-align: right;
     margin-bottom: 0;
+
+    .footer-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: var(--font-medium);
+        margin-top: 10px;
+
+        .signup-link {
+            cursor: pointer;
+            &:hover {
+                color: #0d5bbf; 
+                text-decoration: underline; 
+            }
+        }
+    
+        .demo-link {
+            cursor: pointer;
+            &:hover {
+                color: #0d5bbf; 
+                text-decoration: underline; 
+            }
+        }
+    }    
 }
 
 .logo-frame {
@@ -162,7 +136,7 @@ p {
       z-index: 3;
       margin: 0 auto;
     }
-  }
+}
   
 
 /* 모바일 일때 */
@@ -193,4 +167,4 @@ p {
     .mobile-logo-team {
       display: none;
     }
-  }
+}
