@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./NavigationBar.scss";
 import profile_img from "../assets/images/coolman_profile.png";
@@ -7,7 +7,8 @@ function NavigationBar() {
     const location = useLocation();
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(true);
-    const [lastScrollY, setLastScrollY] = useState(0);
+    const lastScrollY = useRef(0); 
+    // const [lastScrollY, setLastScrollY] = useState(0);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const menuItems = [
@@ -18,26 +19,31 @@ function NavigationBar() {
         { label: "Gallery", route: "/gallery" },
     ];
 
-    const activeIndex = menuItems.findIndex((item) => item.route === location.pathname);
+    const activeIndex = menuItems.findIndex((item) => {        
+        return item.route === location.pathname;
+    });
 
     const handleScroll = () => {
-        const currentScrollY = window.scrollY;
-        if (currentScrollY > lastScrollY && currentScrollY > 50) {
-            setIsVisible(false);
-        } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
-            setIsVisible(true);
+        const scrollContainer = document.querySelector(".gray-background");
+        const currentScrollY = scrollContainer.scrollTop;
+
+        if (currentScrollY > lastScrollY.current) {
+            setIsVisible(false); 
+        } else if (currentScrollY < lastScrollY.current ) {
+            setIsVisible(true); 
         }
-        setLastScrollY(currentScrollY);
+
+        lastScrollY.current = currentScrollY; 
     };
 
     useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
-        document.body.style.paddingTop = "30px";
+        const scrollContainer = document.querySelector(".gray-background");
+
+        scrollContainer.addEventListener("scroll", handleScroll);
         return () => {
-            window.removeEventListener("scroll", handleScroll);
-            document.body.style.paddingTop = "0px"; // 복구
+            scrollContainer.removeEventListener("scroll", handleScroll);
         };
-    }, [lastScrollY]);
+    }, []);
 
     return (
         <div className={`navigation-bar ${isVisible ? "visible" : "hidden"}`}>

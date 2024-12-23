@@ -7,13 +7,18 @@
     padding: 0 20px;
     background-color: white;
     border-bottom: 1px solid #E0E0E0;
+    border-left: 1px solid #E0E0E0; 
+    border-right: 1px solid #E0E0E0;
     height: 60px;
     position: fixed;
+    max-width: 768px;
     top: 0;
-    left: 0;
+    // left: 50%;
+    // transform: translateX(+50%);
     width: 100%;
+    box-sizing: border-box;
     z-index: 1000;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;     
 
     &.hidden {
         transform: translateY(-100%);
@@ -67,7 +72,7 @@
         align-items: center;
         cursor: pointer;
         gap: 10px;
-        min-width: 180px;
+        min-width: 120px;
 
         .profile-photo {
             width: 40px;
@@ -114,7 +119,7 @@
         }
 
         .profile-section {
-            min-width: 100px;
+            min-width: 80px;
             gap: 8px; /* 갭 축소 */
             .profile-photo {
                 width: 30px; /* 모바일에서 더 작은 프로필 사진 */

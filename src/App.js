@@ -4,8 +4,8 @@ import LoginPage from './pages/Login'
 import SignupPage from './pages/Signup';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
-import Players from './pages/Matches';
-import Matches from './pages/Players';
+import Matches from './pages/Matches';
+import Players from './pages/Players';
 import Records from './pages/Records';
 import Gallery from './pages/Gallery';
 
