@@ -7,8 +7,7 @@ function NavigationBar() {
     const location = useLocation();
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(true);
-    const lastScrollY = useRef(0); 
-    // const [lastScrollY, setLastScrollY] = useState(0);
+    const lastScrollY = useRef(0);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const menuItems = [
@@ -19,29 +18,25 @@ function NavigationBar() {
         { label: "Gallery", route: "/gallery" },
     ];
 
-    const activeIndex = menuItems.findIndex((item) => {        
-        return item.route === location.pathname;
-    });
+    const activeIndex = menuItems.findIndex((item) => item.route === location.pathname);
 
+    // 스크롤 이벤트 핸들러
     const handleScroll = () => {
-        const scrollContainer = document.querySelector(".gray-background");
-        const currentScrollY = scrollContainer.scrollTop;
+        const currentScrollY = window.scrollY; // window 기준 스크롤 위치
 
         if (currentScrollY > lastScrollY.current) {
-            setIsVisible(false); 
-        } else if (currentScrollY < lastScrollY.current ) {
-            setIsVisible(true); 
+            setIsVisible(false); // 스크롤 내릴 때 숨김
+        } else if (currentScrollY < lastScrollY.current) {
+            setIsVisible(true); // 스크롤 올릴 때 보임
         }
 
-        lastScrollY.current = currentScrollY; 
+        lastScrollY.current = currentScrollY;
     };
 
     useEffect(() => {
-        const scrollContainer = document.querySelector(".gray-background");
-
-        scrollContainer.addEventListener("scroll", handleScroll);
+        window.addEventListener("scroll", handleScroll); // window 기준 스크롤 이벤트 등록
         return () => {
-            scrollContainer.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("scroll", handleScroll); // 클린업
         };
     }, []);
 

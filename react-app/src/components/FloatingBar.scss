@@ -1,0 +1,58 @@
+@import '../assets/styles/variables.scss';
+
+.floating-bar {
+    position: fixed;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0; // 버튼 간격 제거
+    background-color: #ffffff;
+    padding: 0;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    overflow: hidden; // 버튼이 바깥으로 나가지 않도록 설정
+    width: auto; // 기존 가로 크기를 유지
+    min-width: 200px; // 최소 너비 설정 (필요에 따라 조정 가능)
+    height: 50px; // 플로팅바 높이 설정
+}
+
+.action-button {
+    flex: 1; // 버튼이 동일한 비율로 공간을 차지
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0 10px; // 내부 여백
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    // 확인 버튼 스타일
+    &.confirm {
+        background-color: #007bff; // 파랑
+        color: #fff;
+
+        &:hover {
+            background-color: #0056b3; // 더 짙은 파랑
+        }
+    }
+
+    // 취소 버튼 스타일
+    &.cancel {
+        background-color: #ff4d4f; // 빨강
+        color: #fff;
+
+        &:hover {
+            background-color: #d9363e; // 더 짙은 빨강
+        }
+    }
+
+    // 버튼 구분선
+    &:not(:last-child) {
+        border-right: 1px solid #f0f0f0; // 중간 구분선
+    }
+}

@@ -6,7 +6,9 @@ function Players() {
     return (
         <div class="gray-background">
             <NavigationBar />
-            <h1>hi</h1>
+            <div className="content">
+                <h1>hi</h1>
+            </div>
         </div>      
     );
 }

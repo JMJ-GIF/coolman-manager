@@ -1,0 +1,152 @@
+@import '../assets/styles/variables.scss';
+
+.card-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+
+        h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        &:hover {
+            transform: translateY(-5px); // 호버 시 위로 이동
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // 호버 시 그림자 강조
+            cursor: pointer;
+        }
+
+        &:active {
+            transform: translateY(0); // 클릭 시 원래 위치로 복귀
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // 클릭 시 그림자 원래대로
+        }
+
+        &.editable {
+            cursor: pointer;
+
+            &:hover {
+                background-color: #f9f9f9;
+            }
+
+            .card-checkbox {
+                display: block; // 체크박스 활성화
+            }
+
+            .card-content {
+                margin-left: 40px; // 체크박스 공간 확보
+            }
+        }
+
+        .card-checkbox {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            display: none; // 기본 상태에서 숨김
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .card-content {
+            flex: 1;
+            display: flex; // 가로 나열
+            align-items: center;
+            justify-content: flex-start; // 왼쪽 정렬
+            gap: 10px; // 요소 간 간격
+            margin-left: 0; // 기본 상태에서 체크박스 공간 없음
+            transition: margin-left 0.3s ease; // 체크박스 활성화 시 부드럽게 이동
+        }
+
+        .card-title {
+            flex: 0 0 auto; // 고정 크기
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .card-description {
+            flex: 1; // 남은 공간 사용
+            color: #666;
+            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; // 한 줄로 표시
+        }
+    }
+}
+
+.load-more {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: #0056b3;
+    }
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    height: 50px;
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        animation: rotate 2s linear infinite;
+
+        .path {
+            stroke: var(--primary-color);
+            stroke-linecap: round;
+            animation: dash 1.5s ease-in-out infinite;
+        }
+    }
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash {
+    0% {
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -35;
+    }
+    100% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -124;
+    }
+}

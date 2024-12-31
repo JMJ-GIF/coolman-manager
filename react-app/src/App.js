@@ -8,6 +8,8 @@ import Matches from './pages/Matches';
 import Players from './pages/Players';
 import Records from './pages/Records';
 import Gallery from './pages/Gallery';
+import MatchesAdd from './pages/MatchesAdd';
+import MatchDetails from './pages/MatchDetails';
 
 export default function App() {
   return (
@@ -18,9 +20,11 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/matches" element={<Matches />} />
+        <Route path="/matches/:id" element={<MatchDetails />} />
         <Route path="/players" element={<Players />} />
         <Route path="/records" element={<Records />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/matches/add" element={<MatchesAdd />} />
       </Routes>
     </Router>
   );
