@@ -4,6 +4,7 @@
 /react-app/node_modules
 /.pnp
 .pnp.js
+/api/__pycache__
 
 # testing
 /coverage
@@ -24,3 +25,6 @@ yarn-error.log*
 
 # lock
 package-lock.json
+
+# python
+*.ipynb

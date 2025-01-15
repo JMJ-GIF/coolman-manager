@@ -8,8 +8,7 @@
     .card {
         background-color: #fff;
         border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
+        border-radius: 8px;        
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -25,9 +24,8 @@
         }
 
         p {
-            margin: 0;
-            color: #666;
-            font-size: 0.9rem;
+            margin: 0;            
+            font-size: 0.8rem;
         }
 
         &:hover {
@@ -49,49 +47,128 @@
             }
 
             .card-checkbox {
-                display: block; // 체크박스 활성화
+                display: block;
             }
 
             .card-content {
-                margin-left: 40px; // 체크박스 공간 확보
+                margin-right: 40px; 
             }
         }
 
         .card-checkbox {
             position: absolute;
             top: 50%;
-            left: 10px;
+            right: 10px;
             transform: translateY(-50%);
-            display: none; // 기본 상태에서 숨김
-            width: 20px;
-            height: 20px;
+            display: none; 
+            width: 15px;
+            height: 15px;
             cursor: pointer;
         }
 
         .card-content {
             flex: 1;
-            display: flex; // 가로 나열
+            display: flex; 
             align-items: center;
-            justify-content: flex-start; // 왼쪽 정렬
-            gap: 10px; // 요소 간 간격
-            margin-left: 0; // 기본 상태에서 체크박스 공간 없음
-            transition: margin-left 0.3s ease; // 체크박스 활성화 시 부드럽게 이동
+            justify-content: flex-start; 
+            gap: 15px;                         
+            transition: margin-right 0.3s ease; 
+
+            > div {
+                flex-shrink: 0;
+                overflow: hidden;
+                white-space: normal; 
+                word-wrap: break-word; 
+                word-break: break-word;                                                         
+            }
+
+
+            .flag-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;                
+                font-size: 0.9rem;
+                width: 50px;   
+                border-radius: 5px;                             
+                            
+                p:first-child {
+                    font-size: 0.5rem;
+                    margin-bottom: 5px;                    
+                }
+                            
+                p:last-child {
+                    text-transform: uppercase; 
+                    font-size: 0.7rem;                                     
+                    font-weight: bold;
+                }
+                            
+                &[data-result="승리"] {
+                    background-color: var(--background-win-color);
+                    color: #FFFFFF; 
+                }
+            
+                &[data-result="패배"] {
+                    background-color: var(--background-lose-color);
+                    color: #FFFFFF;
+                }
+            
+                &[data-result="무승부"] {
+                    background-color: #f0f0f0;
+                    color: #666; 
+                }
+            }
+
+            .team-info {
+                display: flex;
+                flex-direction: row;
+                width: 20%;
+                text-align: center;
+
+                p {
+                    margin: 10px;
+                    font-size: 0.7rem;
+                }
+            }
+
+            .score-info{
+                display: flex;
+                text-align: center;
+                width: 10%;
+                gap: 2px;
+
+                p {
+                    font-size: 0.7rem;
+                    font-weight: normal; 
+                }
+                
+                &[data-result="승리"] p:first-child {
+                    color: var(--background-win-color);
+                    font-weight: bold;
+                }
+
+                &[data-result="패배"] p:last-child {
+                    color: var(--background-lose-color);
+                    font-weight: bold;
+                }
+            }
+
+            .location-info{
+                display: flex;
+                width: 25%;
+                gap: 0.7rem;
+
+                img {
+                    width: 0.7rem;
+                }
+
+                p {                    
+                    font-size: 0.7rem;
+                }
+            }
+            
         }
 
-        .card-title {
-            flex: 0 0 auto; // 고정 크기
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .card-description {
-            flex: 1; // 남은 공간 사용
-            color: #666;
-            font-size: 0.9rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap; // 한 줄로 표시
-        }
     }
 }
 

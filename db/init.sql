@@ -50,32 +50,39 @@ CREATE TABLE IF NOT EXISTS matches (
     status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 );
+CREATE TABLE IF NOT EXISTS quarters (
+    quarter_idx SERIAL PRIMARY KEY,          
+    match_idx INT NOT NULL,                  
+    quarter_number INT NOT NULL,
+    tactics VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,             
+    FOREIGN KEY (match_idx) REFERENCES matches (match_idx) ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS goals (
     goal_idx SERIAL PRIMARY KEY,               
-    match_idx INT NOT NULL,                    
+    match_idx INT NOT NULL,   
+    quarter_idx INT NOT NULL,                 
     goal_player_id INT,               
     assist_player_id INT,  
-    goal_type VARCHAR(50) NOT NULL,            
-    quarter INT NOT NULL,                      
+    goal_type VARCHAR(50) NOT NULL,                                    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-    FOREIGN KEY (match_idx) REFERENCES matches (match_idx) ON DELETE CASCADE 
+    FOREIGN KEY (match_idx) REFERENCES matches (match_idx) ON DELETE CASCADE,
+    FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS positions (
     position_idx SERIAL PRIMARY KEY,               
     tactics VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL    
+    description VARCHAR(255) NOT NULL,
+    top_coordinate INT NOT NULL,
+    left_coordinate INT NOT NULL   
 );
-CREATE TABLE IF NOT EXISTS lineup (
-    lineup_idx SERIAL PRIMARY KEY,               
-    match_idx INT NOT NULL,
-    quarter INT NOT NULL,
-    tactics VARCHAR(255) NOT NULL
-);
-CREATE TABLE IF NOT EXISTS lineup_detail (
+CREATE TABLE IF NOT EXISTS quarters_lineup (
+    lineup_idx SERIAL PRIMARY KEY,
     player_idx INT NOT NULL,
-    lineup_idx INT NOT NULL, 
-    position_idx INT NOT NULL    
+    quarter_idx INT NOT NULL, 
+    position_idx INT NOT NULL ,
+    FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
 
@@ -114,222 +121,265 @@ VALUES
 ('2024-12-18', '승리', 5, 2, '스톰 팀', '코스탈 필드', '2024-12-18 16:00:00', '2024-12-18 17:45:00', '바람', 22, '4-3-3', 'Confirmed'),
 ('2024-12-19', '무승부', 0, 0, '불스 클럽', '해안 스타디움', '2024-12-19 19:00:00', '2024-12-19 20:45:00', '비', 22, '5-4-1', 'Confirmed'),
 ('2024-12-20', '승리', 4, 1, '팔콘스 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed');
-INSERT INTO goals (match_idx, goal_player_id, assist_player_id, goal_type, quarter)
-VALUES
-(1, 1, 2, '득점', 1),
-(1, 3, NULL, '실점', 2),
-(1, 4, 5, '자살골', 3),
-(1, 6, NULL, '패널티', 4),
-(2, 7, 8, '득점', 1),
-(2, 9, NULL, '실점', 2),
-(2, 10, 1, '자살골', 3),
-(2, 2, NULL, '패널티', 4),
-(3, 3, 4, '득점', 1),
-(3, 5, NULL, '실점', 2),
-(3, 6, 7, '자살골', 3),
-(3, 8, NULL, '패널티', 4),
-(4, 9, 10, '득점', 1),
-(4, 1, NULL, '실점', 2),
-(4, 2, 3, '자살골', 3),
-(4, 4, NULL, '패널티', 4),
-(5, 5, 6, '득점', 1),
-(5, 7, NULL, '실점', 2),
-(5, 8, 9, '자살골', 3),
-(5, 10, NULL, '패널티', 4),
-(6, 1, 2, '득점', 1),
-(6, 3, NULL, '실점', 2),
-(6, 4, 5, '자살골', 3),
-(6, 6, NULL, '패널티', 4),
-(7, 7, 8, '득점', 1),
-(7, 9, NULL, '실점', 2),
-(7, 10, 1, '자살골', 3),
-(7, 2, NULL, '패널티', 4);
-INSERT INTO positions (tactics, name, description)
+INSERT INTO quarters (quarter_idx, match_idx, quarter_number, tactics) VALUES
+(1, 1, 1, '3-4-3'),
+(2, 1, 2, '5-3-2'),
+(3, 1, 3, '4-3-3'),
+(4, 1, 4, '5-3-2'),
+(5, 2, 1, '4-4-2'),
+(6, 2, 2, '3-4-3'),
+(7, 2, 3, '4-4-2'),
+(8, 2, 4, '4-2-3-1'),
+(9, 3, 1, '4-2-3-1'),
+(10, 3, 2, '3-5-2'),
+(11, 3, 3, '3-5-2'),
+(12, 3, 4, '3-4-3'),
+(13, 4, 1, '3-4-3'),
+(14, 4, 2, '3-4-3'),
+(15, 4, 3, '4-2-3-1'),
+(16, 4, 4, '4-2-3-1'),
+(17, 5, 1, '4-2-3-1'),
+(18, 5, 2, '4-4-2'),
+(19, 5, 3, '5-3-2'),
+(20, 5, 4, '4-3-3'),
+(21, 6, 1, '5-3-2'),
+(22, 6, 2, '3-5-2'),
+(23, 6, 3, '4-2-3-1'),
+(24, 6, 4, '4-3-3'),
+(25, 7, 1, '4-3-3'),
+(26, 7, 2, '4-3-3'),
+(27, 7, 3, '5-3-2'),
+(28, 7, 4, '4-2-3-1'),
+(29, 8, 1, '3-5-2'),
+(30, 8, 2, '3-5-2'),
+(31, 8, 3, '4-2-3-1'),
+(32, 8, 4, '5-4-1'),
+(33, 9, 1, '4-2-3-1'),
+(34, 9, 2, '5-3-2'),
+(35, 9, 3, '5-3-2'),
+(36, 9, 4, '4-4-2'),
+(37, 10, 1, '4-2-3-1'),
+(38, 10, 2, '4-2-3-1'),
+(39, 10, 3, '5-3-2'),
+(40, 10, 4, '4-4-2'),
+(41, 11, 1, '4-4-2'),
+(42, 11, 2, '5-3-2'),
+(43, 11, 3, '3-5-2'),
+(44, 11, 4, '3-4-3'),
+(45, 12, 1, '5-4-1'),
+(46, 12, 2, '3-4-3'),
+(47, 12, 3, '4-4-2'),
+(48, 12, 4, '3-4-3'),
+(49, 13, 1, '5-3-2'),
+(50, 13, 2, '3-5-2'),
+(51, 13, 3, '4-3-3'),
+(52, 13, 4, '3-5-2'),
+(53, 14, 1, '3-4-3'),
+(54, 14, 2, '5-3-2'),
+(55, 14, 3, '4-3-3'),
+(56, 14, 4, '4-4-2'),
+(57, 15, 1, '3-5-2'),
+(58, 15, 2, '5-4-1'),
+(59, 15, 3, '3-5-2'),
+(60, 15, 4, '3-5-2'),
+(61, 16, 1, '4-2-3-1'),
+(62, 16, 2, '4-4-2'),
+(63, 16, 3, '4-2-3-1'),
+(64, 16, 4, '3-4-3'),
+(65, 17, 1, '4-3-3'),
+(66, 17, 2, '4-3-3'),
+(67, 17, 3, '5-3-2'),
+(68, 17, 4, '5-4-1'),
+(69, 18, 1, '5-4-1'),
+(70, 18, 2, '5-4-1'),
+(71, 18, 3, '4-2-3-1'),
+(72, 18, 4, '3-5-2'),
+(73, 19, 1, '4-2-3-1'),
+(74, 19, 2, '4-2-3-1'),
+(75, 19, 3, '4-4-2'),
+(76, 19, 4, '3-5-2'),
+(77, 20, 1, '5-4-1'),
+(78, 20, 2, '4-3-3'),
+(79, 20, 3, '5-4-1'),
+(80, 20, 4, '5-4-1');
+INSERT INTO goals (goal_idx, match_idx, quarter_idx, goal_player_id, assist_player_id, goal_type) VALUES
+(2, 1, 2, 9, 11, '득점'),
+(3, 1, 3, 2, 10, '득점'),
+(4, 1, 3, NULL, NULL, '실점'),
+(1, 1, 4, 10, 7, '득점'),
+(6, 2, 5, 7, 11, '득점'),
+(7, 2, 5, NULL, NULL, '실점'),
+(9, 2, 6, NULL, NULL, '실점'),
+(5, 2, 7, 4, 3, '득점'),
+(8, 2, 8, NULL, NULL, '실점'),
+(12, 3, 9, NULL, NULL, '실점'),
+(11, 3, 11, 11, 11, '득점'),
+(10, 3, 12, 7, 6, '득점'),
+(13, 3, 12, NULL, NULL, '실점'),
+(15, 4, 13, 10, NULL, '득점'),
+(17, 4, 14, 5, NULL, '득점'),
+(14, 4, 16, 3, 4, '득점'),
+(16, 4, 16, 4, NULL, '자살골'),
+(19, 5, 17, NULL, NULL, '실점'),
+(18, 5, 18, 11, 7, '득점'),
+(20, 5, 20, NULL, NULL, '실점'),
+(21, 6, 21, 8, NULL, '득점'),
+(22, 6, 21, 11, 6, '득점'),
+(24, 6, 22, NULL, NULL, '실점'),
+(23, 6, 23, 3, NULL, '득점'),
+(27, 7, 27, NULL, NULL, '실점'),
+(25, 7, 28, 8, NULL, '득점'),
+(26, 7, 28, 2, 8, '득점'),
+(29, 8, 31, NULL, NULL, '실점'),
+(28, 8, 32, 8, NULL, '득점'),
+(30, 9, 35, 8, NULL, '득점'),
+(31, 9, 36, NULL, NULL, '실점'),
+(32, 9, 36, NULL, NULL, '실점'),
+(33, 10, 37, 3, NULL, '득점'),
+(36, 10, 37, 4, NULL, '득점'),
+(38, 10, 37, NULL, NULL, '실점'),
+(37, 10, 38, 11, 6, '득점'),
+(40, 10, 38, NULL, NULL, '실점'),
+(34, 10, 39, 11, 5, '득점'),
+(35, 10, 39, 5, NULL, '득점'),
+(39, 10, 40, NULL, NULL, '실점'),
+(41, 11, 41, 7, NULL, '득점'),
+(42, 11, 41, 9, 5, '득점'),
+(45, 12, 47, NULL, NULL, '실점'),
+(43, 12, 48, NULL, NULL, '실점'),
+(44, 12, 48, NULL, NULL, '실점'),
+(46, 13, 49, 3, NULL, '자살골'),
+(48, 13, 50, 9, 2, '득점'),
+(51, 13, 50, NULL, NULL, '실점'),
+(47, 13, 51, 9, NULL, '자살골'),
+(49, 13, 52, 2, 11, '득점'),
+(50, 13, 52, NULL, NULL, '실점'),
+(57, 14, 53, NULL, NULL, '실점'),
+(52, 14, 55, 10, NULL, '득점'),
+(53, 14, 56, 2, 7, '득점'),
+(54, 14, 56, 7, NULL, '득점'),
+(55, 14, 56, NULL, NULL, '실점'),
+(56, 14, 56, NULL, NULL, '실점'),
+(59, 15, 57, NULL, NULL, '실점'),
+(58, 15, 58, 4, 10, '득점'),
+(60, 15, 59, NULL, NULL, '실점'),
+(64, 16, 62, NULL, NULL, '실점'),
+(62, 16, 63, 3, NULL, '득점'),
+(61, 16, 64, 10, 3, '득점'),
+(63, 16, 64, 7, NULL, '득점'),
+(65, 17, 66, NULL, NULL, '실점'),
+(71, 18, 69, NULL, NULL, '실점'),
+(68, 18, 70, 6, 6, '득점'),
+(69, 18, 70, 4, NULL, '득점'),
+(67, 18, 71, 1, NULL, '득점'),
+(66, 18, 72, 7, NULL, '득점'),
+(70, 18, 72, 2, NULL, '득점'),
+(72, 18, 72, NULL, NULL, '실점'),
+(77, 20, 78, NULL, NULL, '실점'),
+(73, 20, 79, 11, 11, '득점'),
+(75, 20, 79, 11, 10, '득점'),
+(74, 20, 80, 1, NULL, '득점'),
+(76, 20, 80, 10, NULL, '득점');
+INSERT INTO positions (tactics, name, description, top_coordinate, left_coordinate)
 VALUES
 -- 4-4-2 Formation
-('4-4-2', 'GK', 'Goalkeeper'),
-('4-4-2', 'RB', 'Right Back'),
-('4-4-2', 'LCB', 'Left Center Back'),
-('4-4-2', 'RCB', 'Right Center Back'),
-('4-4-2', 'LB', 'Left Back'),
-('4-4-2', 'RM', 'Right Midfielder'),
-('4-4-2', 'LCM', 'Left Central Midfielder'),
-('4-4-2', 'RCM', 'Right Central Midfielder'),
-('4-4-2', 'LM', 'Left Midfielder'),
-('4-4-2', 'LST', 'Left Striker'),
-('4-4-2', 'RST', 'Right Striker'),
+('4-4-2', 'GK', 'Goalkeeper', 85, 50), -- 골키퍼 위치 조정
+('4-4-2', 'RB', 'Right Back', 70, 80),
+('4-4-2', 'RCB', 'Right Center Back', 70, 65),
+('4-4-2', 'LCB', 'Left Center Back', 70, 35),
+('4-4-2', 'LB', 'Left Back', 70, 20),
+('4-4-2', 'RM', 'Right Midfielder', 50, 75),
+('4-4-2', 'RCM', 'Right Central Midfielder', 50, 60),
+('4-4-2', 'LCM', 'Left Central Midfielder', 50, 40),
+('4-4-2', 'LM', 'Left Midfielder', 50, 25),
+('4-4-2', 'RST', 'Right Striker', 25, 60),
+('4-4-2', 'LST', 'Left Striker', 25, 40),
 
 -- 4-3-3 Formation
-('4-3-3', 'GK', 'Goalkeeper'),
-('4-3-3', 'RB', 'Right Back'),
-('4-3-3', 'LCB', 'Left Center Back'),
-('4-3-3', 'RCB', 'Right Center Back'),
-('4-3-3', 'LB', 'Left Back'),
-('4-3-3', 'CDM', 'Central Defensive Midfielder'),
-('4-3-3', 'CM', 'Central Midfielder'),
-('4-3-3', 'CAM', 'Central Attacking Midfielder'),
-('4-3-3', 'RW', 'Right Winger'),
-('4-3-3', 'LW', 'Left Winger'),
-('4-3-3', 'CF', 'Center Forward'),
+('4-3-3', 'GK', 'Goalkeeper', 85, 50), -- 골키퍼 위치 조정
+('4-3-3', 'RB', 'Right Back', 70, 80),
+('4-3-3', 'RCB', 'Right Center Back', 70, 65),
+('4-3-3', 'LCB', 'Left Center Back', 70, 35),
+('4-3-3', 'LB', 'Left Back', 70, 20),
+('4-3-3', 'CDM', 'Central Defensive Midfielder', 55, 50),
+('4-3-3', 'RCM', 'Right Central Midfielder', 45, 65),
+('4-3-3', 'LCM', 'Left Central Midfielder', 45, 35),
+('4-3-3', 'RW', 'Right Winger', 25, 80),
+('4-3-3', 'LW', 'Left Winger', 25, 20),
+('4-3-3', 'CF', 'Center Forward', 25, 50),
 
 -- 3-5-2 Formation
-('3-5-2', 'GK', 'Goalkeeper'),
-('3-5-2', 'LCB', 'Left Center Back'),
-('3-5-2', 'CCB', 'Center Center Back'),
-('3-5-2', 'RCB', 'Right Center Back'),
-('3-5-2', 'RWB', 'Right Wing Back'),
-('3-5-2', 'LWB', 'Left Wing Back'),
-('3-5-2', 'CDM', 'Central Defensive Midfielder'),
-('3-5-2', 'CM', 'Central Midfielder'),
-('3-5-2', 'CAM', 'Central Attacking Midfielder'),
-('3-5-2', 'LST', 'Left Striker'),
-('3-5-2', 'RST', 'Right Striker'),
+('3-5-2', 'GK', 'Goalkeeper', 85, 50), -- 골키퍼 위치 조정
+('3-5-2', 'LCB', 'Left Center Back', 70, 30),
+('3-5-2', 'CCB', 'Center Center Back', 70, 50),
+('3-5-2', 'RCB', 'Right Center Back', 70, 70),
+('3-5-2', 'LWB', 'Left Wing Back', 60, 20),
+('3-5-2', 'RWB', 'Right Wing Back', 60, 80),
+('3-5-2', 'CDM', 'Central Defensive Midfielder', 50, 50),
+('3-5-2', 'CM', 'Central Midfielder', 40, 50),
+('3-5-2', 'CAM', 'Central Attacking Midfielder', 30, 50),
+('3-5-2', 'LST', 'Left Striker', 20, 35),
+('3-5-2', 'RST', 'Right Striker', 20, 65),
 
 -- 4-2-3-1 Formation
-('4-2-3-1', 'GK', 'Goalkeeper'),
-('4-2-3-1', 'RB', 'Right Back'),
-('4-2-3-1', 'LCB', 'Left Center Back'),
-('4-2-3-1', 'RCB', 'Right Center Back'),
-('4-2-3-1', 'LB', 'Left Back'),
-('4-2-3-1', 'LCDM', 'Left Central Defensive Midfielder'),
-('4-2-3-1', 'RCDM', 'Right Central Defensive Midfielder'),
-('4-2-3-1', 'RAM', 'Right Attacking Midfielder'),
-('4-2-3-1', 'CAM', 'Central Attacking Midfielder'),
-('4-2-3-1', 'LAM', 'Left Attacking Midfielder'),
-('4-2-3-1', 'ST', 'Striker'),
+('4-2-3-1', 'GK', 'Goalkeeper', 85, 50), -- 골키퍼 위치 조정
+('4-2-3-1', 'RB', 'Right Back', 70, 80),
+('4-2-3-1', 'RCB', 'Right Center Back', 70, 65),
+('4-2-3-1', 'LCB', 'Left Center Back', 70, 35),
+('4-2-3-1', 'LB', 'Left Back', 70, 20),
+('4-2-3-1', 'RCDM', 'Right Central Defensive Midfielder', 55, 65),
+('4-2-3-1', 'LCDM', 'Left Central Defensive Midfielder', 55, 35),
+('4-2-3-1', 'RAM', 'Right Attacking Midfielder', 40, 70),
+('4-2-3-1', 'CAM', 'Central Attacking Midfielder', 40, 50),
+('4-2-3-1', 'LAM', 'Left Attacking Midfielder', 40, 30),
+('4-2-3-1', 'ST', 'Striker', 25, 50),
 
 -- 3-4-3 Formation
-('3-4-3', 'GK', 'Goalkeeper'),
-('3-4-3', 'LCB', 'Left Center Back'),
-('3-4-3', 'CCB', 'Center Center Back'),
-('3-4-3', 'RCB', 'Right Center Back'),
-('3-4-3', 'RWB', 'Right Wing Back'),
-('3-4-3', 'LWB', 'Left Wing Back'),
-('3-4-3', 'LCM', 'Left Central Midfielder'),
-('3-4-3', 'RCM', 'Right Central Midfielder'),
-('3-4-3', 'RW', 'Right Winger'),
-('3-4-3', 'LW', 'Left Winger'),
-('3-4-3', 'CF', 'Center Forward'),
-
--- 5-3-2 Formation
-('5-3-2', 'GK', 'Goalkeeper'),
-('5-3-2', 'RB', 'Right Back'),
-('5-3-2', 'LCB', 'Left Center Back'),
-('5-3-2', 'CCB', 'Center Center Back'),
-('5-3-2', 'RCB', 'Right Center Back'),
-('5-3-2', 'LB', 'Left Back'),
-('5-3-2', 'CDM', 'Central Defensive Midfielder'),
-('5-3-2', 'LCM', 'Left Central Midfielder'),
-('5-3-2', 'RCM', 'Right Central Midfielder'),
-('5-3-2', 'LST', 'Left Striker'),
-('5-3-2', 'RST', 'Right Striker'),
+('3-4-3', 'GK', 'Goalkeeper', 85, 50), -- 골키퍼 위치 조정
+('3-4-3', 'LCB', 'Left Center Back', 70, 30),
+('3-4-3', 'CCB', 'Center Center Back', 70, 50),
+('3-4-3', 'RCB', 'Right Center Back', 70, 70),
+('3-4-3', 'LWB', 'Left Wing Back', 55, 20),
+('3-4-3', 'RWB', 'Right Wing Back', 55, 80),
+('3-4-3', 'LCM', 'Left Central Midfielder', 45, 40),
+('3-4-3', 'RCM', 'Right Central Midfielder', 45, 60),
+('3-4-3', 'LW', 'Left Winger', 25, 20),
+('3-4-3', 'RW', 'Right Winger', 25, 80),
+('3-4-3', 'CF', 'Center Forward', 25, 50),
 
 -- 5-4-1 Formation
-('5-4-1', 'GK', 'Goalkeeper'),
-('5-4-1', 'RB', 'Right Back'),
-('5-4-1', 'LCB', 'Left Center Back'),
-('5-4-1', 'CCB', 'Center Center Back'),
-('5-4-1', 'RCB', 'Right Center Back'),
-('5-4-1', 'LB', 'Left Back'),
-('5-4-1', 'RM', 'Right Midfielder'),
-('5-4-1', 'LCM', 'Left Central Midfielder'),
-('5-4-1', 'RCM', 'Right Central Midfielder'),
-('5-4-1', 'LM', 'Left Midfielder'),
-('5-4-1', 'ST', 'Striker');
+('5-4-1', 'GK', 'Goalkeeper', 85, 50), -- 골키퍼 위치 조정
+('5-4-1', 'LB', 'Left Back', 70, 20),
+('5-4-1', 'LCB', 'Left Center Back', 70, 35),
+('5-4-1', 'CCB', 'Center Center Back', 70, 50),
+('5-4-1', 'RCB', 'Right Center Back', 70, 65),
+('5-4-1', 'RB', 'Right Back', 70, 80),
+('5-4-1', 'LM', 'Left Midfielder', 50, 20),
+('5-4-1', 'LCM', 'Left Central Midfielder', 50, 40),
+('5-4-1', 'RCM', 'Right Central Midfielder', 50, 60),
+('5-4-1', 'RM', 'Right Midfielder', 50, 80),
+('5-4-1', 'ST', 'Striker', 25, 50);
 
-INSERT INTO lineup (match_idx, quarter, tactics)
-VALUES
-(1, 1, '4-4-2'),
-(1, 2, '4-3-3'),
-(1, 3, '3-5-2'),
-(1, 4, '4-2-3-1'),
-(2, 1, '3-4-3'),
-(2, 2, '5-3-2'),
-(2, 3, '5-4-1'),
-(2, 4, '4-4-2'),
-(3, 1, '4-3-3'),
-(3, 2, '3-5-2'),
-(3, 3, '4-2-3-1'),
-(3, 4, '3-4-3'),
-(4, 1, '5-3-2'),
-(4, 2, '5-4-1'),
-(4, 3, '4-4-2'),
-(4, 4, '4-3-3'),
-(5, 1, '3-5-2'),
-(5, 2, '4-2-3-1'),
-(5, 3, '3-4-3'),
-(5, 4, '5-3-2'),
-(6, 1, '5-4-1'),
-(6, 2, '4-4-2'),
-(6, 3, '4-3-3'),
-(6, 4, '3-5-2'),
-(7, 1, '4-2-3-1'),
-(7, 2, '3-4-3'),
-(7, 3, '5-3-2'),
-(7, 4, '5-4-1'),
-(8, 1, '4-4-2'),
-(8, 2, '4-3-3'),
-(8, 3, '3-5-2'),
-(8, 4, '4-2-3-1'),
-(9, 1, '3-4-3'),
-(9, 2, '5-3-2'),
-(9, 3, '5-4-1'),
-(9, 4, '4-4-2'),
-(10, 1, '4-3-3'),
-(10, 2, '3-5-2'),
-(10, 3, '4-2-3-1'),
-(10, 4, '3-4-3'),
-(11, 1, '5-3-2'),
-(11, 2, '5-4-1'),
-(11, 3, '4-4-2'),
-(11, 4, '4-3-3'),
-(12, 1, '3-5-2'),
-(12, 2, '4-2-3-1'),
-(12, 3, '3-4-3'),
-(12, 4, '5-3-2'),
-(13, 1, '5-4-1'),
-(13, 2, '4-4-2'),
-(13, 3, '4-3-3'),
-(13, 4, '3-5-2'),
-(14, 1, '4-2-3-1'),
-(14, 2, '3-4-3'),
-(14, 3, '5-3-2'),
-(14, 4, '5-4-1'),
-(15, 1, '4-4-2'),
-(15, 2, '4-3-3'),
-(15, 3, '3-5-2'),
-(15, 4, '4-2-3-1'),
-(16, 1, '3-4-3'),
-(16, 2, '5-3-2'),
-(16, 3, '5-4-1'),
-(16, 4, '4-4-2'),
-(17, 1, '4-3-3'),
-(17, 2, '3-5-2'),
-(17, 3, '4-2-3-1'),
-(17, 4, '3-4-3'),
-(18, 1, '5-3-2'),
-(18, 2, '5-4-1'),
-(18, 3, '4-4-2'),
-(18, 4, '4-3-3'),
-(19, 1, '3-5-2'),
-(19, 2, '4-2-3-1'),
-(19, 3, '3-4-3'),
-(19, 4, '5-3-2'),
-(20, 1, '5-4-1'),
-(20, 2, '4-4-2'),
-(20, 3, '4-3-3'),
-(20, 4, '3-5-2');
 
--- lineup_detail 데이터 삽입
-INSERT INTO lineup_detail (player_idx, lineup_idx, position_idx)
-WITH numbered_rows AS (
-    SELECT 
-        *,
-        ROW_NUMBER() OVER () AS row_num  
-    FROM positions
-),
-repeated_series AS (
 
+
+-- quarters_lineup 데이터 삽입
+INSERT INTO quarters_lineup (player_idx, quarter_idx, position_idx)
+select		
+		t2.player_idx,
+		t1.quarter_idx,			
+		t1.position_idx		
+from
+(
+	select
+			q.*,
+			p.position_idx,			
+			ROW_NUMBER() OVER () AS row_num
+	from quarters q
+		join positions p on q.tactics = p.tactics
+) t1
+JOIN
+(
 	select 
 			*,
 	        ROW_NUMBER() OVER () AS row_num
@@ -338,22 +388,7 @@ repeated_series AS (
 		SELECT player_idx
 	    FROM (
 	        SELECT generate_series(1, 11) AS player_idx, repeat_num
-	        FROM generate_series(1, 5) AS repeat_num
+	        FROM generate_series(1, 80) AS repeat_num
 	    ) AS repeated_series
 	) a
-
-),mapped_series AS (
-    SELECT
-        n.*,
-        r.player_idx AS player_idx
-    FROM numbered_rows n
-    	JOIN repeated_series r
-    ON n.row_num = r.row_num
-)
-
-SELECT 
-		b.player_idx, a.lineup_idx , b.position_idx 
-FROM 
-	lineup a
-	JOIN
-	mapped_series b on a.tactics = b.tactics
+) t2 on t1.row_num = t2.row_num

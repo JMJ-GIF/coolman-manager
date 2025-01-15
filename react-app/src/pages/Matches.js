@@ -1,38 +1,55 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import './Matches.scss';
 import NavigationBar from "../components/NavigationBar";
 import FloatingBar from "../components/FloatingBar";
+import location_svg from "../assets/icons/location.svg";
 
 function Matches() {
     const navigate = useNavigate();
-    const fetchData = () => {
-        return Array.from({ length: 100 }, (_, i) => ({
-            id: i + 1,
-            title: `Card ${i + 1}`,
-            description: `This is card number ${i + 1}`,
-        }));
-    };
-
-    const allData = fetchData();
     const batchSize = 10;
+    const API_URL = process.env.REACT_APP_API_URL;
+
     const [visibleCards, setVisibleCards] = useState([]);
-    const [startIndex, setStartIndex] = useState(0);
+    const [lastItemId, setLastItemId] = useState(null);
+    const [lastItemDt, setLastItemDt] = useState(null);
     const [loading, setLoading] = useState(false);    
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedCards, setSelectedCards] = useState([]);
 
-    const loadMoreCards = () => {
-        if (startIndex >= allData.length || loading) return;
+    const fetchMatches = async () => {
+        if (loading) return;
+        setLoading(true);        
+        try {            
+            const response = await axios.get(`${API_URL}/matches/`, {
+                params: {
+                    page_size: batchSize,
+                    ...(lastItemId && {last_item_id: lastItemId}),
+                    ...(lastItemDt && {last_item_dt: lastItemDt}),
+                },
+            });
 
-        setLoading(true);
-        setTimeout(() => {
-            const nextBatch = allData.slice(startIndex, startIndex + batchSize);
-            setVisibleCards([...visibleCards, ...nextBatch]);
-            setStartIndex(startIndex + batchSize);
+            const data = response.data;
+
+            setVisibleCards((prevCards) => {
+                const allCards = [...prevCards, ...data];
+                const uniqueCards = Array.from(
+                    new Map(allCards.map((card) => [card.match_idx, card])).values()
+                );
+                return uniqueCards;
+            });
+            if (data.length > 0) {
+                const lastItem = data[data.length - 1]
+                setLastItemDt(lastItem.dt);
+                setLastItemId(lastItem.match_idx);
+            }
+        } catch (error) {            
+            console.error("Error fetching matches:", error);
+        } finally {
             setLoading(false);
-        }, 500);
-    };
+        }
+    }
 
     const handleScroll = () => {
         const scrollTop = window.scrollY;
@@ -40,19 +57,17 @@ function Matches() {
         const scrollHeight = document.documentElement.scrollHeight;
 
         if (scrollTop + clientHeight >= scrollHeight - 30 && !loading) {
-            loadMoreCards();
+            fetchMatches();
         }
     };
 
     useEffect(() => {
-        loadMoreCards();
+        fetchMatches();
     }, []);
 
-    useEffect(() => {
-        const onScroll = () => handleScroll();
-        window.addEventListener("scroll", onScroll);
-
-        return () => window.removeEventListener("scroll", onScroll);
+    useEffect(() => {        
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, [handleScroll]);
     
     const enterEditMode = () => {
@@ -66,7 +81,7 @@ function Matches() {
     };
 
     const confirmDelete = () => {
-        setVisibleCards(visibleCards.filter(card => !selectedCards.includes(card.id)));
+        setVisibleCards(visibleCards.filter(card => !selectedCards.includes(card.match_idx)));
         setIsEditMode(false);
         setSelectedCards([]);
     };
@@ -89,23 +104,40 @@ function Matches() {
             <div className="content">
                 <div className="card-container">
                     {visibleCards.map((card) => (
-                        <div key={card.id} className={`card ${isEditMode ? "editable" : ""}`}>
+                        <div key={card.match_idx} className={`card ${isEditMode ? "editable" : ""}`}>
                             {isEditMode && (
                                 <input
                                     type="checkbox"
                                     className="card-checkbox"
-                                    checked={selectedCards.includes(card.id)}
-                                    onChange={() => toggleCardSelection(card.id)}
+                                    checked={selectedCards.includes(card.match_idx)}
+                                    onChange={() => toggleCardSelection(card.match_idx)}
                                 />
                             )}
                             <div
                                 className="card-content"
                                 onClick={() =>
-                                    !isEditMode && navigate(`/matches/${card.id}`)
+                                    !isEditMode && navigate(`/matches/${card.match_idx}`)
                                 }
-                            >
-                                <h3>{card.title}</h3>
-                                <p>{card.description}</p>
+                            >                                
+                                <div className='flag-info' data-result={card.result}>
+                                    <p>{card.dt}</p>
+                                    <p>{card.result}</p> 
+                                </div>
+                                <div>
+                                    <p>vs</p>
+                                </div>                                
+                                <div className='team-info'>                                                                    
+                                    <p>{card.opposing_team}</p>
+                                </div>
+                                <div className="score-info" data-result={card.result}>
+                                    <p>{card.winning_point}</p> 
+                                    <p>:</p> 
+                                    <p>{card.losing_point}</p>                                    
+                                </div> 
+                                <div className='location-info'>
+                                    <img src={location_svg} alt="Location" />
+                                    <p>{card.location}</p>  
+                                </div>                                                                                                                              
                             </div>
                         </div>
                     ))}

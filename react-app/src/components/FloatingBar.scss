@@ -6,16 +6,27 @@
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 0; // 버튼 간격 제거
+    gap: 0;
     background-color: #ffffff;
     padding: 0;
     border-radius: 50px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    overflow: hidden; // 버튼이 바깥으로 나가지 않도록 설정
-    width: auto; // 기존 가로 크기를 유지
-    min-width: 200px; // 최소 너비 설정 (필요에 따라 조정 가능)
-    height: 50px; // 플로팅바 높이 설정
+    overflow: hidden;
+    width: auto; 
+    min-width: 200px; 
+    height: 50px;
+
+    @media screen and (max-width: 768px) { // 모바일용 스타일
+        min-width: 150px; // 최소 너비 축소
+        height: 40px; // 높이 축소
+    }
+
+    @media screen and (max-width: 480px) { // 더 작은 화면용 스타일
+        min-width: 120px; // 최소 너비 축소
+        height: 35px; // 높이 축소
+    }
+
 }
 
 .action-button {
@@ -54,5 +65,15 @@
     // 버튼 구분선
     &:not(:last-child) {
         border-right: 1px solid #f0f0f0; // 중간 구분선
+    }
+
+    @media screen and (max-width: 768px) { // 모바일용 스타일
+        font-size: 0.9rem; // 글자 크기 축소
+        padding: 0 8px; // 내부 여백 축소
+    }
+
+    @media screen and (max-width: 480px) { // 더 작은 화면용 스타일
+        font-size: 0.8rem; // 글자 크기 축소
+        padding: 0 6px; // 내부 여백 축소
     }
 }

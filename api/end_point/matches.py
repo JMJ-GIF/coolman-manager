@@ -1,40 +1,100 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from api.db import Base, engine, get_db
-from api.models.matches import Matches
-from api.schemas.matches import Match, MatchCreate, MatchUpdate
-from api.crud.matches import create_match, get_match_by_id, get_all_matches, update_match, delete_match
+from db import get_db
+from schemas.matches import (
+    Match, MatchCreate, MatchUpdate, 
+    Quarter, QuarterCreate, QuarterUpdate,
+    Goal, GoalCreate, GoalUpdate,
+    Lineup, LineupCreate, LineupUpdate,
+    LineupDetail
+)
+from models.matches import Matches, Quarters, Goals, Lineups
+from models.positions import Positions
+from models.users import Users
+from crud import CRUDBase
 
-Base.metadata.create_all(bind=engine)
+router = APIRouter()
+match_crud = CRUDBase[Matches, MatchCreate, MatchUpdate](Matches, primary_key="match_idx")
+quarter_crud = CRUDBase[Quarters, QuarterCreate, QuarterUpdate](Quarters, primary_key='quarter_idx')
+goal_crud = CRUDBase[Goals, GoalCreate, GoalUpdate](Goals, primary_key="goal_idx")
+lineup_crud = CRUDBase[Lineups, LineupCreate, LineupUpdate](Lineups, primary_key="lineup_idx")
 
-app = FastAPI()
+# CREATE
+@router.post("/", response_model=Match)
+def create_match(match_data: MatchCreate, db: Session = Depends(get_db)):    
+    match = match_crud.create(db, match_data)
+    return match
 
-@app.post("/matches/", response_model=Match)
-def create_match_endpoint(match_data: MatchCreate, db: Session = Depends(get_db)):
-    return create_match(db, match_data)
-
-@app.get("/matches/{match_idx}", response_model=Match)
-def get_match_endpoint(match_idx: int, db: Session = Depends(get_db)):
-    match = get_match_by_id(db, match_idx)
+# READ
+@router.get("/{match_idx}", response_model=Match)
+def get_match(match_idx: int, db: Session = Depends(get_db)):
+    match = match_crud.get(db, match_idx)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     return match
 
-@app.get("/matches/", response_model=List[Match])
-def get_all_matches_endpoint(db: Session = Depends(get_db)):
-    return get_all_matches(db)
+@router.get("/{match_idx}/quarters", response_model=List[Quarter])
+def get_quarters_in_match(match_idx: int, db: Session = Depends(get_db)):
+    quarters = quarter_crud.get_by_id(db, id_col = 'match_idx', id_value = match_idx)
+    if not quarters:
+        raise HTTPException(status_code=404, detail="Quarter not found")
+    return quarters
 
-@app.put("/matches/{match_idx}", response_model=Match)
-def update_match_endpoint(match_idx: int, update_data: MatchUpdate, db: Session = Depends(get_db)):
-    match = update_match(db, match_idx, update_data)
+@router.get("/{match_idx}/goals", response_model=List[Goal])
+def get_goals_in_match(match_idx: int, db: Session = Depends(get_db)):
+    goals = goal_crud.get_by_id(db, id_col = 'match_idx', id_value = match_idx)
+    if not goals:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return goals
+
+@router.get("/{match_idx}/lineups", response_model=List[LineupDetail])
+def get_lineups_in_match(match_idx: int, db: Session = Depends(get_db)):
+    query = (
+        db.query(
+            Quarters.match_idx,
+            Quarters.quarter_idx,
+            Quarters.quarter_number,
+            Quarters.tactics,
+            Lineups.lineup_idx,
+            Positions.name.label("position_name"),
+            Positions.top_coordinate,
+            Positions.left_coordinate,
+            Users.name.label("user_name"),
+        )
+        .join(Quarters, Lineups.quarter_idx == Quarters.quarter_idx)
+        .join(Positions, Lineups.position_idx == Positions.position_idx)
+        .join(Users, Lineups.player_idx == Users.user_idx)
+        .filter(Quarters.match_idx == match_idx) 
+    )
+    lineups = query.all()    
+    if not lineups:
+        raise HTTPException(status_code=404, detail="Lineup not found")
+    return lineups
+
+@router.get("/", response_model=List[Match])
+def get_match_for_pagination(last_item_id: int = None, last_item_dt: str = None,  
+                             page_size: int = 10, db: Session = Depends(get_db)):
+    match = match_crud.get_by_last_item_with_dt(
+        db = db,
+        last_item_id=last_item_id,
+        last_item_dt=last_item_dt,
+        page_size=page_size
+    )
+    return match
+
+# UPDATE
+@router.put("/{match_idx}", response_model=Match)
+def update_match(match_idx: int, update_data: MatchUpdate, db: Session = Depends(get_db)):
+    match = match_crud.update(db, match_idx, update_data)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     return match
 
-@app.delete("/matches/{match_idx}", response_model=dict)
+# DELETE
+@router.delete("/{match_idx}", response_model=dict)
 def delete_match_endpoint(match_idx: int, db: Session = Depends(get_db)):
-    match = delete_match(db, match_idx)
+    match = match_crud.delete(db, match_idx)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     return {"detail": "Match deleted successfully"}

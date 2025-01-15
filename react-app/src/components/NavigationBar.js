@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./NavigationBar.scss";
-import profile_img from "../assets/images/coolman_profile.png";
+import profile_img from "../assets/images/coolman-profile.png";
 
 function NavigationBar() {
     const location = useLocation();
@@ -18,7 +18,7 @@ function NavigationBar() {
         { label: "Gallery", route: "/gallery" },
     ];
 
-    const activeIndex = menuItems.findIndex((item) => item.route === location.pathname);
+    const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));
 
     // 스크롤 이벤트 핸들러
     const handleScroll = () => {
