@@ -4,12 +4,13 @@ import LoginPage from './pages/Login'
 import SignupPage from './pages/Signup';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
-import Matches from './pages/Matches';
 import Players from './pages/Players';
 import Records from './pages/Records';
 import Gallery from './pages/Gallery';
-import MatchesAdd from './pages/MatchesAdd';
-import MatchDetails from './pages/MatchDetails';
+import Matches from './pages/Match/Matches';
+import MatchesAdd from './pages/Match/MatchesAdd';
+import MatchDetails from './pages/Match/MatchDetails';
+import MatchesEdit from './pages/Match/MatchesEdit';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/records" element={<Records />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/matches/add" element={<MatchesAdd />} />
+        <Route path="/matches/:match_id/edit" element={<MatchesEdit />} />
       </Routes>
     </Router>
   );

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import './MatchDetails.scss';
 import axios from "axios";
-import NavigationBar from "../components/NavigationBar";
-import SoccerField from "../components/SoccerField";
-import football_ball from "../assets/icons/football_ball.svg";
+import NavigationBar from "../../components/NavigationBar";
+import SoccerField from "../../components/SoccerField";
+import football_ball from "../../assets/icons/football_ball.svg";
+import FloatingBar from "../../components/FloatingBar";
 
 function formatTime(isoString) {
     const date = new Date(isoString);
@@ -15,14 +16,14 @@ function formatTime(isoString) {
 
 function MatchDetails() {
     const { match_id } = useParams();
-    const API_URL = process.env.REACT_APP_API_URL;        
+    const API_URL = process.env.REACT_APP_API_URL;   
+    const navigate = useNavigate();     
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('goals');
     const [matchDetails, setMatchDetails] = useState(null);
     const [quarters, setQuarters] = useState([])
     const [goals, setGoals] = useState([]);
-    const [lineups, setLineups] = useState([]);
-    const [GoalPlayerNames, setGoalPlayerNames] = useState({}); 
+    const [lineups, setLineups] = useState([]);     
     const [selectedQuarter, setSelectedQuarter] = useState(1);
     
     const fetchData = async () => {
@@ -62,32 +63,7 @@ function MatchDetails() {
                 console.warn("Lineups API failed:", lineupResponse.reason);
                 setLineups([]);
             }
-    
-            // Player data fetch (goals에 의존하므로 빈 배열일 경우 실행되지 않음)
-            if (goalsResponse.status === "fulfilled") {
-                const playerIds = [
-                    ...new Set([
-                        ...goalsResponse.value.data.map((goal) => goal.goal_player_id),
-                        ...goalsResponse.value.data.map((goal) => goal.assist_player_id),
-                    ]),
-                ].filter((id) => id !== null);
-    
-                if (playerIds.length > 0) {
-                    // 한 번의 API 호출로 모든 player 정보를 가져오기
-                    const playerResponse = await axios.get(`${API_URL}/users/`, {
-                        params: { user_list: playerIds.join(",") } 
-                    });
-            
-                    // 응답 데이터를 처리하여 이름 매핑
-                    const players = playerResponse.data.map((player) => ({
-                        user_idx: player.user_idx,
-                        name: player.name,
-                    }));
-                        setGoalPlayerNames(players);
-                    } else {
-                        setGoalPlayerNames([]); 
-                    }
-            }
+                
         } catch (error) {
             console.error("Error fetching match details:", error);
         } finally {
@@ -98,6 +74,10 @@ function MatchDetails() {
     useEffect(() => {
         fetchData();
     }, [match_id]);
+
+    const handleEdit = () => {        
+        navigate(`/matches/${match_id}/edit`);
+    };
 
     const renderQuarters = () => {
         if (quarters.length === 0) {
@@ -145,14 +125,10 @@ function MatchDetails() {
                             let assistName = "N/A";
     
                             if (goal.goal_type === "득점") {
-                                playerName =
-                                    GoalPlayerNames.find((player) => player.user_idx === goal.goal_player_id)?.name || "N/A";
-                                assistName = goal.assist_player_id
-                                    ? GoalPlayerNames.find((player) => player.user_idx === goal.assist_player_id)?.name || "N/A"
-                                    : null;
+                                playerName = goal.goal_player_name                                    
+                                assistName = goal.assist_player_name                                    
                             } else if (goal.goal_type == "자살골") {
-                                playerName = 
-                                    GoalPlayerNames.find((player) => player.user_idx === goal.goal_player_id)?.name || "N/A";                                
+                                playerName = goal.goal_player_name                                    
                             }
     
                             return (
@@ -193,58 +169,75 @@ function MatchDetails() {
         if (!quarters.length || !lineups.length) {
             return <p>라인업 정보가 없습니다.</p>;
         }
-        
+    
         const filteredLineups = lineups.filter(
             (lineup) => lineup.quarter_number === selectedQuarter
         );
     
-        // "선발"과 "교체" 구분
-        const startingPlayers = filteredLineups.filter(player => player.is_substitute === false);
-        const substitutePlayers = filteredLineups.filter(player => player.is_substitute === true);
+        const startingPlayers = filteredLineups.filter(player => player.lineup_status === '선발');
+        const substitutePlayers = filteredLineups.filter(player => player.lineup_status === '후보');
     
         return (
-            <div>                
+            <div>
                 <div className="quarter-buttons">
                     {quarters.map((quarter) => (
                         <button
                             key={quarter.quarter_number}
-                            className={`quarter-btn ${
-                                selectedQuarter === quarter.quarter_number ? "active" : ""
-                            }`}
+                            className={`quarter-btn ${selectedQuarter === quarter.quarter_number ? "active" : ""}`}
                             onClick={() => setSelectedQuarter(quarter.quarter_number)}
                         >
                             {quarter.quarter_number}
                         </button>
                     ))}
-                </div> 
-                <div className="quarter-tactics">{filteredLineups[0]?.tactics}</div>               
-                <SoccerField lineup={filteredLineups}/>                
+                </div>
+                <div className="quarter-tactics">{startingPlayers[0]?.tactics}</div>
+                <SoccerField lineup={startingPlayers}/> 
     
                 <div className="lineup-container">
                     <div className="lineup-section">
                         <h3 className="section-title">선발</h3>
-                        <div className="player-cards">
-                            {filteredLineups.map((lineup) => (
-                                <div key={lineup.lineup_idx} className="player-card">
-                                    <p className="player-position">{lineup.position_name}</p>
-                                    <p className="player-name">{lineup.user_name}</p>
-                                    <span className="player-status starter">선발</span>
-                                </div>
-                            ))}
-                        </div>
+                        <table className="lineup-table">
+                            <thead>
+                                <tr>
+                                    <th>포지션</th>
+                                    <th>등번호</th>
+                                    <th>사람</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {startingPlayers.map((lineup) => (
+                                    <tr key={lineup.lineup_idx}>
+                                        <td>{lineup.position_name}</td>
+                                        <td>{lineup.back_number}</td>
+                                        <td>{lineup.user_name}</td>
+                                        <td className="starter">선발</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
     
                     <div className="lineup-section">
-                        <h3 className="section-title">교체</h3>
-                        <div className="player-cards">
-                            {substitutePlayers.map((lineup) => (
-                                <div key={lineup.lineup_idx} className="player-card">
-                                    <p className="player-position">{lineup.position_name}</p>
-                                    <p className="player-name">{lineup.user_name}</p>
-                                    <span className="player-status substitute">교체</span>
-                                </div>
-                            ))}
-                        </div>
+                        <h3 className="section-title">후보</h3>
+                        <table className="lineup-table">
+                            <thead>
+                                <tr>
+                                    <th>등번호</th>
+                                    <th>사람</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {substitutePlayers.map((lineup) => (
+                                    <tr key={lineup.lineup_idx}>
+                                        <td>{lineup.back_number}</td>
+                                        <td>{lineup.user_name}</td>
+                                        <td className="substitute">후보</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -260,6 +253,51 @@ function MatchDetails() {
         }
     };
 
+    const renderResult = () => {
+        return <>
+        <div className="match-results">
+            <div className="header-card" data-result={matchDetails.result}>
+                <h2>경기결과</h2>
+                <p data-result={matchDetails.result}>{matchDetails.result}</p>
+            </div>
+            <div className="card-container">
+                <div className="card">
+                    <span>스코어</span>
+                    <p>{matchDetails.winning_point} : {matchDetails.losing_point}</p>
+                </div>
+                <div className="card">
+                    <span>상대</span>
+                    <p>{matchDetails.opposing_team}</p>
+                </div>
+                <div className="card">
+                    <span>날짜</span>
+                    <p>{matchDetails.dt}</p>
+                </div>
+                <div className="card">
+                    <span>시간</span>
+                    <p>{`${formatTime(matchDetails.start_time)} ~ ${formatTime(matchDetails.end_time)}`}</p>
+                </div>
+                <div className="card">
+                    <span>날씨</span>
+                    <p>{matchDetails.weather}</p>
+                </div>
+                <div className="card">
+                    <span>장소</span>
+                    <p>{matchDetails.location}</p>
+                </div>
+                <div className="card">
+                    <span>참가인원</span>
+                    <p>{matchDetails.num_players} 명</p>
+                </div>
+                <div className="card">
+                    <span>메인전술</span>
+                    <p>{matchDetails.main_tactics}</p>
+                </div>    
+            </div>                                                                    
+        </div>
+    </>
+    }
+
     return (
         <div className="gray-background">
             <NavigationBar />
@@ -267,40 +305,8 @@ function MatchDetails() {
                 {loading ? (
                     <p>Loading...</p>
                 ) : matchDetails ? (
-                    <>
-                        <div className="match-results">
-                            <div className="header-card" data-result={matchDetails.result}>
-                                <h2>경기결과</h2>
-                                <p data-result={matchDetails.result}>{matchDetails.result}</p>
-                            </div>
-                            <div className="card-container">
-                                <div className="card">
-                                    <span>스코어</span>
-                                    <p>{matchDetails.winning_point} : {matchDetails.losing_point}</p>
-                                </div>
-                                <div className="card">
-                                    <span>경기상대</span>
-                                    <p>{matchDetails.opposing_team}</p>
-                                </div>
-                                <div className="card">
-                                    <span>경기시간</span>
-                                    <p>{`${formatTime(matchDetails.start_time)} ~ ${formatTime(matchDetails.end_time)}`}</p>
-                                </div>
-                                <div className="card">
-                                    <span>경기날씨</span>
-                                    <p>{matchDetails.weather}</p>
-                                </div>
-                                <div className="card">
-                                    <span>경기인원</span>
-                                    <p>{matchDetails.num_players} 명</p>
-                                </div>
-                                <div className="card">
-                                    <span>메인전술</span>
-                                    <p>{matchDetails.main_tactics}</p>
-                                </div>    
-                            </div>                                                                    
-                        </div>
-                        
+                    <>                        
+                        {renderResult()}
                         <div className="match-details">
                             <div className="header-card">
                                 <h2>경기상세</h2>
@@ -326,6 +332,7 @@ function MatchDetails() {
                     <p>매치 상세 정보가 없습니다.</p>
                 )}
             </div>
+            <FloatingBar onEdit={handleEdit} mode='edit'/>
         </div>
     );
 }

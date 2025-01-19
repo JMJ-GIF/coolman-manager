@@ -1,4 +1,4 @@
-@import '../assets/styles/variables.scss';
+@import '../../assets/styles/variables.scss';
 
 .match-results {
     background-color: #fff;    
@@ -255,55 +255,53 @@
                 margin-bottom: 10px;
             }
             
-            .player-cards {
-                display: flex;
-                gap: 10px;
-                flex-direction: column;
-                // flex-wrap: wrap;
-
-                .player-card {
-                    display: flex; /* 가로로 배치 */
-                    align-items: center;
-                    background-color: white;
+            .lineup-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            
+                th, td {
                     border: 1px solid #ddd;
-                    border-radius: 8px;
-                    padding: 10px;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                
-                    .player-position {
-                        font-size: 1rem;
-                        font-weight: bold;
-                        color: #333;
-                        margin-right: 20px; /* 포지션과 이름 간격 */
-                        flex-shrink: 0; /* 크기를 유지 */
+                    text-align: center;
+                    padding: 8px;
+                    font-size: 0.9rem;
+                }
+            
+                th {
+                    background-color: #f2f2f2; // 헤더 배경색
+                    font-weight: bold;
+                    color: #333;
+                }
+            
+                td {
+                    color: #666;
+                }
+            
+                .starter {
+                    color: #007bff; // 선발 상태 색상
+                    font-weight: bold;
+                }
+            
+                .substitute {
+                    color: #ff5722; // 후보 상태 색상
+                    font-weight: bold;
+                }
+            
+                @media screen and (max-width: 768px) {
+                    th, td {
+                        font-size: 0.8rem; // 작은 화면에서 폰트 크기 축소
+                        padding: 6px;
                     }
-                
-                    .player-name {
-                        font-size: 0.9rem;
-                        color: #666;
-                        margin-right: auto; /* 이름을 왼쪽 정렬 */
-                    }
-                
-                    .player-status {
-                        display: inline-block;
-                        font-size: 0.8rem;
-                        font-weight: bold;
-                        padding: 5px 10px;
-                        border-radius: 15px;
-                        text-transform: uppercase;
-                
-                        &.starter {
-                            color: #007bff;
-                            border: 1px solid #007bff;
-                        }
-                
-                        &.substitute {
-                            color: #ff5722;
-                            border: 1px solid #ff5722;
-                        }
+                }
+            
+                @media screen and (max-width: 480px) {
+                    th, td {
+                        font-size: 0.7rem; // 더 작은 화면에서 폰트 크기 축소
+                        padding: 4px;
                     }
                 }
             }
+            
         }
     }
         

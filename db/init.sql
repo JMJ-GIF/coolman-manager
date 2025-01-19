@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
     position VARCHAR(20) NOT NULL,
     back_number INT UNIQUE NOT NULL,
     join_date TIMESTAMP NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('선수', '감독')),   
+    role VARCHAR(20) NOT NULL CHECK (role IN ('선수', '감독', '용병')),   
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS matches (
@@ -81,7 +81,8 @@ CREATE TABLE IF NOT EXISTS quarters_lineup (
     lineup_idx SERIAL PRIMARY KEY,
     player_idx INT NOT NULL,
     quarter_idx INT NOT NULL, 
-    position_idx INT NOT NULL ,
+    position_idx INT NULL,
+    lineup_status VARCHAR(20) NOT NULL CHECK (lineup_status IN ('선발', '후보')),   
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
@@ -98,7 +99,10 @@ INSERT INTO users (user_id, name, position, back_number, join_date, role) VALUES
 ('user008', '안도현', 'RWB', 15, '2021-08-30 15:00:00', '감독'),
 ('user009', '서유리', 'ST', 10, '2022-09-15 10:05:00', '선수'),
 ('user010', '장준호', 'RW', 22, '2023-10-05 17:25:00', '감독'),
-('user011', '진민제', 'RW', 35, '2023-10-05 17:25:00', '선수');
+('user011', '진민제', 'RW', 35, '2023-10-05 17:25:00', '선수'),
+('user012', '장준호', 'ST', 99, '2023-11-01 15:15:00', '선수'),
+('user013', '용병', 'GK', 00, '2023-11-02 15:15:00', '용병');
+
 INSERT INTO matches (dt, result, winning_point, losing_point, opposing_team, location, start_time, end_time, weather, num_players, main_tactics, status)
 VALUES 
 ('2024-12-01', '승리', 3, 1, '라이벌 FC', '국립 경기장', '2024-12-01 15:00:00', '2024-12-01 16:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
@@ -358,17 +362,30 @@ VALUES
 ('5-4-1', 'LCM', 'Left Central Midfielder', 50, 40),
 ('5-4-1', 'RCM', 'Right Central Midfielder', 50, 60),
 ('5-4-1', 'RM', 'Right Midfielder', 50, 80),
-('5-4-1', 'ST', 'Striker', 25, 50);
+('5-4-1', 'ST', 'Striker', 25, 50),
 
-
+-- 5-3-2 Formation
+('5-3-2', 'GK', 'Goalkeeper', 85, 50), -- 골키퍼 위치
+('5-3-2', 'LB', 'Left Back', 70, 15), 
+('5-3-2', 'LCB', 'Left Center Back', 70, 30),
+('5-3-2', 'CCB', 'Center Center Back', 70, 50),
+('5-3-2', 'RCB', 'Right Center Back', 70, 70),
+('5-3-2', 'RB', 'Right Back', 70, 85),
+('5-3-2', 'LCM', 'Left Central Midfielder', 50, 40),
+('5-3-2', 'CM', 'Central Midfielder', 50, 50),
+('5-3-2', 'RCM', 'Right Central Midfielder', 50, 60),
+('5-3-2', 'LST', 'Left Striker', 25, 40),
+('5-3-2', 'RST', 'Right Striker', 25, 60);
 
 
 -- quarters_lineup 데이터 삽입
-INSERT INTO quarters_lineup (player_idx, quarter_idx, position_idx)
+INSERT INTO quarters_lineup (player_idx, quarter_idx, position_idx, lineup_status)
+
 select		
 		t2.player_idx,
 		t1.quarter_idx,			
-		t1.position_idx		
+		t1.position_idx,
+		'선발'as lineup_status
 from
 (
 	select
@@ -392,3 +409,35 @@ JOIN
 	    ) AS repeated_series
 	) a
 ) t2 on t1.row_num = t2.row_num
+
+union all
+
+select		
+		t2.player_idx,
+		t1.quarter_idx,			
+		null as position_idx,
+		'후보' as lineup_status
+from
+(
+	select
+			q.*,					
+			ROW_NUMBER() OVER () AS row_num
+	from quarters q, (
+			SELECT generate_series(12, 13) AS player_idx	        
+    ) a
+) t1
+JOIN
+(
+	select 
+			*,
+	        ROW_NUMBER() OVER () AS row_num
+	from
+	(
+		SELECT player_idx
+	    FROM (
+	        SELECT generate_series(12, 13) AS player_idx, repeat_num
+	        FROM generate_series(1, 80) AS repeat_num
+	    ) AS repeated_series
+	) a
+) t2 on t1.row_num = t2.row_num
+order by quarter_idx, player_idx

@@ -75,6 +75,12 @@ class GoalUpdate(GoalBase):
 class Goal(GoalBase):
     goal_idx: int
     created_at: Optional[datetime] = Field(None, description="골이 생성된 시간 (기본값: 현재 시간)")
+    goal_player_id: Optional[int] = Field(None, description="골을 넣은 선수 ID")
+    goal_player_name: Optional[str] = Field(None, description="골을 넣은 선수 이름")
+    goal_player_back_number: Optional[int] = Field(None, description="골을 넣은 선수 등번호")
+    assist_player_id: Optional[int] = Field(None, description="도움을 준 선수 ID")
+    assist_player_name: Optional[str] = Field(None, description="도움을 준 선수 이름")
+    assist_player_back_number: Optional[int] = Field(None, description="도움을 준 선수 등번호")
 
     class Config:
         from_attributes = True
@@ -103,10 +109,12 @@ class LineupDetail(BaseModel):
     quarter_number: int
     tactics: str
     lineup_idx: int
-    position_name: str
+    position_name: Optional[str] = None 
     user_name: str
-    top_coordinate: int
-    left_coordinate: int
+    back_number: int
+    lineup_status: str
+    top_coordinate: Optional[int] = None 
+    left_coordinate: Optional[int] = None 
 
     class Config:
         from_attributes = True

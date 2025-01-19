@@ -1,5 +1,5 @@
 import './MatchesAdd.scss';
-import NavigationBar from "../components/NavigationBar";
+import NavigationBar from "../../components/NavigationBar";
 
 function MatchesAdd() {
     
@@ -14,4 +14,4 @@ function MatchesAdd() {
     );
 }
 
-export default MatchesAdd;
+export default MatchesAdd; 

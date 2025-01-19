@@ -41,12 +41,39 @@ def get_quarters_in_match(match_idx: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Quarter not found")
     return quarters
 
+from sqlalchemy.orm import aliased
+
 @router.get("/{match_idx}/goals", response_model=List[Goal])
 def get_goals_in_match(match_idx: int, db: Session = Depends(get_db)):
-    goals = goal_crud.get_by_id(db, id_col = 'match_idx', id_value = match_idx)
+    
+    GoalPlayer = aliased(Users)
+    AssistPlayer = aliased(Users)
+
+    query = (
+        db.query(
+            Goals.goal_idx,
+            Goals.match_idx,
+            Goals.quarter_idx,
+            Goals.goal_player_id,
+            GoalPlayer.name.label("goal_player_name"),
+            GoalPlayer.back_number.label("goal_player_back_number"),
+            Goals.assist_player_id,
+            AssistPlayer.name.label("assist_player_name"),
+            AssistPlayer.back_number.label("assist_player_back_number"),
+            Goals.goal_type,
+            Goals.created_at
+        )
+        .outerjoin(GoalPlayer, Goals.goal_player_id == GoalPlayer.user_idx)  # 골 넣은 사람
+        .outerjoin(AssistPlayer, Goals.assist_player_id == AssistPlayer.user_idx)  # 어시스트한 사람
+        .filter(Goals.match_idx == match_idx)
+    )
+
+    goals = query.all()
+    
     if not goals:
-        raise HTTPException(status_code=404, detail="Goal not found")
+        raise HTTPException(status_code=404, detail="Goals not found")
     return goals
+
 
 @router.get("/{match_idx}/lineups", response_model=List[LineupDetail])
 def get_lineups_in_match(match_idx: int, db: Session = Depends(get_db)):
@@ -60,10 +87,12 @@ def get_lineups_in_match(match_idx: int, db: Session = Depends(get_db)):
             Positions.name.label("position_name"),
             Positions.top_coordinate,
             Positions.left_coordinate,
+            Users.back_number,
             Users.name.label("user_name"),
+            Lineups.lineup_status          
         )
         .join(Quarters, Lineups.quarter_idx == Quarters.quarter_idx)
-        .join(Positions, Lineups.position_idx == Positions.position_idx)
+        .outerjoin(Positions, Lineups.position_idx == Positions.position_idx)
         .join(Users, Lineups.player_idx == Users.user_idx)
         .filter(Quarters.match_idx == match_idx) 
     )

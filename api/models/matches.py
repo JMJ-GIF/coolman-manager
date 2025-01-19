@@ -1,6 +1,6 @@
 from db import Base
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Date, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, TIMESTAMP, ForeignKey, CheckConstraint
 
 
 class Matches(Base):
@@ -63,7 +63,12 @@ class Lineups(Base):
     lineup_idx = Column(Integer, primary_key=True, index=True)
     player_idx = Column(Integer, nullable=False)
     quarter_idx = Column(Integer, ForeignKey("quarters.quarter_idx", ondelete="CASCADE"), nullable=False)
-    position_idx = Column(Integer, nullable=False)
+    position_idx = Column(Integer, nullable=True)
+    lineup_status = Column(String(20), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("lineup_status IN ('선발', '후보')", name="check_user_role"),
+    )
 
     # Relationships
     quarter = relationship("Quarters", back_populates="lineups")

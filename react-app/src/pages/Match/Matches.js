@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import './Matches.scss';
-import NavigationBar from "../components/NavigationBar";
-import FloatingBar from "../components/FloatingBar";
-import location_svg from "../assets/icons/location.svg";
+import NavigationBar from "../../components/NavigationBar";
+import FloatingBar from "../../components/FloatingBar";
+import location_svg from "../../assets/icons/location.svg";
 
 function Matches() {
     const navigate = useNavigate();
@@ -96,7 +96,7 @@ function Matches() {
         <div className="gray-background">
             <NavigationBar />
             <FloatingBar
-                isEditMode={isEditMode}
+                mode={isEditMode ? "confirm_cancel" : "add_delete"}
                 onConfirm={confirmDelete}
                 onCancel={exitEditMode}
                 onEdit={enterEditMode}

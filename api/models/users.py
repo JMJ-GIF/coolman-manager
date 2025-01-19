@@ -15,5 +15,5 @@ class Users(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     
     __table_args__ = (
-        CheckConstraint("role IN ('선수', '감독')", name="check_user_role"),
+        CheckConstraint("role IN ('선수', '감독', '용병')", name="check_user_role"),
     )
