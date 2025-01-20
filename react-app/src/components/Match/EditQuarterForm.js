@@ -5,6 +5,7 @@ import shoes from "../../assets/icons/shoes.svg";
 import plus_svg from "../../assets/icons/plus.svg";
 import delete_svg from "../../assets/icons/delete.svg";
 import add_square_svg from "../../assets/icons/add_square.svg";
+import x_square_svg from "../../assets/icons/x_square.svg";
 import football_ball from "../../assets/icons/football_ball.svg";
 
 const EditQuarterForm = ({
@@ -76,6 +77,7 @@ const EditQuarterForm = ({
                                         <input
                                             type="text"
                                             list={`goal-players-${quarterIndex}-${goalIndex}`}
+                                            placeholder="골"
                                             {...register(`${goalsPath}.${goalIndex}.goal_player_name`)}
                                             disabled={goalType === "실점"}
                                         />
@@ -89,6 +91,7 @@ const EditQuarterForm = ({
                                         <input
                                             type="text"
                                             list={`assist-players-${quarterIndex}-${goalIndex}`}
+                                            placeholder="어시"
                                             {...register(`${goalsPath}.${goalIndex}.assist_player_name`)}
                                             disabled={goalType === "실점"}
                                         />
@@ -103,7 +106,7 @@ const EditQuarterForm = ({
                                             className="delete-goal-button"
                                             onClick={() => removeGoal(quarterIndex, goalIndex)}
                                         >
-                                            삭제
+                                            <img src={x_square_svg} alt="delete goal" />
                                         </button>
                                     </div>
                                 );

@@ -19,7 +19,7 @@ function formatTime(isoString) {
     return `${hours}:${minutes}`;
 }
 
-function MatchDetails() {
+function MatchesEdit() {
     // Config
     const navigate = useNavigate();         
     const { match_id } = useParams();    
@@ -139,15 +139,78 @@ function MatchDetails() {
     }, [match_id, setValue]);
 
     
-    const handleResultSubmit = handleSubmit(async (data) => {
-        console.log("제출된 데이터:", data);
-        // API 호출 등 처리
+    const handleFormSubmit = handleSubmit(async (data) => {
+        const { winning_point, losing_point, quarters } = data;
+    
+        // 1. 쿼터 번호가 연속적인지 확인
+        const areQuarterNumbersSequential = () => {
+            const quarterNumbers = quarters
+                .map((quarter) => quarter.quarter_number)
+                .sort((a, b) => a - b);
+            return quarterNumbers.every((num, index) => num === index + 1);
+        };        
+    
+        // 2. 스코어와 골 수가 일치하는지 확인
+        const areScoresValid = () => {
+            const goals = quarters.flatMap((quarter) => quarter.goals || []);
+            const totalWinningGoals = goals.filter((goal) => goal.goal_type === "득점").length;
+            const totalLosingGoals = goals.filter(
+                (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
+            ).length;
+            return (
+                parseInt(winning_point, 10) === totalWinningGoals &&
+                parseInt(losing_point, 10) === totalLosingGoals
+            );
+        };        
+
+        // 3. 유저 이름이 유효한지 검증
+        const validateUserNames = () => {
+            const quarters = watch("quarters");
+            const allGoals = quarters.flatMap((quarter) => quarter.goals || []);
+            
+            const invalidGoals = allGoals.filter((goal) => {                
+                const isGoalPlayerValid =
+                    !goal.goal_player_name || 
+                    users.some((user) => user.name === goal.goal_player_name); 
+                        
+                const isAssistPlayerValid =
+                    !goal.assist_player_name ||
+                    users.some((user) => user.name === goal.assist_player_name);
+        
+                return !isGoalPlayerValid || !isAssistPlayerValid; 
+            });
+        
+            if (invalidGoals.length > 0) {                
+                return false;
+            }
+            return true;
+        };
+
+        if (!areQuarterNumbersSequential()) {
+            alert("쿼터 번호는 반드시 1부터 시작하는 연속된 숫자여야 합니다.");
+            return;
+        }
+        if (!validateUserNames()) {
+            alert("골 또는 어시스트 필드에 입력된 이름 중 유효하지 않은 사용자가 있습니다.");
+            return;
+        }
+        if (!areScoresValid()) {
+            const totalWinningGoals = quarters.flatMap((q) => q.goals || []).filter(
+                (goal) => goal.goal_type === "득점"
+            ).length;
+            const totalLosingGoals = quarters.flatMap((q) => q.goals || []).filter(
+                (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
+            ).length;
+            alert(
+                `스코어(${winning_point}:${losing_point})와 골 수(${totalWinningGoals}:${totalLosingGoals})가 일치하지 않습니다. 폼을 수정해주세요.`
+            );
+            return;
+        }
+    
+        // 4. 데이터 제출
+        console.log("폼 데이터:", data);
     });
     
-    const handleQuarterSubmit = handleSubmit(async (data) => {
-        console.log("제출된 데이터:", data);
-        // API 호출 등 처리
-    });
     
     const handleCancel = () => {
         navigate(`/matches/${match_id}/`);
@@ -240,7 +303,7 @@ function MatchDetails() {
             register={register}
             watch={watch}
             users={users}
-            onSubmit={handleQuarterSubmit}  
+            onSubmit={handleFormSubmit}  
         />
         } else if (activeTab === "lineup") {
             return renderLineups();
@@ -259,7 +322,7 @@ function MatchDetails() {
                             register={register}                            
                             errors={errors}
                             watch={watch}                            
-                            onSubmit={handleResultSubmit}
+                            onSubmit={handleFormSubmit}
                             tactics={tactics}
                         />
                         <div className="match-details">
@@ -289,14 +352,14 @@ function MatchDetails() {
             </div>
             <FloatingBar
                 mode="confirm_cancel"
-                onConfirm={handleResultSubmit}
+                onConfirm={handleFormSubmit}
                 onCancel={handleCancel}
             />
         </div>
     );
 }
 
-export default MatchDetails;
+export default MatchesEdit;
 
 
 //     const renderEditResult = () => {
