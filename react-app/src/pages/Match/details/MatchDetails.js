@@ -1,11 +1,11 @@
+import './Details.scss';
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import './MatchDetails.scss';
-import axios from "axios";
-import NavigationBar from "../../components/NavigationBar";
-import SoccerField from "../../components/SoccerField";
-import football_ball from "../../assets/icons/football_ball.svg";
-import FloatingBar from "../../components/FloatingBar";
+import FloatingBar from "../../../components/FloatingBar";
+import NavigationBar from "../../../components/NavigationBar";
+import defaultImage from "../../../assets/images/coolman-profile.png";
+import football_ball from "../../../assets/icons/football_ball.svg";
 
 function formatTime(isoString) {
     const date = new Date(isoString);
@@ -106,7 +106,7 @@ function MatchDetails() {
         return quartersWithGoals.map((quarter) => (
             <div key={quarter.quarter_idx} className="quarter-group">
                 <div className="quarter-header">
-                    <h3>쿼터 {quarter.quarter_number}</h3>
+                    <h4>쿼터 {quarter.quarter_number}</h4>
                     <p>
                        ({quarter.quarterHomeScore} : {quarter.quarterAwayScore})
                     </p>
@@ -178,7 +178,7 @@ function MatchDetails() {
         const substitutePlayers = filteredLineups.filter(player => player.lineup_status === '후보');
     
         return (
-            <div>
+            <div className='lineup-group'>
                 <div className="quarter-buttons">
                     {quarters.map((quarter) => (
                         <button
@@ -191,8 +191,22 @@ function MatchDetails() {
                     ))}
                 </div>
                 <div className="quarter-tactics">{startingPlayers[0]?.tactics}</div>
-                <SoccerField lineup={startingPlayers}/> 
-    
+                <div className="soccer-field">
+                    {startingPlayers.map((player, index) => (
+                        <div key={index} className="player-marker"
+                            style={{
+                                top: `${player.top_coordinate}%`,
+                                left: `${player.left_coordinate}%`,
+                            }}>
+                            <div className="position-label">{player.position_name}</div>
+                            <div className="player-circle"
+                                style={{
+                                    backgroundImage: `url(${player.image_url || defaultImage})`,
+                                }}></div>
+                            <div className="player-name">{player.user_name}</div>
+                        </div>
+                    ))}
+                </div>    
                 <div className="lineup-container">
                     <div className="lineup-section">
                         <h3 className="section-title">선발</h3>

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import './Matches.scss';
-import NavigationBar from "../../components/NavigationBar";
 import FloatingBar from "../../components/FloatingBar";
+import NavigationBar from "../../components/NavigationBar";
 import location_svg from "../../assets/icons/location.svg";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 function Matches() {
     const navigate = useNavigate();
@@ -144,18 +145,7 @@ function Matches() {
                 </div>
 
                 {loading && (
-                    <div className="loading">
-                        <svg className="spinner" viewBox="0 0 50 50">
-                            <circle
-                                className="path"
-                                cx="25"
-                                cy="25"
-                                r="20"
-                                fill="none"
-                                strokeWidth="4"
-                            />
-                        </svg>
-                    </div>
+                    <LoadingSpinner/>
                 )}
             </div>
         </div>
