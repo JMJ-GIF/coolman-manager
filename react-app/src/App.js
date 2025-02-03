@@ -7,6 +7,7 @@ import Profile from './pages/Profile';
 import Records from './pages/Records';
 import Gallery from './pages/Gallery';
 import Players from './pages/player/Players';
+import PlayerDetails from './pages/player/PlayerDetails';
 import Matches from './pages/match/Matches';
 import MatchDetails from './pages/match/details/MatchDetails';
 import MatchDetailsAdd from './pages/match/details/MatchDetailsAdd';
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/matches" element={<Matches />} />
         <Route path="/matches/:match_id" element={<MatchDetails />} />
         <Route path="/players" element={<Players />} />
+        <Route path="/players/:user_idx/:cardClass" element={<PlayerDetails />} />
         <Route path="/records" element={<Records />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/matches/add" element={<MatchDetailsAdd />} />

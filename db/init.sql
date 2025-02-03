@@ -124,7 +124,9 @@ VALUES
 ('2024-12-17', '패배', 0, 1, '타이탄스 FC', '시티 아레나', '2024-12-17 18:00:00', '2024-12-17 19:45:00', '구름', 22, '3-5-2', 'Confirmed'),
 ('2024-12-18', '승리', 5, 2, '스톰 팀', '코스탈 필드', '2024-12-18 16:00:00', '2024-12-18 17:45:00', '바람', 22, '4-3-3', 'Confirmed'),
 ('2024-12-19', '무승부', 0, 0, '불스 클럽', '해안 스타디움', '2024-12-19 19:00:00', '2024-12-19 20:45:00', '비', 22, '5-4-1', 'Confirmed'),
-('2024-12-20', '승리', 4, 1, '팔콘스 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed');
+('2024-12-20', '승리', 4, 1, '팔콘스 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed'),
+('2024-12-21', '승리', 4, 1, '내맘대로 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed');
+
 INSERT INTO quarters (quarter_idx, match_idx, quarter_number, tactics) VALUES
 (1, 1, 1, '3-4-3'),
 (2, 1, 2, '5-3-2'),
@@ -205,7 +207,11 @@ INSERT INTO quarters (quarter_idx, match_idx, quarter_number, tactics) VALUES
 (77, 20, 1, '5-4-1'),
 (78, 20, 2, '4-3-3'),
 (79, 20, 3, '5-4-1'),
-(80, 20, 4, '5-4-1');
+(80, 20, 4, '5-4-1'),
+(81, 21, 1, '5-4-1'),
+(82, 21, 2, '4-3-3'),
+(83, 21, 3, '5-4-1'),
+(84, 21, 4, '5-4-1');
 INSERT INTO goals (goal_idx, match_idx, quarter_idx, goal_player_id, assist_player_id, goal_type) VALUES
 (2, 1, 2, 9, 11, '득점'),
 (3, 1, 3, 2, 10, '득점'),
@@ -437,6 +443,39 @@ JOIN
 	    FROM (
 	        SELECT generate_series(12, 13) AS player_idx, repeat_num
 	        FROM generate_series(1, 80) AS repeat_num
+	    ) AS repeated_series
+	) a
+) t2 on t1.row_num = t2.row_num
+
+union all
+
+select		
+		t2.player_idx,
+		t1.quarter_idx,			
+		t1.position_idx,
+		'선발'as lineup_status
+from
+(
+	select
+			q.*,
+			p.position_idx,			
+			ROW_NUMBER() OVER () AS row_num
+	from quarters q
+		join positions p on q.tactics = p.tactics
+	where quarter_idx > 80
+		and quarter_idx <= 84
+) t1
+JOIN
+(
+	select 
+			*,
+	        ROW_NUMBER() OVER () AS row_num
+	from
+	(
+		SELECT player_idx
+	    FROM (
+	        SELECT generate_series(1, 11) AS player_idx, repeat_num
+	        FROM generate_series(1, 4) AS repeat_num
 	    ) AS repeated_series
 	) a
 ) t2 on t1.row_num = t2.row_num

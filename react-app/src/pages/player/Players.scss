@@ -1,48 +1,209 @@
 @import '../../assets/styles/variables.scss';
 
 .user-container {    
-    gap: 20px; 
     display: grid;
-    grid-template-columns: repeat(2, 1fr);     
-    
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px; 
+    align-items: center;
+    justify-content: center; 
+
+    @media (max-width: 800px) {
+        grid-template-columns: repeat(2, 1fr); 
+        justify-content: center; 
+        place-items: center; 
+    }
+
+    @media (max-width: 460px) {
+        grid-template-columns: repeat(1, 1fr);
+        justify-content: center; 
+        place-items: center; 
+    }
+
     .card {
         display: flex;
         flex-direction: column;
+        justify-content: flex-start;
         align-items: center;
-        background: white;
-        padding: 10px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 200px;
+        height: 300px;
+        clip-path: polygon(
+            0% 0%, 100% 0%, 
+            100% 85%, 50% 100%, 0% 85% 
+        );
+        border-radius: 5px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
         text-align: center;
-        transition: transform 0.2s ease-in-out;
-
+        font-family: 'Arial', sans-serif;
+        position: relative;
+        transition: transform 0.3s ease-in-out;
+    
         &:hover {
-            transform: translateY(-5px); 
+            transform: translateY(-5px);
+        }
+        
+        &.gold {
+            background: linear-gradient(
+                135deg, 
+                #fff8e1 5%,  
+                #e6b800 25%, 
+                #d4af37 50%, 
+                #c99500 75%, 
+                #fff8e1 95%  
+            );
+
+            .name-section {
+                background: #d4af37; 
+                color: white;
+            }
+        }
+        
+        &.silver {
+            background: linear-gradient(
+                135deg, 
+                #f2f2f2 5%,  
+                #d9d9d9 25%, 
+                #b3b3b3 50%, 
+                #a6a6a6 75%, 
+                #f2f2f2 95%  
+            );
+
+            .name-section {
+                background: #b3b3b3; 
+                color: white;
+            }
+        }
+        
+        &.bronze {
+            background: linear-gradient(
+                135deg, 
+                #f2e6d9 5%,  
+                #e0a96d 25%, 
+                #c57b57 50%, 
+                #9f5630 75%, 
+                #f2e6d9 95%  
+            );
+
+            .name-section {
+                background: #c57b57; 
+                color: white;
+            }
         }
 
-        .profile {
-            width: 100%;
-            height: 150px;
-            border-radius: 0%;
-            overflow: hidden;
-            background-color: #ccc;
-            border: 3px solid white;
+        .profile-section {
+            width: 200px;
+            height: 150px; 
             background-size: cover;
-            background-position: center;
-            margin-bottom: 10px;
-        }
+            background-position: top center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;              
+
+            .vertical-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                width: 40px;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                color: white;
+                font-size: 1em;
+                font-weight: bold;
+                text-align: center;                
+                position: absolute;  
+                left: 0; 
+                top: 0;
+
+                .score {
+                    font-size: 1.2em;
+                    margin-top: 5px;
+                }
+                .position {
+                    font-size: 0.8em;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    width: 30px;
+                    text-align: center;
+                    white-space: nowrap;
+                }            
+                .role {
+                    font-size: 0.8em;
+                    font-weight: bold;
+                    padding: 3px 5px;
+                    border-radius: 5px;
+                    color: white;
+                    text-align: center;
+                    width: fit-content;
+                    margin-top: auto;
+                    align-self: center; 
+                    margin-bottom: 10px;
     
-        .name {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-        }
+                    &.coach {
+                        background: red;
+                    }
     
-        .position, .back_number, .joindate, .role {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 5px;
+                    &.player {
+                        background: blue;
+                    }
+                }
+            }
         }
-    }
         
+        .name-section {
+            font-size: 1.0em;
+            font-weight: bold;
+            padding: 10px;
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            width: 100%;
+
+            .name {                
+                flex-grow: 1; 
+                text-align: left;
+                padding-left: 10px;
+                color: black;
+            }
+            
+            .back-number {
+                font-size: 0.8em;                
+                background: #6c757d; 
+                color: white;
+                padding: 3px 8px;
+                border-radius: 5px;
+                text-align: center;
+                margin-right: 10px;
+            }
+        }
+
+        .stat-section {
+            width: 100%;
+            padding: 5px 10px;
+            display: flex;
+            justify-content: center;
+            
+            .stat-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.9em;
+                text-align: center;
+                color: black; 
+                background: transparent; 
+        
+                thead {
+                    font-weight: bold;
+                }
+        
+                th, td {
+                    padding: 3px;
+                }
+        
+                thead tr {
+                    border-bottom: 1px solid black; // 제목과 내용 구분하는 가로선
+                }
+            }
+        }
+        
+    }
 }

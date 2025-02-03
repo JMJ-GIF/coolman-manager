@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from end_point.matches import router as matches_router
 from end_point.users import router as users_router
 from end_point.positions import router as position_router
+from end_point.rank import router as rank_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,3 +21,4 @@ app.add_middleware(
 app.include_router(matches_router, prefix="/matches", tags=["Matches"])
 app.include_router(users_router, prefix="/users", tags=["Users"])
 app.include_router(position_router, prefix="/positions", tags=["Positions"])
+app.include_router(rank_router, prefix='/rank', tags=["Rank"])
