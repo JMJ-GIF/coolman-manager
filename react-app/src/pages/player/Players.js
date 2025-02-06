@@ -85,8 +85,8 @@ function Players() {
                                             <tr>
                                                 <td>{user.goal_cnt}</td>
                                                 <td>{user.assist_cnt}</td>
-                                                <td>{user.participant_cnt}</td>
-                                                <td>{user.max_participant_cnt}</td>
+                                                <td>{user.match_cnt}</td>
+                                                <td>{user.max_match_cnt}</td>
                                             </tr>
                                         </tbody>
                                     </table>

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from db import get_db
-from schemas.rank import UserAllStats, UserParticipation, UserStatsOpposingTeam, UserStatsPosition
+from schemas.rank import UserAllStats, UserParticipation, UserStatsOpposingTeam, UserStatsPosition, OpposingTeamAllStats
 from sqlalchemy.sql import text
 
 router = APIRouter()
@@ -11,23 +11,14 @@ router = APIRouter()
 def get_user_all_stats(db: Session = Depends(get_db)):
     query = """
         select
-                b.*,
-                a.participant_cnt,
-                cast(participant_cnt as float) / max_participant_cnt as ratio,
+                a.*,
+                coalesce(b.match_cnt, 0) as match_cnt,
+                case when b.match_cnt = 0 then 0 
+                else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,
                 coalesce(c.goal_cnt, 0) as goal_cnt,
-                coalesce(d.assist_cnt, 0) as assist_cnt
+                coalesce(d.assist_cnt, 0) as assist_cnt,
+                coalesce(b.quarter_cnt, 0) as quarter_cnt
         from
-        (
-            select
-                    ql.player_idx as user_idx,
-                    count(distinct m.match_idx) as participant_cnt		
-            from matches m
-                join quarters q on m.match_idx = q.match_idx 
-                join quarters_lineup ql on ql.quarter_idx = q.quarter_idx
-            group by 1
-
-        ) a
-        join
         (
             select 
                     u.user_idx,
@@ -35,11 +26,22 @@ def get_user_all_stats(db: Session = Depends(get_db)):
                     u.back_number,
                     u.position,
                     u.role,                    
-                    count(distinct m.match_idx) as max_participant_cnt	 		
+                    count(distinct m.match_idx) as max_match_cnt
             from users u  	 	 	
                 left join matches m on m.dt >= u.join_date  
-            group by 1,2,3,4,5
+            group by 1,2,3,4,5            
 
+        ) a
+        join
+        (
+            select
+                    ql.player_idx as user_idx,
+                    count(distinct m.match_idx) as match_cnt,
+                    count(distinct ql.quarter_idx) as quarter_cnt
+            from matches m
+                join quarters q on m.match_idx = q.match_idx 
+                join quarters_lineup ql on ql.quarter_idx = q.quarter_idx
+            group by 1
         ) b on a.user_idx = b.user_idx
         left join 
         (
@@ -70,11 +72,12 @@ def get_user_all_stats(db: Session = Depends(get_db)):
             back_number=row.back_number,
             position=row.position,
             role=row.role,
-            participant_cnt=row.participant_cnt,
-            max_participant_cnt=row.max_participant_cnt,
+            match_cnt=row.match_cnt,
+            max_match_cnt=row.max_match_cnt,
             ratio=row.ratio,
             goal_cnt=row.goal_cnt,
             assist_cnt=row.assist_cnt,
+            quarter_cnt=row.quarter_cnt
         )
         for row in result
     ]
@@ -187,6 +190,34 @@ def get_user_stats_by_position(user_idx: int, db: Session = Depends(get_db)):
             goal_cnt=row.goal_cnt,
             assist_cnt=row.assist_cnt,
             quarter_cnt=row.quarter_cnt
+        )
+        for row in result
+    ]    
+
+@router.get("/opposing_team", response_model=List[OpposingTeamAllStats])
+def get_opposing_team_all_stat(db: Session = Depends(get_db)):
+    query = f"""
+        select 
+                m.opposing_team,
+                sum(case when "result" = '승리' then 1 else 0 end) as win_match,
+                sum(case when "result" = '패배' then 1 else 0 end) as lose_match,
+                sum(case when "result" = '무승부' then 1 else 0 end) as draw_match,
+                sum(winning_point) as winning_point,
+                sum(losing_point) as losing_point
+        from matches m
+        group by 1
+    """
+
+    result = db.execute(text(query)).fetchall()
+
+    return [
+        OpposingTeamAllStats(
+            opposing_team=row.opposing_team,
+            win_match=row.win_match, 
+            lose_match=row.lose_match,
+            draw_match=row.draw_match,
+            winning_point=row.winning_point,
+            losing_point=row.losing_point
         )
         for row in result
     ]    

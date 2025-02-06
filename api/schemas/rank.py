@@ -5,14 +5,15 @@ from typing import Optional
 class UserAllStats(BaseModel):
     user_idx: int
     name: str
-    back_number: Optional[int]
-    position: Optional[str]
-    role: Optional[str]
-    participant_cnt: int
-    max_participant_cnt: int
+    back_number: int
+    position: str
+    role: str
+    match_cnt: int
+    max_match_cnt: int
     ratio: float
     goal_cnt: int
     assist_cnt: int
+    quarter_cnt: int
 
 class UserParticipation(BaseModel):
     user_idx: int    
@@ -34,3 +35,11 @@ class UserStatsPosition(BaseModel):
     goal_cnt: Optional[int]
     assist_cnt: Optional[int]
     quarter_cnt: Optional[int]
+
+class OpposingTeamAllStats(BaseModel):
+    opposing_team: Optional[str]
+    win_match: Optional[int]
+    lose_match: Optional[int]
+    draw_match: Optional[int]
+    winning_point: Optional[int]
+    losing_point: Optional[int]

@@ -14,8 +14,7 @@ function NavigationBar() {
         { label: "Home", route: "/home" },
         { label: "Matches", route: "/matches" },
         { label: "Players", route: "/players" },
-        { label: "Records", route: "/records" },
-        { label: "Gallery", route: "/gallery" },
+        { label: "Records", route: "/records" },        
     ];
 
     const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));
