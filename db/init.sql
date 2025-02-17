@@ -25,13 +25,13 @@ $$;
 
 -- 테이블 생성
 CREATE TABLE IF NOT EXISTS users (
-    user_idx SERIAL PRIMARY KEY,
-    user_id VARCHAR(20) UNIQUE NOT NULL,
-    name VARCHAR(50) NOT NULL,
+    user_idx SERIAL PRIMARY KEY,    
+    name VARCHAR(50) NOT NULL,	
     position VARCHAR(20) NOT NULL,
     back_number INT UNIQUE NOT NULL,
     join_date TIMESTAMP NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('선수', '감독', '용병')),   
+    role VARCHAR(20) NOT NULL CHECK (role IN ('선수', '감독', '용병')),
+	social_uuid VARCHAR(50) UNIQUE NOT NULL,    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS matches (
@@ -86,22 +86,21 @@ CREATE TABLE IF NOT EXISTS quarters_lineup (
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
-
 -- 기본 데이터 삽입
-INSERT INTO users (user_id, name, position, back_number, join_date, role) VALUES
-('user001', '홍길동', 'GK', 9, '2022-01-10 10:00:00', '선수'),
-('user002', '김철수', 'CB', 5, '2022-02-15 11:30:00', '선수'),
-('user003', '이영희', 'RM', 8, '2023-03-12 14:45:00', '선수'),
-('user004', '박민준', 'ST', 1, '2023-04-20 09:20:00', '선수'),
-('user005', '최예림', 'ST', 11, '2021-05-25 16:10:00', '선수'),
-('user006', '정수현', 'LB', 6, '2022-06-18 13:40:00', '선수'),
-('user007', '윤지훈', 'RB', 4, '2023-07-22 12:50:00', '선수'),
-('user008', '안도현', 'RWB', 15, '2021-08-30 15:00:00', '감독'),
-('user009', '서유리', 'ST', 10, '2022-09-15 10:05:00', '선수'),
-('user010', '장준호', 'RW', 22, '2023-10-05 17:25:00', '감독'),
-('user011', '진민제', 'RW', 35, '2023-10-05 17:25:00', '선수'),
-('user012', '장준호', 'ST', 99, '2023-11-01 15:15:00', '선수'),
-('user013', '용병', 'GK', 00, '2023-11-02 15:15:00', '용병');
+INSERT INTO users (name, position, back_number, join_date, role, social_uuid) VALUES
+('홍길동','GK', 9, '2022-01-10 10:00:00', '선수', '1'),
+('김철수','CB', 5, '2022-02-15 11:30:00', '선수', '2'),
+('이영희','RM', 8, '2023-03-12 14:45:00', '선수', '3'),
+('박민준','ST', 1, '2023-04-20 09:20:00', '선수', '4'),
+('최예림','ST', 11, '2021-05-25 16:10:00', '선수', '5'),
+('정수현','LB', 6, '2022-06-18 13:40:00', '선수', '6'),
+('윤지훈','RB', 4, '2023-07-22 12:50:00', '선수', '7'),
+('안도현','RWB', 15, '2021-08-30 15:00:00', '감독', '8'),
+('서유리','ST', 10, '2022-09-15 10:05:00', '선수', '9'),
+('장준호','RW', 22, '2023-10-05 17:25:00', '감독', '10'),
+('진민제','RW', 35, '2023-10-05 17:25:00', '선수', '8RI4g6BlISEiGG8dXsbJgzckc9j_hgH9ZEGRGqXGvzk'),
+('장준호','ST', 99, '2023-11-01 15:15:00', '선수', '11'),
+('용병','GK', 00, '2023-11-02 15:15:00', '용병', '12');
 
 INSERT INTO matches (dt, result, winning_point, losing_point, opposing_team, location, start_time, end_time, weather, num_players, main_tactics, status)
 VALUES 

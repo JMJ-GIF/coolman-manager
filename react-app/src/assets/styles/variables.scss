@@ -42,29 +42,28 @@
   flex-direction: column;
   justify-content: flex-start; 
   align-items: center;
-  overflow: auto;  
-}
+  overflow: auto;
+  padding-top: 40px;  
 
-.gray-background .content {
-  width: 100%;
-  min-height: 100vh;
-  max-width: 768px;  
-  background-color: var(--background-content-color);  
-  padding: 20px;
-  border-radius: 8px;
-  box-sizing: border-box;
-  position: relative; 
-  margin-top: 40px; 
-}
-
-@media (min-width: 768px) {
-  .gray-background {
+  @media screen and (min-width: 768px)  {
       background-color: var(--background-margin-color);  
   }
+  
+  .content {
 
-  .gray-background .content {
+    width: 100%;
+    min-height: 100vh;
+    max-width: 768px;  
+    background-color: var(--background-content-color);  
+    padding: 20px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    position: relative;     
+
+    @media screen and (min-width: 768px)  {
       width: 768px; 
       background-color: var(--background-content-color);  
       padding: 30px;
+    }
   }
 }

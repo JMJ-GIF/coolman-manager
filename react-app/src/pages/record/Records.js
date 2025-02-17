@@ -2,11 +2,11 @@ import './Records.scss';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import NavigationBar from "../components/NavigationBar";
-import LoadingSpinner from "../components/LoadingSpinner";
-import gold_svg from "../assets/icons/gold.svg"
-import silver_svg from "../assets/icons/silver.svg"
-import bronze_svg from "../assets/icons/bronze.svg"
+import NavigationBar from "../../components/NavigationBar";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import gold_svg from "../../assets/icons/gold.svg"
+import silver_svg from "../../assets/icons/silver.svg"
+import bronze_svg from "../../assets/icons/bronze.svg"
 
 function Records() {
     const navigate = useNavigate();

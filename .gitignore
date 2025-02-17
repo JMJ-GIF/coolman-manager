@@ -4,7 +4,7 @@
 /react-app/node_modules
 /.pnp
 .pnp.js
-/api/__pycache__
+__pycache__
 
 # testing
 /coverage
@@ -28,3 +28,7 @@ package-lock.json
 
 # python
 *.ipynb
+
+# env
+/react-app/.env
+/api/.env

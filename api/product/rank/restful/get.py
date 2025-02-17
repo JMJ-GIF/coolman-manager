@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import List, Optional
-from db import get_db
-from schemas.rank import UserAllStats, UserParticipation, UserStatsOpposingTeam, UserStatsPosition, OpposingTeamAllStats
+from typing import List
 from sqlalchemy.sql import text
+from sqlalchemy.orm import Session
+from fastapi import Depends, HTTPException
 
-router = APIRouter()
+from db import get_db
+from product.rank.router import router
+from product.rank.schema import (
+    UserAllStats, UserParticipation, UserStatsOpposingTeam,
+    UserStatsPosition, OpposingTeamAllStats
+)
 
 @router.get("/", response_model=List[UserAllStats])
 def get_user_all_stats(db: Session = Depends(get_db)):
-    query = """
+    sql = """
         select
                 a.*,
                 coalesce(b.match_cnt, 0) as match_cnt,
@@ -63,28 +66,16 @@ def get_user_all_stats(db: Session = Depends(get_db)):
         ) d on d.user_idx = c.user_idx
     """
     
-    result = db.execute(text(query)).fetchall()
+    result = db.execute(text(sql)).mappings().all()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="No user statistics found.")
     
-    return [
-        UserAllStats(
-            user_idx=row.user_idx,
-            name=row.name,
-            back_number=row.back_number,
-            position=row.position,
-            role=row.role,
-            match_cnt=row.match_cnt,
-            max_match_cnt=row.max_match_cnt,
-            ratio=row.ratio,
-            goal_cnt=row.goal_cnt,
-            assist_cnt=row.assist_cnt,
-            quarter_cnt=row.quarter_cnt
-        )
-        for row in result
-    ]
+    return result
 
 @router.get("/{user_idx}/participation", response_model=List[UserParticipation])
 def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
-    query = f"""
+    sql = f"""
         select
                 u.user_idx,                
                 a.dt,
@@ -115,22 +106,17 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
         where a.dt >= u.join_date 
     """
 
-    result = db.execute(text(query)).fetchall()
+    result = db.execute(text(sql)).mappings().all()
 
-    return [
-        UserParticipation(
-            user_idx=row.user_idx,            
-            dt=row.dt,
-            is_participation=row.is_participation,
-            quarter_cnt = row.quarter_cnt
-        )
-        for row in result
-    ]    
+    if not result:
+        raise HTTPException(status_code=404, detail=f"No participation data found for user {user_idx}.")
+
+    return result
 
 
 @router.get("/{user_idx}/opposing_team", response_model=List[UserStatsOpposingTeam])
 def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)):
-    query = f"""
+    sql = f"""
         select                 
                 m.opposing_team,
                 {user_idx} as user_idx,
@@ -147,22 +133,16 @@ def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)
         group by 1,2
     """
 
-    result = db.execute(text(query)).fetchall()
+    result = db.execute(text(sql)).mappings().all()
 
-    return [
-        UserStatsOpposingTeam(
-            opposing_team=row.opposing_team,
-            user_idx=row.user_idx, 
-            goal_cnt=row.goal_cnt,
-            assist_cnt=row.assist_cnt,
-            match_cnt=row.match_cnt           
-        )
-        for row in result
-    ]    
+    if not result:
+        raise HTTPException(status_code=404, detail=f"No opposing team stats found for user {user_idx}.")
+
+    return result
 
 @router.get("/{user_idx}/position", response_model=List[UserStatsPosition])
 def get_user_stats_by_position(user_idx: int, db: Session = Depends(get_db)):
-    query = f"""
+    sql = f"""
         select 
                 {user_idx} as user_idx,
                 p.tactics,
@@ -180,23 +160,16 @@ def get_user_stats_by_position(user_idx: int, db: Session = Depends(get_db)):
         group by 1,2,3
     """
 
-    result = db.execute(text(query)).fetchall()
+    result = db.execute(text(sql)).mappings().all()
 
-    return [
-        UserStatsPosition(
-            user_idx=row.user_idx,
-            tactics=row.tactics, 
-            position_name=row.position_name,
-            goal_cnt=row.goal_cnt,
-            assist_cnt=row.assist_cnt,
-            quarter_cnt=row.quarter_cnt
-        )
-        for row in result
-    ]    
+    if not result:
+        raise HTTPException(status_code=404, detail=f"No position statistics found for user {user_idx}.")
+
+    return result
 
 @router.get("/opposing_team", response_model=List[OpposingTeamAllStats])
 def get_opposing_team_all_stat(db: Session = Depends(get_db)):
-    query = f"""
+    sql = f"""
         select 
                 m.opposing_team,
                 sum(case when "result" = '승리' then 1 else 0 end) as win_match,
@@ -208,16 +181,9 @@ def get_opposing_team_all_stat(db: Session = Depends(get_db)):
         group by 1
     """
 
-    result = db.execute(text(query)).fetchall()
+    result = db.execute(text(sql)).mappings().all()
 
-    return [
-        OpposingTeamAllStats(
-            opposing_team=row.opposing_team,
-            win_match=row.win_match, 
-            lose_match=row.lose_match,
-            draw_match=row.draw_match,
-            winning_point=row.winning_point,
-            losing_point=row.losing_point
-        )
-        for row in result
-    ]    
+    if not result:
+        raise HTTPException(status_code=404, detail="No opposing team statistics found.")
+
+    return result

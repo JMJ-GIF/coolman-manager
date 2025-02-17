@@ -25,12 +25,12 @@ function FloatingBar({ mode, onEdit, onConfirm, onCancel }) {
 
     if (mode === "confirm_cancel") {
         return (
-            <div className="floating-bar">
-                <button className="action-button confirm" onClick={onConfirm}>
-                    확인
-                </button>
+            <div className="floating-bar">                
                 <button className="action-button cancel" onClick={onCancel}>
                     취소
+                </button>
+                <button className="action-button confirm" onClick={onConfirm}>
+                    확인
                 </button>
             </div>
         );

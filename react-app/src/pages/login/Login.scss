@@ -1,0 +1,107 @@
+@import '../../assets/styles/variables.scss';
+
+.login-frame {
+    width: 70%;
+    height: 80%;
+    top: 50%; 
+    left: 50%;
+    position: absolute;      
+    background-color: white;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+    transform: translate(-50%, -50%);
+    max-width: 768px;
+    border-radius: 10px; 
+
+    .login-header {
+        width: 100%;
+        display: flex;
+        flex-direction: column;        
+        text-align: center;                
+        margin-bottom: 30px;
+        align-items: center; 
+        justify-content: center; 
+        text-align: center;                      
+
+        .mobile-logo-team {            
+            width: 50%;
+            margin: 0 20px;
+            height: auto;
+            z-index: 3;                                  
+        }
+        
+        h2 {                        
+            font-size: clamp(12px, 4vw, 24px);                               
+        }
+    }
+
+    @media (max-width: 768px) {
+        width: 90%
+    }
+
+    .login-middle {        
+        display: flex;
+        flex-direction: column;       
+        text-align: center; 
+        justify-content: center; 
+        align-items: center;
+        margin: 0 20px;
+        width: 100%;
+
+        .naver-login-button {
+            width: 40%;             
+            cursor: pointer; 
+            transition: transform 0.2s ease, opacity 0.2s ease; 
+            margin-bottom: 40px;
+          
+            &:hover {
+              transform: scale(1.1); 
+              opacity: 0.8; 
+            }
+          
+            &:active {
+              transform: scale(0.95);
+            }
+
+            @media (min-width: 768px) {
+                width: 200px;
+            }
+        }
+
+        hr {
+            width: 50%;
+        }
+    }
+
+    .login-bottom {
+        display: flex;
+        flex-direction: column;                        
+        align-items: center;
+        text-align: center;
+        margin: 0 20px;
+        width: 50%;        
+
+        .demo-link {
+            cursor: pointer; 
+            font-size: clamp(8px, 4vw, 12px);                                          
+            
+            &:hover {
+                color: #0d5bbf; 
+                text-decoration: underline; 
+            }
+        }
+        
+        .logo-sns {
+            width: 8%;
+            height: auto;
+            z-index: 3;
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+        }       
+    }
+}
