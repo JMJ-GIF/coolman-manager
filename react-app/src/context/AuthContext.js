@@ -5,7 +5,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false); 
 
@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   
     try {
       const response = await axios.get(`${API_URL}/auth/me`, { withCredentials: true });
-      setUser(response.data);
+      setAuthUser(response.data);
     } catch (error) {
       console.warn("❌ 유저 정보 가져오기 실패:", error.response?.data);
   
@@ -27,27 +27,37 @@ export const AuthProvider = ({ children }) => {
           console.log("✅ access_token 갱신 성공!");
   
           setIsRefreshing(false);
-          await fetchUser(); // ✅ refresh 성공 후 다시 fetchUser 실행
+          await fetchUser();
           return;
         } catch (refreshError) {
           console.error("❌ refresh_token도 만료됨. 로그아웃 처리...");
-          setUser(null);
+          setAuthUser(null);
         } finally {
           setIsRefreshing(false);
         }
       } else {
-        setUser(null);
+        setAuthUser(null);
       }
     } finally {
       setLoading(false); 
     }
   };
 
+  const logout = async () => {
+    try {
+      await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true }); 
+      setAuthUser(null); 
+      console.log("🚪 로그아웃 완료!");
+    } catch (error) {
+      console.error("❌ 로그아웃 실패:", error);
+    }
+  };
+  
   useEffect(() => {
     fetchUser();
   }, []);
 
-  return <AuthContext.Provider value={{ user, loading, fetchUser }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ authUser, loading, fetchUser, logout }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

@@ -10,13 +10,13 @@ const RedirectURI = () => {
   const loginUser = async (user_idx) => {
     try {
       await axios.post(`${API_URL}/auth/login`,{ user_idx },{ withCredentials: true });      
-      navigate("/home");
+      navigate("/matches");
     } catch (error) {
       console.error("❌ 로그인 실패:", error.response?.data);
     }
   };
   
-  const checkUserExists = async (uuid) => {
+  const checkUserExists = async (uuid, name) => {
     try {      
       const response = await axios.get(`${API_URL}/users/uuid/exists?uuid=${uuid}`);      
 
@@ -24,7 +24,7 @@ const RedirectURI = () => {
         loginUser(response.data.user_idx);        
 
       } else {                
-        navigate("/signup"); 
+        navigate("/signup", { state: { name, uuid } }); 
 
       }
     } catch (error) {
@@ -39,11 +39,12 @@ const RedirectURI = () => {
           Authorization: `Bearer ${accessToken}`, 
         },
       });
+      console.log(response.data.id)
       
-      checkUserExists(response.data.id);
+      checkUserExists(response.data.id, response.data.name);
 
     } catch (error) {
-      console.error("❌ 사용자 정보 요청 오류:", error);
+      console.error("❌ Naver 사용자 정보 요청 오류:", error);
     }
   };
 
@@ -59,10 +60,10 @@ const RedirectURI = () => {
       if (response.data.access_token) {
         getUserInfo(response.data.access_token);
       } else {
-        console.error("❌ Access Token 발급 실패:", response.data);
+        console.error("❌ Naver Access Token 발급 실패:", response.data);
       }
     } catch (error) {
-      console.error("❌ Access Token 요청 오류:", error);
+      console.error("❌ Naver Access Token 요청 오류:", error);
     }
   };
   

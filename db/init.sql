@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS quarters_lineup (
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
+-- 8RI4g6BlISEiGG8dXsbJgzckc9j_hgH9ZEGRGqXGvzk
 -- 기본 데이터 삽입
 INSERT INTO users (name, position, back_number, join_date, role, social_uuid) VALUES
 ('홍길동','GK', 9, '2022-01-10 10:00:00', '선수', '1'),
@@ -98,7 +99,7 @@ INSERT INTO users (name, position, back_number, join_date, role, social_uuid) VA
 ('안도현','RWB', 15, '2021-08-30 15:00:00', '감독', '8'),
 ('서유리','ST', 10, '2022-09-15 10:05:00', '선수', '9'),
 ('장준호','RW', 22, '2023-10-05 17:25:00', '감독', '10'),
-('진민제','RW', 35, '2023-10-05 17:25:00', '선수', '8RI4g6BlISEiGG8dXsbJgzckc9j_hgH9ZEGRGqXGvzk'),
+('진민제','RW', 35, '2023-10-05 17:25:00', '선수', 'xx'),
 ('장준호','ST', 99, '2023-11-01 15:15:00', '선수', '11'),
 ('용병','GK', 00, '2023-11-02 15:15:00', '용병', '12');
 

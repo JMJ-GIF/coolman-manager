@@ -300,7 +300,7 @@ function MatchDetails() {
                     <p>{matchDetails.location}</p>
                 </div>
                 <div className="card">
-                    <span>참가인원</span>
+                    <span>참가인원 (용병제외)</span>
                     <p>{matchDetails.num_players} 명</p>
                 </div>
                 <div className="card">

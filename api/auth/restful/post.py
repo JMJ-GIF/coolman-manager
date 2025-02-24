@@ -80,6 +80,37 @@ async def logout(response: Response):
     """
     로그아웃 - 쿠키 삭제
     """
-    response.delete_cookie(AUTH_COOKIE_NAME)
-    response.delete_cookie(AUTH_REFRESH_COOKIE_NAME)
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        path="/",  # 🔥 설정한 path와 동일하게
+        samesite="None",
+        secure=True,
+    )
+    response.delete_cookie(
+        key=AUTH_REFRESH_COOKIE_NAME,
+        path="/",
+        samesite="None",
+        secure=True,
+    )
+
+    # ✅ 쿠키를 강제로 만료시키는 추가적인 Set-Cookie 헤더 설정
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value="",
+        httponly=True,
+        secure=True,
+        samesite="None",
+        path="/",
+        max_age=0,  # 즉시 만료
+    )
+    response.set_cookie(
+        key=AUTH_REFRESH_COOKIE_NAME,
+        value="",
+        httponly=True,
+        secure=True,
+        samesite="None",
+        path="/",
+        max_age=0,  # 즉시 만료
+    )
+
     return {"message": "Logged out successfully"}

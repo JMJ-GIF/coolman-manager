@@ -52,3 +52,13 @@ def get_positions(
             raise HTTPException(status_code=404, detail="No positions found")
 
         return result
+
+@router.get("/signup/4-3-3", response_model=List[Position])
+def get_positions_in_signup(db: Session = Depends(get_db)):
+    sql = "SELECT * FROM positions WHERE tactics = '4-3-3'"
+    result = db.execute(text(sql)).mappings().all()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="No positions found")
+
+    return result

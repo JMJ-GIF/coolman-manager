@@ -10,8 +10,7 @@ function NavigationBar() {
     const lastScrollY = useRef(0);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
-    const menuItems = [
-        { label: "Home", route: "/home" },
+    const menuItems = [        
         { label: "Matches", route: "/matches" },
         { label: "Players", route: "/players" },
         { label: "Records", route: "/records" },        

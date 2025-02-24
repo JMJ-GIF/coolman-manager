@@ -13,4 +13,12 @@ class User(BaseModel):
 
 class UserCheck(BaseModel):
     user_idx: Optional[int] = None 
-    exists: bool      
+    exists: bool 
+
+class UserCreate(BaseModel):
+    name: str
+    position: str
+    back_number: int
+    role: str
+    social_uuid: str
+    image: Optional[str] = None
