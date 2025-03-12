@@ -15,10 +15,10 @@ function LoginPage() {
   const handleNaverLogin = (e) => {
     window.location.href = NAVER_AUTH_URL;
   };
-  const handleDemoLogin = (e) => {
-    e.preventDefault(); 
-    navigate('/home');
-  }
+  // const handleDemoLogin = (e) => {
+  //   e.preventDefault(); 
+  //   navigate('/matches');
+  // }
 
   return (
     <div className="img-background">
@@ -32,7 +32,7 @@ function LoginPage() {
           <hr className="divider"/>
         </div>
         <div className="login-bottom">
-          <p className="demo-link" onClick={handleDemoLogin}>데모버전으로 이용하기</p>          
+          {/* <p className="demo-link" onClick={handleDemoLogin}>로그인 없이 둘러보기</p>           */}
           <a href="https://band.us/band/70861479/" target="_blank" rel="noopener noreferrer">
             <img src={BandLogo} alt="밴드" className="logo-sns" />
           </a>

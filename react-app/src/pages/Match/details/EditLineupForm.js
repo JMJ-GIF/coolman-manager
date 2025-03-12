@@ -14,26 +14,23 @@ const EditLineupForm = ({
     positions,
     onSubmit
 }) => { 
-    const { fields: quarterFields } = useFieldArray({
-        control,
-        name: "quarters",
-    });          
-
-    const inputRefs = useRef([]);    
+ 
+    const quartersData = watch("quarters", []);  
+    
     const [selectedQuarter, setSelectedQuarter] = useState(1);
-    const [selectedTactics, setSelectedTactics] = useState(null); 
-    const [duplicateIndexes, setDuplicateIndexes] = useState([]);                               
+    const [selectedTactics, setSelectedTactics] = useState(""); 
+    const [duplicateIndexes, setDuplicateIndexes] = useState([]);    
+    
+    const filteredQuarter = quartersData.find((quarter) => quarter.quarter_number === selectedQuarter);
+    const filteredQuarterIndex = quartersData.findIndex((quarter) => quarter.quarter_number === selectedQuarter);
+    const filteredQuarterPath = filteredQuarterIndex !== -1 ? `quarters.${filteredQuarterIndex}`: null;
     
     const { fields: lineupFields, append: appendLineup, remove: deleteLineup } = useFieldArray({
         control,
-        name: `quarters.${quarterFields.findIndex((q) => q.quarter_number === selectedQuarter)}.lineups`
+        name: filteredQuarterPath ? `${filteredQuarterPath}.lineups` : "quarters.0.lineups",
     });        
-    const quartersData = watch("quarters", []);
-    const filteredQuarter = quartersData.find((quarter) => quarter.quarter_number === selectedQuarter);
-    const filteredQuarterIndex = quarterFields.findIndex((quarter) => quarter.quarter_number === selectedQuarter);
-    const filteredQuarterPath = filteredQuarterIndex !== -1
-    ? `quarters.${filteredQuarterIndex}`
-    : null;
+    
+    
     const filteredLineups = filteredQuarter ? filteredQuarter.lineups : [];
     const startingPlayers = filteredLineups.filter(player => player.lineup_status === '선발');
     const substitutePlayers = filteredLineups.filter(player => player.lineup_status === '후보');
@@ -41,40 +38,44 @@ const EditLineupForm = ({
     useEffect(() => {
         if (filteredQuarter && filteredQuarter.tactics) {
             setSelectedTactics(filteredQuarter.tactics);
+            updateLineups(filteredQuarter.tactics);
         }
     }, [filteredQuarter]);
 
     useEffect(() => {
-        
         const subscription = watch((values) => {
             const RealTimeLineups = values?.quarters?.[filteredQuarterIndex]?.lineups || [];
             const seen = new Set();
             const duplicates = [];
     
             RealTimeLineups.forEach((lineup, index) => {
-                const key = `${lineup.user_name}-${lineup.back_number}`;
-                if (lineup.user_name === "용병" && lineup.back_number === 0) {
-                     return;
-                }
-                if (lineup.user_name && lineup.back_number && seen.has(key)) {
-                    duplicates.push(index); 
+                if (lineup.role === "용병") {
+                    return;
+                }                
+                if (lineup.user_idx && seen.has(lineup.user_idx)) {
+                    duplicates.push(index);
                 } else {
-                    seen.add(key); 
+                    seen.add(lineup.user_idx);
                 }
             });
     
-            setDuplicateIndexes(duplicates); 
+            setDuplicateIndexes(duplicates);
         });
     
-        return () => subscription.unsubscribe(); // Cleanup subscription
+        return () => subscription.unsubscribe();
     }, [watch, filteredQuarterIndex]);
-    
 
+    useEffect(() => {
+        setOpenDropdown(null);
+    }, [selectedQuarter, selectedTactics]);
+    
+    
     const addSubstitute = () => {
         if (!filteredQuarterPath) return;
 
         const newSubstitute = {
             user_name: "",
+            user_idx : "",
             back_number: "",
             lineup_status: "후보",                
         };
@@ -101,6 +102,7 @@ const EditLineupForm = ({
                     ...lineup,
                     tactics: newTactics,
                     position_name: position?.name,
+                    position_idx: position?.position_idx,
                     top_coordinate: position?.top_coordinate,
                     left_coordinate: position?.left_coordinate,
                 };
@@ -119,12 +121,14 @@ const EditLineupForm = ({
         setSelectedTactics(newTactics);
         updateLineups(newTactics);        
     };
+
+    const [openDropdown, setOpenDropdown] = useState(null);
     
     return (
         <form onSubmit={onSubmit}>   
             <div className='lineup-group'>
                 <div className="quarter-buttons">
-                    {quarterFields.map((quarter) => (
+                    {quartersData.map((quarter) => (
                         <button
                             key={quarter.quarter_number}
                             className={`quarter-btn ${selectedQuarter === quarter.quarter_number ? "active" : ""}`}
@@ -137,64 +141,80 @@ const EditLineupForm = ({
                 </div>   
                 <div className="quarter-tactics">
                     <select value={selectedTactics} onChange={handleTacticsChange}>                    
-                        {Array.from(new Set(positions.map((item) => item.tactics))).map((tactic, index) => (
-                            <option key={index} value={tactic}>
-                                {tactic}
-                            </option>
-                        ))}
+                    {Array.from(new Set(positions.map((item) => item.tactics))).map((tactic) => (
+                        <option key={tactic} value={tactic}>
+                            {tactic}
+                        </option>
+                    ))}
                     </select>
                 </div>             
                 <div className="soccer-field">
                     {startingPlayers.map((lineup, index) => {
-                        const selectedUserName = watch(`${filteredQuarterPath}.lineups.${index}.user_name`, "");
-                        const isDuplicate = duplicateIndexes.includes(index);                        
+                        const selectedUserIdx = watch(`${filteredQuarterPath}.lineups.${index}.user_idx`, "");
+                        const selectedUser = users.find((u) => u.user_idx === selectedUserIdx);
+                        const isDuplicate = duplicateIndexes.includes(index);
+
                         return (
-                            <div
-                                key={index}
-                                className="player-marker"
-                                style={{
-                                    top: `${lineup.top_coordinate}%`,
-                                    left: `${lineup.left_coordinate}%`,
-                                }}
-                            >
-                                <div className="position-label">{lineup.position_name}</div>
+                            <div>
                                 <div
-                                    className="player-circle"
+                                    key={index}
+                                    className="player-marker"                                    
                                     style={{
-                                        backgroundImage: `url(${defaultImage})`,
+                                        top: `${lineup.top_coordinate}%`,
+                                        left: `${lineup.left_coordinate}%`,
                                     }}
                                     onClick={() => {
-                                        inputRefs.current[index].focus();
+                                        setOpenDropdown(index);                                          
                                     }}
-                                ></div>
-                                <select
-                                    ref={(el) => (inputRefs.current[index] = el)}
-                                    value={selectedUserName}
-                                    className={`${selectedUserName === "" || isDuplicate ? "error" : ""}`}
-                                    onChange={(e) => {
-                                        const selectedValue = e.target.value;
-                                        const user = users.find((u) => u.name === selectedValue);
-
-                                        if (user) {                                            
-                                            setValue(`${filteredQuarterPath}.lineups.${index}.user_name`, user.name);
-                                            setValue(`${filteredQuarterPath}.lineups.${index}.back_number`, user.back_number);
-                                        }
-                                    }}
-                                    onFocus={() => {                                        
-                                        setValue(`${filteredQuarterPath}.lineups.${index}.user_name`, "");
-                                        setValue(`${filteredQuarterPath}.lineups.${index}.back_number`, "");
-                                    }}                           
-                                >                                    
-                                    <option value={selectedUserName}>
-                                        {selectedUserName}
-                                    </option>                                    
-                                    {users.map((user) => (
-                                        <option key={user.user_idx} value={user.name}>
-                                            {user.name} ({user.back_number})
-                                        </option>
-                                    ))}
-                                </select>
+                                    
+                                >
+                                    <div className="position-label">{lineup.position_name}</div>
+                                    <div
+                                        className="player-circle"
+                                        style={{
+                                            backgroundImage: `url(${defaultImage})`,
+                                        }}                                        
+                                    ></div>                                                                
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            className={`selected-user-input ${selectedUserIdx === "" || isDuplicate ? "error" : ""}`}
+                                            value={selectedUser ? selectedUser.name : ""}
+                                            onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+                                            onFocus={() => { 
+                                                setValue(`${filteredQuarterPath}.lineups.${index}.user_name`, "");
+                                                setValue(`${filteredQuarterPath}.lineups.${index}.back_number`, "");
+                                                setValue(`${filteredQuarterPath}.lineups.${index}.user_idx`, "");
+                                                setValue(`${filteredQuarterPath}.lineups.${index}.role`, "");
+                                            }}
+                                            
+                                        />                                                                                                            
+                                </div>
+                                {openDropdown === index && (
+                                    <ul className="dropdown-menu"
+                                    style={{                                        
+                                        top: `${lineup.top_coordinate}%`,
+                                        left: `${lineup.left_coordinate}%`,                                                                                
+                                    }}>
+                                        {users.map((user) => (
+                                            <li
+                                                key={user.user_idx}
+                                                className="dropdown-item"
+                                                onClick={() => {
+                                                    setValue(`${filteredQuarterPath}.lineups.${index}.user_name`, user.name);
+                                                    setValue(`${filteredQuarterPath}.lineups.${index}.back_number`, user.back_number);
+                                                    setValue(`${filteredQuarterPath}.lineups.${index}.user_idx`, user.user_idx);
+                                                    setValue(`${filteredQuarterPath}.lineups.${index}.role`, user.role);
+                                                    setOpenDropdown(null); 
+                                                }}
+                                            >
+                                                {user.name} ({user.back_number})
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
+                            
                         );
                     })}
                 </div>
@@ -212,58 +232,49 @@ const EditLineupForm = ({
                             </thead>
                             <tbody>
                                 {substitutePlayers.map((lineup, index) => {
-                                    const selectedUserName = watch(
-                                        `${filteredQuarterPath}.lineups.${startingPlayers.length + index}.user_name`,
-                                        ""
-                                    );
-                                    const isDuplicate = duplicateIndexes.includes(index);
+                                    const subIndex = startingPlayers.length + index;
+                                    const selectedUserIdx = watch(`${filteredQuarterPath}.lineups.${subIndex}.user_idx`, "");
+                                    const selectedUser = users.find((u) => u.user_idx === selectedUserIdx);
+                                    const isDuplicate = duplicateIndexes.includes(subIndex);
+              
                                     return (
                                         <tr key={lineup.lineup_idx}>
                                             <td>{lineup.back_number}</td>
                                             <td>
-                                                <select
-                                                    value={selectedUserName}
-                                                    onChange={(e) => {
-                                                        const selectedValue = e.target.value;
-                                                        const user = users.find(
-                                                            (u) => `${u.name} (${u.back_number})` === selectedValue
-                                                        );
-
-                                                        if (user) {
-                                                            setValue(
-                                                                `${filteredQuarterPath}.lineups.${startingPlayers.length + index}.user_name`,
-                                                                user.name
-                                                            );
-                                                            setValue(
-                                                                `${filteredQuarterPath}.lineups.${startingPlayers.length + index}.back_number`,
-                                                                user.back_number
-                                                            );
-                                                        }
-                                                    }}
+                                                
+                                                <input
+                                                    type="text"
+                                                    readOnly
+                                                    className={`selected-user-input ${selectedUserIdx === "" || isDuplicate ? "error" : ""}`}
+                                                    value={selectedUser ? selectedUser.name : ""}
+                                                    onClick={() => setOpenDropdown(openDropdown === subIndex ? null : subIndex)}
                                                     onFocus={() => {
-                                                        setValue(
-                                                            `${filteredQuarterPath}.lineups.${startingPlayers.length + index}.user_name`,
-                                                            ""
-                                                        );
-                                                        setValue(
-                                                            `${filteredQuarterPath}.lineups.${startingPlayers.length + index}.back_number`,
-                                                            ""
-                                                        );
+                                                        setValue(`${filteredQuarterPath}.lineups.${subIndex}.user_name`, "");
+                                                        setValue(`${filteredQuarterPath}.lineups.${subIndex}.back_number`, "");
+                                                        setValue(`${filteredQuarterPath}.lineups.${subIndex}.user_idx`, "");
+                                                        setValue(`${filteredQuarterPath}.lineups.${subIndex}.role`, "");
                                                     }}
-                                                    className={`${selectedUserName === "" || isDuplicate ? "error" : ""}`}
-                                                >
-                                                    <option value={selectedUserName}>
-                                                        {selectedUserName || ""}
-                                                    </option> 
-                                                    {users.map((user) => (
-                                                        <option
-                                                            key={user.user_idx}
-                                                            value={`${user.name} (${user.back_number})`}
-                                                        >
-                                                            {user.name} ({user.back_number})
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                />
+                                                {openDropdown === subIndex && (
+                                                    <ul className="dropdown-menu">
+                                                        {users.map((user) => (
+                                                            <li
+                                                                key={user.user_idx}
+                                                                className="dropdown-item"
+                                                                onClick={() => {
+                                                                    setValue(`${filteredQuarterPath}.lineups.${subIndex}.user_name`, user.name);
+                                                                    setValue(`${filteredQuarterPath}.lineups.${subIndex}.back_number`, user.back_number);
+                                                                    setValue(`${filteredQuarterPath}.lineups.${subIndex}.user_idx`, user.user_idx);
+                                                                    setValue(`${filteredQuarterPath}.lineups.${subIndex}.role`, user.role);
+                                                                    setOpenDropdown(null);
+                                                                }}
+                                                            >
+                                                                {user.name} ({user.back_number})
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                                
                                             </td>
                                             <td className="substitute">후보</td>
                                             <td>

@@ -1,0 +1,58 @@
+@import '../assets/styles/variables.scss';
+
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .custom-alert {
+    width: 320px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;    
+    background: white;    
+    transition: all 0.3s ease-in-out;
+  
+    .alert-icon {
+      width: 40px;
+      height: 40px;      
+    }
+    
+    .alert-message {
+      font-size: 16px;      
+    }
+  
+    .alert-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+  
+      button {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+  
+      .confirm-btn {
+        background: var(--background-win-color);
+        color: white;
+      }
+  
+      .close-btn {
+        background: gray;
+        color: white;
+      }
+    }
+  }
+  

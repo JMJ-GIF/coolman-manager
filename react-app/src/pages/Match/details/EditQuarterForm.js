@@ -28,8 +28,8 @@ const EditQuarterForm = ({
         const goalsPath = `quarters.${quarterIndex}.goals`;
         const goals = watch(goalsPath) || []; 
         const newGoal = {
-            goal_player_id: "",
-            assist_player_id: "",
+            goal_player_id: null,
+            assist_player_id: null,
             goal_type: "득점",
         };
         
@@ -100,17 +100,35 @@ const EditQuarterForm = ({
                                 const goalPlayerName = watch(`${goalsPath}.${goalIndex}.goal_player_name`, "");                                
                                 const isGoalPlayerInvalid =
                                     (goalType === "득점" || goalType === "자살골") && !goalPlayerName;
-
+                                const isGoalTypeInvalid = !goalType;
+                                    
 
                                 return (
                                     <div key={goalIndex} className='goal-item'>
-                                        <select
-                                            {...register(`${goalsPath}.${goalIndex}.goal_type`)}
-                                        >
-                                            <option value="득점">득점</option>
-                                            <option value="실점">실점</option>
-                                            <option value="자살골">자살골</option>
-                                        </select>
+                                        <input
+                                            type="text"
+                                            list={`goal-type-options-${goalIndex}`}                                            
+                                            value={watch(`${goalsPath}.${goalIndex}.goal_type`, "득점")}
+                                            onChange={(e) => {
+                                                const selectedValue = e.target.value;
+                                                const validOptions = ["득점", "실점", "자살골"];
+
+                                                if (validOptions.includes(selectedValue)) {
+                                                    setValue(`${goalsPath}.${goalIndex}.goal_type`, selectedValue);
+                                                } else {
+                                                    setValue(`${goalsPath}.${goalIndex}.goal_type`, "");
+                                                }
+                                            }}
+                                            onFocus={() => {
+                                                setValue(`${goalsPath}.${goalIndex}.goal_type`, "");
+                                            }}
+                                            className={isGoalTypeInvalid ? "error" : ""}                                            
+                                        />
+                                        <datalist id={`goal-type-options-${goalIndex}`}>
+                                            <option value="득점" />
+                                            <option value="실점" />
+                                            <option value="자살골" />
+                                        </datalist>
 
                                         <img src={football_ball} alt="goal" />
                                         <input
@@ -122,7 +140,7 @@ const EditQuarterForm = ({
                                             onFocus={(e) => {                                                
                                                 setValue(`${goalsPath}.${goalIndex}.goal_player_name`, "");
                                                 setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, "");
-                                                setValue(`${goalsPath}.${goalIndex}.goal_player_id`, "");
+                                                setValue(`${goalsPath}.${goalIndex}.goal_player_id`, null);
                                             }}                                            
                                             onInput={(e) => {
                                                 const selectedValue = e.target.value;
@@ -161,7 +179,7 @@ const EditQuarterForm = ({
                                             onFocus={(e) => {                                                
                                                 setValue(`${goalsPath}.${goalIndex}.assist_player_name`, "");
                                                 setValue(`${goalsPath}.${goalIndex}.assist_player_back_number`, "");
-                                                setValue(`${goalsPath}.${goalIndex}.assist_player_id`, "");
+                                                setValue(`${goalsPath}.${goalIndex}.assist_player_id`, null);
                                             }}  
                                             onInput={(e) => {
                                                 const selectedValue = e.target.value;

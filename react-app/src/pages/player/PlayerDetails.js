@@ -39,18 +39,20 @@ function PlayerDetails() {
 
     const fetchData = async () => {
         setLoading(true);
-        try {                
-            const userResponse = await axios.get(`${API_URL}/users/${user_idx}`);
-            const participationResponse = await axios.get(`${API_URL}/rank/${user_idx}/participation`);
-            const opposingTeamResponse = await axios.get(`${API_URL}/rank/${user_idx}/opposing_team`);
-            const positionResponse = await axios.get(`${API_URL}/rank/${user_idx}/position`);
-            
-            setUser(userResponse.data);
-            setUserParticipation(participationResponse.data);
-            setUserStatsOpposingTeam(opposingTeamResponse.data);
-            setUserPosition(positionResponse.data);
     
-            if (participationResponse.data.length > 0) {            
+        try {
+            const userResponse = await axios.get(`${API_URL}/users/${user_idx}`);
+            setUser(userResponse.data);
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+            setUser(null);
+        }
+    
+        try {
+            const participationResponse = await axios.get(`${API_URL}/rank/${user_idx}/participation`);
+            setUserParticipation(participationResponse.data);
+    
+            if (participationResponse.data.length > 0) {
                 const participatedDates = participationResponse.data
                     .filter(item => item.is_participation === 1)
                     .map(item => new Date(item.dt))
@@ -69,31 +71,44 @@ function PlayerDetails() {
                 setQuarterCnt(totalQuarterCnt);
             } 
     
+        } catch (error) {
+            console.error("Error fetching user participation:", error);
+            setUserParticipation([]); 
+            setMatchCnt(0);
+            setMaxMatchCnt(0);
+            setQuarterCnt(0);
+        }
+    
+        try {
+            const opposingTeamResponse = await axios.get(`${API_URL}/rank/${user_idx}/opposing_team`);
+            setUserStatsOpposingTeam(opposingTeamResponse.data);
+    
             if (opposingTeamResponse.data.length > 0) {
-                
                 const totalGoalCnt = opposingTeamResponse.data.reduce((sum, item) => sum + (item.goal_cnt || 0), 0);
                 const totalAssistCnt = opposingTeamResponse.data.reduce((sum, item) => sum + (item.assist_cnt || 0), 0);
     
                 setGoalCnt(totalGoalCnt);
                 setAssistCnt(totalAssistCnt);
             } 
-
+    
         } catch (error) {
-            console.error("Error fetching user participation:", error);
-            setUserParticipation([]); 
-            setUserStatsOpposingTeam([]); 
-            setUserPosition([]); 
-            setMatchCnt(0);
-            setMaxMatchCnt(0);
-            setQuarterCnt(0);
+            console.error("Error fetching opposing team stats:", error);
+            setUserStatsOpposingTeam([]);
             setGoalCnt(0);
             setAssistCnt(0);
-        } finally {
-            setLoading(false);
         }
+    
+        try {
+            const positionResponse = await axios.get(`${API_URL}/rank/${user_idx}/position`);
+            setUserPosition(positionResponse.data);
+        } catch (error) {
+            console.error("Error fetching user position:", error);
+            setUserPosition([]);
+        }
+    
+        setLoading(false);
     };
     
-
     
     useEffect(() => {
         fetchData();        

@@ -15,7 +15,7 @@ function formatTime(isoString) {
 }
 
 function MatchDetails() {
-    const { match_id } = useParams();
+    const { match_idx } = useParams();
     const API_URL = process.env.REACT_APP_API_URL;   
     const navigate = useNavigate();     
     const [loading, setLoading] = useState(false);
@@ -30,14 +30,14 @@ function MatchDetails() {
         setLoading(true);
         try {
             // Match details 요청은 항상 실행하고 성공적인 응답을 설정
-            const matchResponse = await axios.get(`${API_URL}/matches/${match_id}`);
+            const matchResponse = await axios.get(`${API_URL}/matches/${match_idx}`);
             setMatchDetails(matchResponse.data);
     
             // 나머지 API 콜은 실패할 경우 빈 배열로 처리
             const [quarterResponse, goalsResponse, lineupResponse] = await Promise.allSettled([
-                axios.get(`${API_URL}/matches/${match_id}/quarters`),
-                axios.get(`${API_URL}/matches/${match_id}/goals`),
-                axios.get(`${API_URL}/matches/${match_id}/lineups`)
+                axios.get(`${API_URL}/matches/${match_idx}/quarters`),
+                axios.get(`${API_URL}/matches/${match_idx}/goals`),
+                axios.get(`${API_URL}/matches/${match_idx}/lineups`)
             ]);
     
             // Quarters API 결과 처리
@@ -73,10 +73,10 @@ function MatchDetails() {
     
     useEffect(() => {
         fetchData();
-    }, [match_id]);
+    }, [match_idx]);
 
     const handleEdit = () => {        
-        navigate(`/matches/${match_id}/edit`);
+        navigate(`/matches/${match_idx}/edit`);
     };
 
     const renderQuarters = () => {

@@ -6,23 +6,33 @@ import EditResultForm from "./EditResultForm";
 import EditLineupForm from "./EditLineupForm";
 import EditQuarterForm from "./EditQuarterForm";
 import React, { useState, useEffect } from "react";
+import { useAlert } from "../../../context/AlertContext";
 import { useNavigate, useParams } from "react-router-dom";
 import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
 
 
-function formatTime(isoString) {
-    const date = new Date(isoString);
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${minutes}`;
-}
+const determineResult = (winningPoint, losingPoint) => {
+    if (winningPoint > losingPoint) return "승리";
+    if (winningPoint < losingPoint) return "패배";
+    return "무승부";
+};
+
+
+const formatDateTime = (date, timeString) => {
+    const dateObj = new Date(date);  
+    const [hours, minutes] = timeString.split(":").map(Number); 
+
+    dateObj.setHours(hours, minutes, 0, 0); 
+    return dateObj.toISOString(); 
+};
 
 function MatchDetailsAdd() {
     // Config
     const navigate = useNavigate();             
+    const { showAlert } = useAlert();
     const API_URL = process.env.REACT_APP_API_URL;       
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);    
     const [activeTab, setActiveTab] = useState('goals');
 
     // API DATA
@@ -121,8 +131,19 @@ function MatchDetailsAdd() {
     
 
     const handleFormSubmit = handleSubmit(async (data) => {
-        const { winning_point, losing_point, quarters } = data;
+        const { dt, start_time, end_time, winning_point, losing_point, quarters } = data;
+
+        data.start_time = formatDateTime(dt, start_time);
+        data.end_time = formatDateTime(dt, end_time);
+        data.result = determineResult(winning_point, losing_point);
     
+        // 0. 골 유형이 빈값인지 확인
+        const validateGoalTypes = () => {
+            const allGoals = quarters.flatMap((quarter) => quarter.goals || []);
+    
+            return allGoals.every(goal => goal.goal_type && goal.goal_type.trim() !== "");
+        };
+        
         // 1. 쿼터 번호가 연속적인지 확인
         const areQuarterNumbersSequential = () => {
             const quarterNumbers = quarters
@@ -224,13 +245,23 @@ function MatchDetailsAdd() {
             return ResultNumPlayers === lineupNumPlayers;
             
         };
-        
+
+        if (!quarters || quarters.length === 0){
+            showAlert("warning", '최소 하나의 쿼터가 필요합니다.');            
+            return;
+        }
+
+        if (!validateGoalTypes()) {
+            showAlert("warning", '모든 골의 유형(goal_type)은 반드시 입력되어야 합니다.');            
+            return;
+        }
+
         if (!areQuarterNumbersSequential()) {
-            alert("쿼터 번호는 반드시 1부터 시작하는 연속된 숫자여야 합니다.");
+            showAlert("warning", '쿼터 번호는 반드시 1부터 시작하는 연속된 숫자여야 합니다.');            
             return;
         }
         if (!validateGoalUserNames()) {
-            alert("골 플레이어는 반드시 유효한 이름이어야 하며, 어시스트 플레이어는 빈 값이거나 유효한 이름이어야 합니다.");
+            showAlert("warning", '골 플레이어는 반드시 유효한 이름이어야 하며, 어시스트 플레이어는 빈 값이거나 유효한 이름이어야 합니다.');            
             return;
         }
         if (!areScoresValid()) {
@@ -240,23 +271,47 @@ function MatchDetailsAdd() {
             const totalLosingGoals = quarters.flatMap((q) => q.goals || []).filter(
                 (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
             ).length;
-            alert(
-                `스코어(${winning_point}:${losing_point})와 골 수(${totalWinningGoals}:${totalLosingGoals})가 일치하지 않습니다. 폼을 수정해주세요.`
-            );
+            showAlert("warning", `스코어(${winning_point}:${losing_point})와 골 수(${totalWinningGoals}:${totalLosingGoals})가 일치하지 않습니다. 폼을 수정해주세요.`);            
             return;
         }
         if (!validateUniqueLineupPlayers()) {
-            alert("라인업 내에서 중복된 선수가 있거나, 빈 값이 있습니다");
+            showAlert("warning", '라인업 내에서 중복된 선수가 있거나, 빈 값이 있습니다');            
             return;
         }
         if (!validateNumPlayers()) {
-            alert("참가 인원 수가 라인업에서 계산된 고유 인원과 일치하지 않습니다.");
+            showAlert("warning", '참가 인원 수가 라인업에서 계산된 고유 인원과 일치하지 않습니다.');            
             return;
         }
 
         // 4. 데이터 제출
-        console.log("폼 데이터:", data);
+        console.log("최종 제출 데이터:", data);
+        try {
+            setLoading(true);
+            const response = await axios.post(`${API_URL}/matches`, data, {
+                headers: { "Content-Type": "application/json" },
+            });
+            console.log("✅ 응답 상태 코드:", response.status);
+            console.log("✅ 성공:", response.data);            
+        
+            // ✅ 서버 응답이 정상적이라면 페이지 이동
+            if (response.status === 200 || response.status === 201) {
+                showAlert("success", '매치가 성공적으로 생성되었습니다!');
+                navigate(`/matches`);
+            }
+        } catch (error) {
+            showAlert("warning", '데이터 저장에 실패했습니다. 다시 시도해주세요.');
+            console.error("❌ 오류 발생:", error.response?.data || error.message);            
+        } finally {
+            setLoading(false); // 로딩 상태 해제
+        }   
+
     });
+
+    const handleConfirmSubmit = () => {
+        showAlert("confirm", "새 매치를 생성하시겠습니까?", async () => {
+            await handleFormSubmit();
+        });
+    };
     
     const handleCancel = () => {
         navigate(`/matches`);
@@ -271,6 +326,7 @@ function MatchDetailsAdd() {
                 ) : (
                     <>   
                         <EditResultForm 
+                            setValue={setValue}
                             register={register}
                             errors={errors}
                             watch={watch}
@@ -322,7 +378,7 @@ function MatchDetailsAdd() {
             </div>
             <FloatingBar
                 mode="confirm_cancel"
-                onConfirm={handleFormSubmit}
+                onConfirm={handleConfirmSubmit}
                 onCancel={handleCancel}
             />
         </div>

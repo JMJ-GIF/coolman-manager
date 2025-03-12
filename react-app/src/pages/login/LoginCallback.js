@@ -1,17 +1,23 @@
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
+import { useAlert } from "../../context/AlertContext";
 import LoadingSpinner from "../../components/LoadingSpinner";
 
 const RedirectURI = () => {
   const API_URL = process.env.REACT_APP_API_URL;
+  const { showAlert } = useAlert();
   const navigate = useNavigate();
+  const { fetchUser } = useAuth();
 
   const loginUser = async (user_idx) => {
     try {
       await axios.post(`${API_URL}/auth/login`,{ user_idx },{ withCredentials: true });      
+      await fetchUser();      
       navigate("/matches");
     } catch (error) {
+      showAlert("warning", '로그인을 실패하였습니다');
       console.error("❌ 로그인 실패:", error.response?.data);
     }
   };

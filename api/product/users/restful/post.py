@@ -47,7 +47,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         )
         db.commit() 
 
-        return {"message": "회원가입 성공", "social_uuid": user.social_uuid}
+        return {"message": "회원가입 성공","social_uuid": user.social_uuid}
 
     except HTTPException as http_err:
         db.rollback()  

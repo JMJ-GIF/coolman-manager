@@ -16,8 +16,7 @@ def get_user_all_stats(db: Session = Depends(get_db)):
         select
                 a.*,
                 coalesce(b.match_cnt, 0) as match_cnt,
-                case when b.match_cnt = 0 then 0 
-                else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,
+                case when coalesce(b.match_cnt, 0) = 0 then 0 else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,
                 coalesce(c.goal_cnt, 0) as goal_cnt,
                 coalesce(d.assist_cnt, 0) as assist_cnt,
                 coalesce(b.quarter_cnt, 0) as quarter_cnt
@@ -35,7 +34,7 @@ def get_user_all_stats(db: Session = Depends(get_db)):
             group by 1,2,3,4,5            
 
         ) a
-        join
+        left join
         (
             select
                     ql.player_idx as user_idx,

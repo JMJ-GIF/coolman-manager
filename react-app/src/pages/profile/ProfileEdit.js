@@ -5,12 +5,12 @@ import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import img_box from "../../assets/icons/img_box.svg";
+import { useAlert } from "../../context/AlertContext";
 import FloatingBar from "../../components/FloatingBar";
 import ImageCropper from "../../components/ImageCropper";
 import back_arrow from "../../assets/icons/back_arrow.svg";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import userProfile from "../../assets/images/transparent-profile.png";
-
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -22,6 +22,7 @@ function formatDate(isoString) {
 
 function ProfileEdit() {
     const { authUser } = useAuth();
+    const { showAlert } = useAlert();
     const navigate = useNavigate();
     const [positions, setPositions] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -45,7 +46,7 @@ function ProfileEdit() {
                 const response = await axios.get(`${API_URL}/users/${authUser.user_idx}`);
                 setValue("name", response.data.name || "");
                 setValue("role", response.data.role || "");  
-                setValue("join_date", formatDate(response.data.join_date) || ""); 
+                setValue("join_date", response.data.join_date || ""); 
                 setValue("back_number", response.data.back_number || "");
                 setValue("position", response.data.position || "");
             } catch (error) {
@@ -83,15 +84,39 @@ function ProfileEdit() {
                 const blob = await response.blob();
                 formData.append("image", blob, "profile.jpg");
             }
+            
+            await axios.put(`${API_URL}/users/${authUser.user_idx}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" }, 
+                withCredentials: true
+            });
 
-            await axios.put(`${API_URL}/users/${authUser.user_idx}`, data, { withCredentials: true });
-
-            console.log("✅ 프로필 업데이트 성공!");
+            showAlert("success", '프로필 수정을 성공하였습니다!');
             navigate("/profile");
+
         } catch (error) {
+            console.log(error)
+            if (error.response && error.response.data) {        
+                const errorCode = error.response.data.detail.error_code;
+                const message = error.response.data.detail.error_message;
+                if (errorCode === "EXISTING_USER") {
+                    showAlert("warning", message);                                  
+                  } else if (errorCode === "DUPLICATE_BACK_NUMBER") {
+                    showAlert("warning", message);      
+                  } else {
+                    showAlert("warning", "알 수 없는 오류 발생: " + message);                          
+                  }
+            } else {   
+                showAlert("warning", "회원가입 중 오류가 발생했습니다.");                                               
+            }
             console.error("❌ 프로필 업데이트 실패:", error);
         }
     });
+
+    const handleConfirmSubmit = () => {
+        showAlert("confirm", "프로필 정보를 수정하시겠습니까?", async () => {
+            await handleFormSubmit();
+        });
+    };
 
     const handleCropperOpen = () => {
         setShowCropper(false);
@@ -164,7 +189,7 @@ function ProfileEdit() {
             </div>
             <FloatingBar
                 mode="confirm_cancel"
-                onConfirm={handleFormSubmit}
+                onConfirm={handleConfirmSubmit}
                 onCancel={handleCancel}
             />
             {loading && <LoadingSpinner />}

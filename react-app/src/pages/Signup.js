@@ -1,7 +1,9 @@
 import axios from "axios";
 import "./Signup.scss";
 import { useForm } from "react-hook-form";
+import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
+import { useAlert } from "../context/AlertContext";
 import ImageCropper from "../components/ImageCropper";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -10,7 +12,10 @@ const API_URL = process.env.REACT_APP_API_URL;
 const SignupPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { fetchUser } = useAuth();
+  const { showAlert } = useAlert();  
   const name = location.state?.name || "";
+  const social_uuid = location.state?.uuid || "";
   const [positions, setPositions] = useState([]);  
   const [showCropper, setShowCropper] = useState(false);
   const [croppedImage, setCroppedImage] = useState(null);
@@ -44,16 +49,17 @@ const SignupPage = () => {
   };
   
   const onSubmit = async (data) => {
-    try {
-      const social_uuid = location.state?.uuid;
+    try {      
       const formData = {
-        social_uuid,
+        social_uuid: social_uuid,
         name: name, 
         position: data.position, 
-        back_number: Number(data.back_number),
+        back_number: data.back_number,
         role: data.role, 
         image: croppedImage || null,
-      };      
+      };
+      
+      console.log(formData)
 
       const response = await axios.post(`${API_URL}/users`, formData, {
         headers: { "Content-Type": "application/json" },
@@ -61,7 +67,17 @@ const SignupPage = () => {
 
       if (response.status === 201) {
         console.log("회원가입 성공!", response.data);
-        navigate("/home"); 
+
+        try {   
+          const login = await axios.get(`${API_URL}/users/uuid/exists?uuid=${response.data.social_uuid}`); 
+          const user_idx = login.data.user_idx
+          await axios.post(`${API_URL}/auth/login`,{ user_idx },{ withCredentials: true }); 
+          fetchUser();
+          showAlert("celebration", '회원 가입을 축하합니다!');
+          navigate("/matches");     
+        } catch (error) {
+          console.error("❌ 토큰 생성 및 user_idx 생성 에러:", error);
+        }        
       }
     } catch (error) {      
       if (error.response && error.response.data) {        
@@ -69,11 +85,11 @@ const SignupPage = () => {
         const message = error.response.data.detail.error_message;
         
         if (errorCode === "EXISTING_USER") {
-          alert(message);
+          showAlert("warning", message);
           navigate("/");
         } else if (errorCode === "DUPLICATE_BACK_NUMBER") {
-          alert(message);
-          navigate("/signup");
+          showAlert("warning", message);
+          navigate("/signup", { state: { name: name, uuid: social_uuid } });
         } else {
           alert("알 수 없는 오류 발생: " + message);
         }
@@ -97,6 +113,7 @@ const SignupPage = () => {
               <label>이름</label>
               <input type="text" value={name} disabled />
             </div>
+
             <div className="position">
               <label>선호 포지션</label>
               <select {...register("position", { required: "포지션을 선택하세요." })}>
@@ -107,6 +124,7 @@ const SignupPage = () => {
               </select>
               {errors.position && <p className="error">{errors.position.message}</p>}
             </div>
+
             <div className="back-number">
               <label>등번호</label>
               <input
@@ -119,6 +137,7 @@ const SignupPage = () => {
               />
               {errors.back_number && <p className="error">{errors.back_number.message}</p>}
             </div>
+
             <div className="role">
               <label>역할</label>
               <div>

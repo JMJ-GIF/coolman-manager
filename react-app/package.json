@@ -14,7 +14,8 @@
     "react-hook-form": "^7.46.1",
     "react-select": "^5.10.0",
     "cropperjs": "^1.6.2",
-  "react-cropper": "^2.2.0"   
+    "react-cropper": "^2.2.0",   
+    "framer-motion": "^12.4.10"
   },
   "scripts": {
     "start": "react-scripts start",

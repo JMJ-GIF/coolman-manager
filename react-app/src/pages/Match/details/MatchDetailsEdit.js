@@ -6,10 +6,24 @@ import EditResultForm from "./EditResultForm";
 import EditLineupForm from "./EditLineupForm";
 import EditQuarterForm from "./EditQuarterForm";
 import React, { useState, useEffect } from "react";
+import { useAlert } from "../../../context/AlertContext";
 import { useNavigate, useParams } from "react-router-dom";
 import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
 
+const determineResult = (winningPoint, losingPoint) => {
+    if (winningPoint > losingPoint) return "승리";
+    if (winningPoint < losingPoint) return "패배";
+    return "무승부";
+};
+
+const formatDateTime = (date, timeString) => {
+    const dateObj = new Date(date);  
+    const [hours, minutes] = timeString.split(":").map(Number); 
+
+    dateObj.setHours(hours, minutes, 0, 0); 
+    return dateObj.toISOString(); 
+};
 
 function formatTime(isoString) {
     const date = new Date(isoString);
@@ -21,7 +35,8 @@ function formatTime(isoString) {
 function MatchDetailsEdit() {
     // Config
     const navigate = useNavigate();         
-    const { match_id } = useParams();    
+    const { showAlert } = useAlert();
+    const { match_idx } = useParams();    
     const API_URL = process.env.REACT_APP_API_URL;       
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('goals');
@@ -67,15 +82,15 @@ function MatchDetailsEdit() {
         setLoading(true);
         try {
             // Match details 요청은 항상 실행하고 성공적인 응답을 설정
-            const matchResponse = await axios.get(`${API_URL}/matches/${match_id}`);
+            const matchResponse = await axios.get(`${API_URL}/matches/${match_idx}`);
             setMatchDetails(matchResponse.data);
             initMatchForm(matchResponse);
                       
             // 나머지 API 콜은 실패할 경우 빈 배열로 처리
             const [quarterResponse, goalsResponse, lineupResponse, positionResponse, userResponse] = await Promise.allSettled([
-                axios.get(`${API_URL}/matches/${match_id}/quarters`),
-                axios.get(`${API_URL}/matches/${match_id}/goals`),
-                axios.get(`${API_URL}/matches/${match_id}/lineups`),
+                axios.get(`${API_URL}/matches/${match_idx}/quarters`),
+                axios.get(`${API_URL}/matches/${match_idx}/goals`),
+                axios.get(`${API_URL}/matches/${match_idx}/lineups`),
                 axios.get(`${API_URL}/positions`),
                 axios.get(`${API_URL}/users`)
             ]);
@@ -106,12 +121,23 @@ function MatchDetailsEdit() {
     
     useEffect(() => {
         fetchAndInitData();        
-    }, [match_id, setValue]);
+    }, [match_idx, setValue]);
 
     
     const handleFormSubmit = handleSubmit(async (data) => {
-        const { winning_point, losing_point, quarters } = data;
+        const { dt, start_time, end_time, winning_point, losing_point, quarters } = data;
+
+        data.start_time = formatDateTime(dt, start_time);
+        data.end_time = formatDateTime(dt, end_time);
+        data.result = determineResult(winning_point, losing_point);
     
+        // 0. 골 유형이 빈값인지 확인
+        const validateGoalTypes = () => {
+            const allGoals = quarters.flatMap((quarter) => quarter.goals || []);
+    
+            return allGoals.every(goal => goal.goal_type && goal.goal_type.trim() !== "");
+        };
+        
         // 1. 쿼터 번호가 연속적인지 확인
         const areQuarterNumbersSequential = () => {
             const quarterNumbers = quarters
@@ -213,13 +239,23 @@ function MatchDetailsEdit() {
             return ResultNumPlayers === lineupNumPlayers;
             
         };
-        
+
+        if (!quarters || quarters.length === 0){
+            showAlert("warning", '최소 하나의 쿼터가 필요합니다.');
+            return;
+        }
+
+        if (!validateGoalTypes()) {
+            showAlert("warning", '모든 골의 유형(goal_type)은 반드시 입력되어야 합니다.');            
+            return;
+        }
+
         if (!areQuarterNumbersSequential()) {
-            alert("쿼터 번호는 반드시 1부터 시작하는 연속된 숫자여야 합니다.");
+            showAlert("warning", '쿼터 번호는 반드시 1부터 시작하는 연속된 숫자여야 합니다.');            
             return;
         }
         if (!validateGoalUserNames()) {
-            alert("골 플레이어는 반드시 유효한 이름이어야 하며, 어시스트 플레이어는 빈 값이거나 유효한 이름이어야 합니다.");
+            showAlert("warning", '골 플레이어는 반드시 유효한 이름이어야 하며, 어시스트 플레이어는 빈 값이거나 유효한 이름이어야 합니다.');            
             return;
         }
         if (!areScoresValid()) {
@@ -229,27 +265,47 @@ function MatchDetailsEdit() {
             const totalLosingGoals = quarters.flatMap((q) => q.goals || []).filter(
                 (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
             ).length;
-            alert(
-                `스코어(${winning_point}:${losing_point})와 골 수(${totalWinningGoals}:${totalLosingGoals})가 일치하지 않습니다. 폼을 수정해주세요.`
-            );
+            showAlert("warning",  `스코어(${winning_point}:${losing_point})와 골 수(${totalWinningGoals}:${totalLosingGoals})가 일치하지 않습니다. 폼을 수정해주세요.`);                        
             return;
         }
         if (!validateUniqueLineupPlayers()) {
-            alert("라인업 내에서 중복된 선수가 있거나, 빈 값이 있습니다");
+            showAlert("warning", '라인업 내에서 중복된 선수가 있거나, 빈 값이 있습니다');                        
             return;
         }
         if (!validateNumPlayers()) {
-            alert("참가 인원 수가 라인업에서 계산된 고유 인원과 일치하지 않습니다.");
+            showAlert("warning", '참가 인원 수가 라인업에서 계산된 고유 인원과 일치하지 않습니다.');                        
             return;
         }
 
-        // 4. 데이터 제출
-        console.log("폼 데이터:", data);
-    });
-    
+        // 4. 데이터 제출        
+        try {
+            setLoading(true);
+            const response = await axios.put(`${API_URL}/matches/${match_idx}`, data, {
+                headers: { "Content-Type": "application/json" },
+            });                     
+        
+            // ✅ 서버 응답이 정상적이라면 페이지 이동
+            if (response.status === 200 || response.status === 201) {
+                showAlert("success", '수정이 성공하였습니다!');
+                navigate(`/matches/${match_idx}/`);
+            }
+        } catch (error) {
+            showAlert("warning", '수정에 실패했습니다. 입력값을 확인해주세요.');
+            console.error("❌ 오류 발생:", error.response?.data || error.message);                        
+        } finally {
+            setLoading(false); // 로딩 상태 해제
+        }   
 
+    });
+
+    const handleConfirmSubmit = () => {
+        showAlert("confirm", "매치 정보를 수정하시겠습니까?", async () => {
+            await handleFormSubmit();
+        });
+    };
+    
     const handleCancel = () => {
-        navigate(`/matches/${match_id}/`);
+        navigate(`/matches/${match_idx}/`);
     };    
 
     return (
@@ -261,9 +317,10 @@ function MatchDetailsEdit() {
                 ) : matchDetails ? (
                     <>   
                         <EditResultForm 
-                            register={register}                            
+                            setValue={setValue}
+                            register={register}
                             errors={errors}
-                            watch={watch}                            
+                            watch={watch}
                             onSubmit={handleFormSubmit}
                             positions={positions}
                         />
@@ -314,7 +371,7 @@ function MatchDetailsEdit() {
             </div>
             <FloatingBar
                 mode="confirm_cancel"
-                onConfirm={handleFormSubmit}
+                onConfirm={handleConfirmSubmit}
                 onCancel={handleCancel}
             />
         </div>

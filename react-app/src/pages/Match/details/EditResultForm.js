@@ -1,7 +1,8 @@
 import './Details.scss';
-import React from "react";
+import React, { useState } from "react";
 
 const EditResultForm = ({
+    setValue,
     register,
     errors,
     watch,
@@ -13,12 +14,8 @@ const EditResultForm = ({
     const uniqueTactics = Array.from(
         new Set(positions.map((item) => item.tactics))
     );
-
-    // fetchLocation 함수 내부 구현
-    const fetchLocation = () => {
-        // 지도 API 호출 로직 (예시)
-        alert("지도 API 호출");
-    };
+    
+    const weatherOptions = ["맑음", "흐림", "눈", "비", "안개", "바람"];
 
     return (
         <form onSubmit={onSubmit}>
@@ -67,7 +64,10 @@ const EditResultForm = ({
                         <span>상대</span>
                         <input
                             type="text"
-                            {...register("opposing_team", { required: "경기 상대를 입력하세요" })}
+                            {...register("opposing_team", { 
+                                required: "경기 상대를 입력하세요", 
+                                maxLength: { value: 20, message: "최대 20자까지 입력 가능합니다." } 
+                            })}
                             placeholder="경기 상대"
                             className={`text-input ${errors.opposing_team ? "error" : ""}`}
                         />
@@ -113,14 +113,23 @@ const EditResultForm = ({
                     {/* 경기 날씨 */}
                     <div className="card">
                         <span>날씨</span>
-                        <select {...register("weather")}>
-                            <option value="맑음">맑음</option>
-                            <option value="흐림">흐림</option>
-                            <option value="눈">눈</option>
-                            <option value="비">비</option>
-                            <option value="안개">안개</option>
-                            <option value="바람">바람</option>
-                        </select>
+                        <input
+                            type="text"
+                            list="weather-options"
+                            placeholder="날씨 선택"
+                            {...register("weather", {
+                                required: "날씨를 선택하세요",
+                                validate: (value) => weatherOptions.includes(value) || "올바른 날씨를 선택하세요",
+                            })}
+                            onFocus={() => setValue("weather", "")}
+                            className={`text-input ${errors.weather ? "error" : ""}`}
+                        />
+                        <datalist id="weather-options">
+                            {weatherOptions.map((weather, index) => (
+                                <option key={index} value={weather} />
+                            ))}
+                        </datalist>
+                        {errors.weather && <p className="result-error-message">{errors.weather.message}</p>}
                     </div>
 
                     {/* 경기 장소 */}
@@ -128,10 +137,12 @@ const EditResultForm = ({
                         <span>장소</span>
                         <input
                             type="text"
-                            {...register("location", { required: "장소를 입력하세요" })}
+                            {...register("location", { 
+                                required: "장소를 입력하세요", 
+                                maxLength: { value: 20, message: "최대 20자까지 입력 가능합니다." }
+                            })}
                             placeholder="경기장소"
-                            className={`text-input ${errors.location ? "error" : ""}`}
-                            onClick={fetchLocation} 
+                            className={`text-input ${errors.location ? "error" : ""}`}                            
                         />
                         {errors.location && <p className="result-error-message">{errors.location.message}</p>}
                     </div>
@@ -151,13 +162,23 @@ const EditResultForm = ({
                     {/* 메인 전술 */}
                     <div className="card">
                         <span>메인전술</span>
-                        <select {...register("main_tactics")}>
+                        <input
+                            type="text"
+                            list="tactics-options"
+                            placeholder="전술 선택"
+                            {...register("main_tactics", {
+                                required: "전술을 선택하세요",
+                                validate: (value) => uniqueTactics.includes(value) || "올바른 전술을 선택하세요",
+                            })}
+                            onFocus={() => setValue("main_tactics", "")}
+                            className={`text-input ${errors.main_tactics ? "error" : ""}`}
+                        />
+                        <datalist id="tactics-options">
                             {uniqueTactics.map((tactic, index) => (
-                                <option key={index} value={tactic}>
-                                    {tactic}
-                                </option>
+                                <option key={index} value={tactic} />
                             ))}
-                        </select>
+                        </datalist>
+                        {errors.main_tactics && <p className="result-error-message">{errors.main_tactics.message}</p>}
                     </div>
                 </div>                
             </div>

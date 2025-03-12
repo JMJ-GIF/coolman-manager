@@ -1,8 +1,11 @@
 import os
 import requests
 from dotenv import load_dotenv
-from fastapi import HTTPException, Query, Header, Request
+from sqlalchemy.sql import text
+from sqlalchemy.orm import Session 
+from fastapi import HTTPException, Query, Header, Request, Depends
 
+from db import get_db
 from auth.router import router
 from auth.jwt import verify_token
 
@@ -58,7 +61,7 @@ async def get_naver_user(authorization: str = Header(...)):
     return user_data["response"]
 
 @router.get("/me")
-async def get_user_data(request: Request):
+async def get_user_data(request: Request, db: Session = Depends(get_db)):
     """
     현재 로그인된 유저 정보 확인
     """
@@ -72,5 +75,11 @@ async def get_user_data(request: Request):
     user = verify_token(token)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")
+    
+    user_exists = db.execute(text("SELECT user_idx FROM users WHERE user_idx = :user_idx"), 
+                             {"user_idx": user["user_idx"]}).fetchone()
+    
+    if not user_exists:
+        raise HTTPException(status_code=401, detail="User does not exist")
 
     return {"user_idx": user["user_idx"]}

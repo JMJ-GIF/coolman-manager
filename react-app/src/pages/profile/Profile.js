@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 import FloatingBar from "../../components/FloatingBar";
 import back_arrow from "../../assets/icons/back_arrow.svg";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -18,10 +19,11 @@ function formatDate(isoString) {
 
 function Profile() {
     const { authUser, logout } = useAuth(); 
+    const { showAlert } = useAlert();
     const navigate = useNavigate();
     const [user, setUser] = useState([]);
-    const [loading, setLoading] = useState(false);        
-    
+    const [loading, setLoading] = useState(false);  
+        
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -37,11 +39,17 @@ function Profile() {
 
     const handleEdit = () => {        
         navigate(`/profile/edit`);
-    };
+    };    
 
     const handleLogout = async () => {
         await logout();  
         navigate("/"); 
+    };
+
+    const handleConfirmLogout = () => {
+        showAlert("confirm", "로그아웃을 진행하시겠습니까?", async () => {
+            await handleLogout();
+        });
     };
     
     useEffect(() => {        
@@ -50,6 +58,8 @@ function Profile() {
         }
         fetchData();
     }, [authUser, navigate]);
+
+    console.log(authUser)
 
     return (
         <div className="gray-background">
@@ -80,7 +90,7 @@ function Profile() {
                             <span className="value">{user.position}</span>
                         </div>  
                     </div>                                   
-                    <button className="logout-button" onClick={handleLogout}>
+                    <button className="logout-button" onClick={handleConfirmLogout}>
                         로그아웃
                     </button>
                 </div>                
