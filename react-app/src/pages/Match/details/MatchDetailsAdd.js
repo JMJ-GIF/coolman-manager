@@ -10,6 +10,7 @@ import { useAlert } from "../../../context/AlertContext";
 import { useNavigate, useParams } from "react-router-dom";
 import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
+import LoadingSpinner from "../../../components/LoadingSpinner"; 
 
 
 const determineResult = (winningPoint, losingPoint) => {
@@ -322,7 +323,7 @@ function MatchDetailsAdd() {
             <NavigationBar />
             <div className="content">                
                 {loading ? (
-                    <p>Loading...</p>
+                    <LoadingSpinner />
                 ) : (
                     <>   
                         <EditResultForm 

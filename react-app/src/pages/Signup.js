@@ -6,6 +6,8 @@ import React, { useState, useEffect } from "react";
 import { useAlert } from "../context/AlertContext";
 import ImageCropper from "../components/ImageCropper";
 import { useLocation, useNavigate } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner"; // LoadingSpinner 임포트
+
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -19,6 +21,7 @@ const SignupPage = () => {
   const [positions, setPositions] = useState([]);  
   const [showCropper, setShowCropper] = useState(false);
   const [croppedImage, setCroppedImage] = useState(null);
+  const [loading, setLoading] = useState(false); 
   const {register, handleSubmit, setValue, watch, formState: { errors, isValid },} = useForm({ mode: "onChange" });
 
   useEffect(() => {
@@ -49,20 +52,23 @@ const SignupPage = () => {
   };
   
   const onSubmit = async (data) => {
+    setLoading(true); 
     try {      
-      const formData = {
-        social_uuid: social_uuid,
-        name: name, 
-        position: data.position, 
-        back_number: data.back_number,
-        role: data.role, 
-        image: croppedImage || null,
-      };
-      
-      console.log(formData)
+      const formData = new FormData();
+      formData.append("social_uuid", social_uuid);
+      formData.append("name", name);
+      formData.append("position", data.position);
+      formData.append("back_number", data.back_number);
+      formData.append("role", data.role);
 
+      if (croppedImage) {
+        const response = await fetch(croppedImage);
+        const blob = await response.blob();
+        formData.append("image", blob, "profile.png");
+      }
+      
       const response = await axios.post(`${API_URL}/users`, formData, {
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.status === 201) {
@@ -76,6 +82,7 @@ const SignupPage = () => {
           showAlert("celebration", '회원 가입을 축하합니다!');
           navigate("/matches");     
         } catch (error) {
+          showAlert("warning", "❌ 토큰 생성 및 user_idx 생성 에러");                        
           console.error("❌ 토큰 생성 및 user_idx 생성 에러:", error);
         }        
       }
@@ -91,11 +98,13 @@ const SignupPage = () => {
           showAlert("warning", message);
           navigate("/signup", { state: { name: name, uuid: social_uuid } });
         } else {
-          alert("알 수 없는 오류 발생: " + message);
+          showAlert("warning", "알 수 없는 오류 발생: " + message);          
         }
-      } else {        
-        alert("회원가입 중 오류가 발생했습니다.");
+      } else {  
+        showAlert("warning", "회원가입 중 오류가 발생했습니다.");                        
       }
+    } finally {
+      setLoading(false); // 로딩 종료
     }
   };
 
@@ -105,9 +114,10 @@ const SignupPage = () => {
 
   return (
     <div className="img-background">
-      <div className="signup-frame">
+      <div className="signup-frame">        
         <div className="signup-container">
           <h2>회원가입</h2>
+          {loading && <LoadingSpinner />}
           <form onSubmit={(e) => e.preventDefault()}> 
             <div className="name">
               <label>이름</label>

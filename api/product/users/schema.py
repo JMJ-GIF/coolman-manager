@@ -9,16 +9,9 @@ class User(BaseModel):
     back_number: int = Field(..., description="등번호")
     join_date: datetime = Field(..., description="가입일")
     role: Literal['선수', '감독', '용병'] = Field(..., description="역할 ('선수' 또는 '감독', '용병')")
+    image_url: Optional[str] = None
     created_at: datetime = Field(..., description="생성된 시간")
 
 class UserCheck(BaseModel):
     user_idx: Optional[int] = None 
     exists: bool 
-
-class UserCreate(BaseModel):
-    name: str
-    position: str
-    back_number: int
-    role: str
-    social_uuid: str
-    image: Optional[str] = None

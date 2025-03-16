@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS users (
     back_number INT UNIQUE NOT NULL,
     join_date TIMESTAMP NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('선수', '감독', '용병')),
-    social_uuid VARCHAR(50) UNIQUE NOT NULL,    
+    social_uuid VARCHAR(50) UNIQUE NOT NULL, 
+    image_url TEXT NULL,    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL
 );
@@ -99,22 +100,21 @@ CREATE TABLE IF NOT EXISTS quarters_lineup (
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
--- 8RI4g6BlISEiGG8dXsbJgzckc9j_hgH9ZEGRGqXGvzk
 -- 기본 데이터 삽입
-INSERT INTO users (name, position, back_number, join_date, role, social_uuid) VALUES
-('홍길동','GK', 9, '2022-01-10 10:00:00', '선수', '1'),
-('김철수','CB', 5, '2022-02-15 11:30:00', '선수', '2'),
-('이영희','RM', 8, '2023-03-12 14:45:00', '선수', '3'),
-('박민준','ST', 1, '2023-04-20 09:20:00', '선수', '4'),
-('최예림','ST', 11, '2021-05-25 16:10:00', '선수', '5'),
-('정수현','LB', 6, '2022-06-18 13:40:00', '선수', '6'),
-('윤지훈','RB', 4, '2023-07-22 12:50:00', '선수', '7'),
-('안도현','RWB', 15, '2021-08-30 15:00:00', '감독', '8'),
-('서유리','ST', 10, '2022-09-15 10:05:00', '선수', '9'),
-('장준호','RW', 22, '2023-10-05 17:25:00', '감독', '10'),
-('진민제','RW', 35, '2023-10-05 17:25:00', '선수', 'xx'),
-('장준호','ST', 99, '2023-11-01 15:15:00', '선수', '11'),
-('용병','GK', 00, '2023-11-02 15:15:00', '용병', '12');
+INSERT INTO users (name, position, back_number, join_date, role, social_uuid, image_url) VALUES
+('홍길동','GK', 9, '2022-01-10 10:00:00', '선수', '1', 'https://kr.object.ncloudstorage.com/coolman-storage/1.png'),
+('김철수','CB', 5, '2022-02-15 11:30:00', '선수', '2', 'https://kr.object.ncloudstorage.com/coolman-storage/2.png'),
+('이영희','RM', 8, '2023-03-12 14:45:00', '선수', '3', 'https://kr.object.ncloudstorage.com/coolman-storage/3.png'),
+('박민준','ST', 1, '2023-04-20 09:20:00', '선수', '4', 'https://kr.object.ncloudstorage.com/coolman-storage/4.png'),
+('최예림','ST', 11, '2021-05-25 16:10:00', '선수', '5', 'https://kr.object.ncloudstorage.com/coolman-storage/5.png'),
+('정수현','LB', 6, '2022-06-18 13:40:00', '선수', '6', 'https://kr.object.ncloudstorage.com/coolman-storage/6.png'),
+('윤지훈','RB', 4, '2023-07-22 12:50:00', '선수', '7', 'https://kr.object.ncloudstorage.com/coolman-storage/7.png'),
+('안도현','RWB', 15, '2021-08-30 15:00:00', '감독', '8', 'https://kr.object.ncloudstorage.com/coolman-storage/8.png'),
+('서유리','ST', 10, '2022-09-15 10:05:00', '선수', '9', 'https://kr.object.ncloudstorage.com/coolman-storage/9.png'),
+('장준호','RW', 22, '2023-10-05 17:25:00', '감독', '10', 'https://kr.object.ncloudstorage.com/coolman-storage/10.png'),
+('진민제','RW', 35, '2023-10-05 17:25:00', '선수', 'xx', 'https://kr.object.ncloudstorage.com/coolman-storage/11.png'),
+('장준호','ST', 99, '2023-11-01 15:15:00', '선수', '11', 'https://kr.object.ncloudstorage.com/coolman-storage/12.png'),
+('용병','GK', 00, '2023-11-02 15:15:00', '용병', '12', NULL);
 
 INSERT INTO matches (dt, result, winning_point, losing_point, opposing_team, location, start_time, end_time, weather, num_players, main_tactics, status)
 VALUES 
@@ -504,7 +504,6 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 
 -- 🔹 각 테이블에 트리거 추가
 CREATE TRIGGER trigger_update_users

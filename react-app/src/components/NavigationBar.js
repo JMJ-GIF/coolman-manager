@@ -1,12 +1,19 @@
+import axios from "axios";
+import "./NavigationBar.scss";
+import { useAuth } from "../context/AuthContext";
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "./NavigationBar.scss";
-import profile_img from "../assets/images/coolman-profile.png";
+import coolman_logo from "../assets/images/coolman-logo-transparent.png";
 
-function NavigationBar() {
+const API_URL = process.env.REACT_APP_API_URL;
+
+function NavigationBar() {       
+    const { authUser } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(true);
+    const [user, setUser] = useState([]);
+    const [loading, setLoading] = useState(false);
     const lastScrollY = useRef(0);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
@@ -16,8 +23,8 @@ function NavigationBar() {
         { label: "Records", route: "/records" },        
     ];
 
-    const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));
-
+    const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));    
+    
     // 스크롤 이벤트 핸들러
     const handleScroll = () => {
         const currentScrollY = window.scrollY; // window 기준 스크롤 위치
@@ -30,6 +37,22 @@ function NavigationBar() {
 
         lastScrollY.current = currentScrollY;
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const userResponse = await axios.get(`${API_URL}/users/${authUser.user_idx}`);   
+                setUser(userResponse.data);
+            } catch (error) {
+                console.error("Error fetching user participation:", error);
+                setUser([]);       
+            } finally {
+                setLoading(false);
+            }
+        } ;
+        fetchData();
+    }, [authUser]);
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll); // window 기준 스크롤 이벤트 등록
@@ -63,7 +86,7 @@ function NavigationBar() {
 
             <div className="profile-section" onClick={() => navigate("/profile")}>
                 <div className="profile-photo">
-                    <img src={profile_img} alt="Profile Photo" />
+                    <img src={user.image_url || coolman_logo} alt="Profile Photo" />
                 </div>
                 <div className="profile-info">
                     <span className="name">진민제</span>

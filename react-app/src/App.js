@@ -16,6 +16,7 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import MatchDetails from "./pages/match/details/MatchDetails";
 import MatchDetailsAdd from "./pages/match/details/MatchDetailsAdd";
 import MatchDetailsEdit from "./pages/match/details/MatchDetailsEdit";
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 export default function App() {
   return (
@@ -44,3 +45,5 @@ export default function App() {
     </AlertProvider>
   );
 }
+
+serviceWorkerRegistration.register();

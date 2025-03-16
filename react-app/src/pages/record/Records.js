@@ -104,6 +104,7 @@ function Records() {
         <div className="gray-background">
             <NavigationBar />
             <div className="content">
+                {loading && <LoadingSpinner />}
                 <div className='user-stat'>
                     <div className='header'>
                         <h2>🥇 유저 랭킹</h2>
@@ -192,8 +193,7 @@ function Records() {
                         <p className="no-data">유저 골/어시스트 정보가 없습니다!</p>
                     )}
                 </div>
-            </div>
-            {loading && <LoadingSpinner />}
+            </div>            
         </div>
     );
 }

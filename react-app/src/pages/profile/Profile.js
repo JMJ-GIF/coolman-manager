@@ -7,7 +7,7 @@ import { useAlert } from "../../context/AlertContext";
 import FloatingBar from "../../components/FloatingBar";
 import back_arrow from "../../assets/icons/back_arrow.svg";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import userProfile from "../../assets/images/transparent-profile.png";
+import coolman_logo from "../../assets/images/coolman-logo-transparent.png";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -64,12 +64,13 @@ function Profile() {
     return (
         <div className="gray-background">
             <div className="content">
+                {loading && <LoadingSpinner />}
                 <div className="top-floating-area">
                     <img src={back_arrow} alt="back" onClick={() => navigate("/matches")} />
                 </div>
                 <div className="profile-container">                    
                     <div className="user-image" style={{
-                        backgroundImage: `url(${user.image_url || userProfile})`,
+                        backgroundImage: `url(${user.image_url || coolman_logo})`,
                     }}></div>
                     <div className='user-name'>{user.name}</div>
                     <div className="form-container">
@@ -95,8 +96,7 @@ function Profile() {
                     </button>
                 </div>                
             </div>
-            <FloatingBar onEdit={handleEdit} mode='edit'/>
-            {loading && <LoadingSpinner />}
+            <FloatingBar onEdit={handleEdit} mode='edit'/>            
         </div>
     );
 }

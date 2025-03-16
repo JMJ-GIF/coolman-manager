@@ -9,6 +9,7 @@ class UserAllStats(BaseModel):
     back_number: int
     position: str
     role: str
+    image_url: Optional[str] = None
     match_cnt: int
     max_match_cnt: int
     ratio: float

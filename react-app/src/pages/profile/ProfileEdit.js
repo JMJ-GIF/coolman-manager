@@ -10,7 +10,7 @@ import FloatingBar from "../../components/FloatingBar";
 import ImageCropper from "../../components/ImageCropper";
 import back_arrow from "../../assets/icons/back_arrow.svg";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import userProfile from "../../assets/images/transparent-profile.png";
+import coolman_logo from "../../assets/images/coolman-logo-transparent.png";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -28,7 +28,7 @@ function ProfileEdit() {
     const [loading, setLoading] = useState(false);
     const [showCropper, setShowCropper] = useState(false);
     const [croppedImage, setCroppedImage] = useState(null);
-    const [userImageUrl, setUserImageUrl] = useState(userProfile);
+    const [userImageUrl, setUserImageUrl] = useState(coolman_logo);
     const {
         register,
         handleSubmit,
@@ -49,6 +49,7 @@ function ProfileEdit() {
                 setValue("join_date", response.data.join_date || ""); 
                 setValue("back_number", response.data.back_number || "");
                 setValue("position", response.data.position || "");
+                setValue("image_url", response.data.image_url || "");
             } catch (error) {
                 console.error("❌ 프로필 정보 불러오기 실패:", error);
             } finally {
@@ -135,18 +136,19 @@ function ProfileEdit() {
 
     const name = watch("name", ""); 
     const role = watch("role", ""); 
-    const joinDate = watch("join_date", "");    
+    const joinDate = watch("join_date", ""); 
     
     return (
         <div className="gray-background">
             <div className="content">
+                {loading && <LoadingSpinner />}
                 <div className="top-floating-area">
                     <img src={back_arrow} alt="back" onClick={() => navigate("/profile")} />
                 </div>
                 <div className="profile-container">
                     <div 
                         className="user-image" 
-                        style={{ backgroundImage: `url(${userImageUrl})` }} 
+                        style={{ backgroundImage: `url(${userImageUrl || coolman_logo})` }} 
                         onClick={handleCropperOpen}
                     >                        
                         <img src={img_box} alt="Edit" className="edit-icon" onClick={() => setShowCropper(true)}/>                   
@@ -191,8 +193,7 @@ function ProfileEdit() {
                 mode="confirm_cancel"
                 onConfirm={handleConfirmSubmit}
                 onCancel={handleCancel}
-            />
-            {loading && <LoadingSpinner />}
+            />            
             {showCropper && <ImageCropper onCrop={handleCroppedImage} onClose={() => setShowCropper(false)} />}
         </div>
     );

@@ -1,8 +1,9 @@
 import './Login.scss';
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import CoolManLogo from '../../assets/images/coolman-logo-transparent.png';
 import BandLogo from '../../assets/icons/bandlogo.svg';
-import CoolmanIcon from '../../assets/icons/coolman.svg';
+import CoolManManager from '../../assets/icons/coolman.svg';
 import NaverLogin from '../../assets/icons/naver_login.svg';
 
 function LoginPage() {
@@ -24,10 +25,11 @@ function LoginPage() {
     <div className="img-background">
       <div className="login-frame">
         <div className="login-header">
-          <img src={CoolmanIcon} alt="로고" className="mobile-logo-team" />
+          <img src={CoolManLogo} alt="팀로고" className="team-logo" />
+          <img src={CoolManManager} alt="서비스명" className="service-logo" />          
           <h2>반가워요! 로그인해주세요</h2>
         </div>
-        <div className="login-middle">
+        <div className="login-middle">          
           <img src={NaverLogin} alt="로그인" className="naver-login-button" onClick={handleNaverLogin}/>            
           <hr className="divider"/>
         </div>

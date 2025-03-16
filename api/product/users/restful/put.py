@@ -5,6 +5,7 @@ from fastapi import HTTPException, Depends, Form, File, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text  
 from db import get_db
+from image_client import upload_image, delete_image
 from product.users.router import router
 
 UPLOAD_DIR = "uploads/"
@@ -31,27 +32,25 @@ async def update_user(
                     detail={"error_code": "NOT EXISTING_USER", "error_message": "존재하지 않는 유저입니다."}
                 )
         
-            sql_check_number = "SELECT * FROM users WHERE back_number = :back_number"
-            existing_number = db.execute(text(sql_check_number), {"back_number": back_number}).fetchone()
+            sql_check_number = "SELECT * FROM users WHERE back_number = :back_number AND user_idx != :user_idx"
+            existing_number = db.execute(text(sql_check_number), {"back_number": back_number, "user_idx": user_idx}).fetchone()
             if existing_number:
                 raise HTTPException(
                     status_code=409,
                     detail={"error_code": "DUPLICATE_BACK_NUMBER", "error_message": "이미 사용 중인 등번호입니다."}
                 )
+            
+            if existing_user.image_url:
+                delete_image(user_idx)
 
-            # image_path = existing_user.image  # 기존 이미지 경로 유지
-
-            # # ✅ 2. 이미지 처리
-            # if image:
-            #     image_path = os.path.join(UPLOAD_DIR, f"user_{user_idx}.jpg")  # 새로운 파일 경로 설정
-            #     with open(image_path, "wb") as buffer:
-            #         shutil.copyfileobj(image.file, buffer)
-
-            # ✅ 3. 유저 정보 업데이트
+            image_url = existing_user.image_url
+            if image:
+                image_url = upload_image(image.file, user_idx)
+  
             update_query = """
                 UPDATE users
                 SET name = :name, position = :position, back_number = :back_number,
-                    role = :role, join_date = :join_date                    
+                    role = :role, join_date = :join_date, image_url = :image_url                    
                 WHERE user_idx = :user_idx
             """
             update_values = {
@@ -61,7 +60,7 @@ async def update_user(
                 "back_number": back_number,
                 "role": role,                
                 "join_date": join_date,
-                # "image": image_path  
+                "image_url": image_url 
             }
 
             db.execute(text(update_query), update_values)

@@ -53,6 +53,8 @@ class LineupDetail(BaseModel):
     lineup_status: str
     top_coordinate: Optional[int] = None 
     left_coordinate: Optional[int] = None
+    image_url: Optional[str] = None
+    role: str
 
 class GoalCreate(BaseModel):
     # match_idx: int

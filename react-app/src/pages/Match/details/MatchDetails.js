@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
-import defaultImage from "../../../assets/images/coolman-profile.png";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 import football_ball from "../../../assets/icons/football_ball.svg";
+import coolman_logo from "../../../assets/images/coolman-logo-transparent.png"; 
 
 function formatTime(isoString) {
     const date = new Date(isoString);
@@ -201,7 +202,7 @@ function MatchDetails() {
                             <div className="position-label">{player.position_name}</div>
                             <div className="player-circle"
                                 style={{
-                                    backgroundImage: `url(${player.image_url || defaultImage})`,
+                                    backgroundImage: `url(${player.image_url || coolman_logo})`,
                                 }}></div>
                             <div className="player-name">{player.user_name}</div>
                         </div>
@@ -317,7 +318,7 @@ function MatchDetails() {
             <NavigationBar />
             <div className="content">                
                 {loading ? (
-                    <p>Loading...</p>
+                    <LoadingSpinner />
                 ) : matchDetails ? (
                     <>                        
                         {renderResult()}

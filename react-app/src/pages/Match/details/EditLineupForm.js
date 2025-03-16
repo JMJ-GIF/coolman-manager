@@ -1,9 +1,9 @@
 import './Details.scss';
 import { useFieldArray } from "react-hook-form";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import x_square_svg from "../../../assets/icons/x_square.svg";
 import add_square_svg from "../../../assets/icons/add_square.svg";
-import defaultImage from "../../../assets/images/coolman-profile.png";
+import coolman_logo from "../../../assets/images/coolman-logo-transparent.png";
 
 const EditLineupForm = ({
     control,
@@ -19,7 +19,7 @@ const EditLineupForm = ({
     
     const [selectedQuarter, setSelectedQuarter] = useState(1);
     const [selectedTactics, setSelectedTactics] = useState(""); 
-    const [duplicateIndexes, setDuplicateIndexes] = useState([]);    
+    const [duplicateIndexes, setDuplicateIndexes] = useState(new Set());    
     
     const filteredQuarter = quartersData.find((quarter) => quarter.quarter_number === selectedQuarter);
     const filteredQuarterIndex = quartersData.findIndex((quarter) => quarter.quarter_number === selectedQuarter);
@@ -29,7 +29,6 @@ const EditLineupForm = ({
         control,
         name: filteredQuarterPath ? `${filteredQuarterPath}.lineups` : "quarters.0.lineups",
     });        
-    
     
     const filteredLineups = filteredQuarter ? filteredQuarter.lineups : [];
     const startingPlayers = filteredLineups.filter(player => player.lineup_status === '선발');
@@ -43,23 +42,34 @@ const EditLineupForm = ({
     }, [filteredQuarter]);
 
     useEffect(() => {
-        const subscription = watch((values) => {
-            const RealTimeLineups = values?.quarters?.[filteredQuarterIndex]?.lineups || [];
+        const checkDuplicates = (lineups) => {
             const seen = new Set();
-            const duplicates = [];
+            const duplicates = new Set();
     
-            RealTimeLineups.forEach((lineup, index) => {
-                if (lineup.role === "용병") {
-                    return;
-                }                
-                if (lineup.user_idx && seen.has(lineup.user_idx)) {
-                    duplicates.push(index);
-                } else {
-                    seen.add(lineup.user_idx);
+            lineups.forEach((lineup) => {
+                
+                if (lineup.role !== "용병" && lineup.user_idx) {                    
+                    if (seen.has(lineup.user_idx)) {
+                        duplicates.add(lineup.user_idx);
+                    } else {
+                        seen.add(lineup.user_idx);
+                    }
                 }
             });
     
-            setDuplicateIndexes(duplicates);
+            return duplicates;
+        };
+    
+        const updateDuplicates = () => {
+            const currentLineups = watch("quarters")?.[filteredQuarterIndex]?.lineups || [];            
+            setDuplicateIndexes(checkDuplicates(currentLineups));
+        };
+            
+        updateDuplicates();
+    
+        const subscription = watch((values) => {
+            const RealTimeLineups = values?.quarters?.[filteredQuarterIndex]?.lineups || [];
+            setDuplicateIndexes(checkDuplicates(RealTimeLineups));
         });
     
         return () => subscription.unsubscribe();
@@ -152,7 +162,7 @@ const EditLineupForm = ({
                     {startingPlayers.map((lineup, index) => {
                         const selectedUserIdx = watch(`${filteredQuarterPath}.lineups.${index}.user_idx`, "");
                         const selectedUser = users.find((u) => u.user_idx === selectedUserIdx);
-                        const isDuplicate = duplicateIndexes.includes(index);
+                        const isDuplicate = duplicateIndexes.has(selectedUserIdx);
 
                         return (
                             <div>
@@ -172,7 +182,7 @@ const EditLineupForm = ({
                                     <div
                                         className="player-circle"
                                         style={{
-                                            backgroundImage: `url(${defaultImage})`,
+                                            backgroundImage: `url(${lineup.image_url || coolman_logo})`,
                                         }}                                        
                                     ></div>                                                                
                                         <input
@@ -186,8 +196,8 @@ const EditLineupForm = ({
                                                 setValue(`${filteredQuarterPath}.lineups.${index}.back_number`, "");
                                                 setValue(`${filteredQuarterPath}.lineups.${index}.user_idx`, "");
                                                 setValue(`${filteredQuarterPath}.lineups.${index}.role`, "");
+                                                setValue(`${filteredQuarterPath}.lineups.${index}.image_url`, "");
                                             }}
-                                            
                                         />                                                                                                            
                                 </div>
                                 {openDropdown === index && (
@@ -205,6 +215,7 @@ const EditLineupForm = ({
                                                     setValue(`${filteredQuarterPath}.lineups.${index}.back_number`, user.back_number);
                                                     setValue(`${filteredQuarterPath}.lineups.${index}.user_idx`, user.user_idx);
                                                     setValue(`${filteredQuarterPath}.lineups.${index}.role`, user.role);
+                                                    setValue(`${filteredQuarterPath}.lineups.${index}.image_url`, user.image_url);
                                                     setOpenDropdown(null); 
                                                 }}
                                             >
@@ -235,7 +246,7 @@ const EditLineupForm = ({
                                     const subIndex = startingPlayers.length + index;
                                     const selectedUserIdx = watch(`${filteredQuarterPath}.lineups.${subIndex}.user_idx`, "");
                                     const selectedUser = users.find((u) => u.user_idx === selectedUserIdx);
-                                    const isDuplicate = duplicateIndexes.includes(subIndex);
+                                    const isDuplicate = duplicateIndexes.has(selectedUserIdx); 
               
                                     return (
                                         <tr key={lineup.lineup_idx}>

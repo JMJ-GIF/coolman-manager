@@ -140,6 +140,9 @@ function Matches() {
                 onEdit={enterEditMode}
             />
             <div className="content">
+                {loading && (
+                        <LoadingSpinner/>
+                    )}
                 <div className="card-container">
                     {visibleCards.map((card) => (
                         <div key={card.match_idx} className={`card ${isEditMode ? "editable" : ""}`}>
@@ -180,10 +183,9 @@ function Matches() {
                         </div>
                     ))}
                 </div>
-
                 {loading && (
                     <LoadingSpinner/>
-                )}
+                )}                
             </div>
         </div>
     );

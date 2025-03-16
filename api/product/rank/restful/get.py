@@ -14,9 +14,18 @@ from product.rank.schema import (
 def get_user_all_stats(db: Session = Depends(get_db)):
     sql = """
         select
-                a.*,
+                a.user_idx,
+                a.name,
+                a.back_number,
+                a.position,
+                a.role,
+                a.image_url,
+                case when coalesce(b.match_cnt, 0) >= max_match_cnt then coalesce(b.match_cnt, 0)
+                     else max_match_cnt end as max_match_cnt,
                 coalesce(b.match_cnt, 0) as match_cnt,
-                case when coalesce(b.match_cnt, 0) = 0 then 0 else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,
+                case when coalesce(b.match_cnt, 0) >= max_match_cnt then 1
+                     when coalesce(b.match_cnt, 0) = 0 then 0
+                     else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,                
                 coalesce(c.goal_cnt, 0) as goal_cnt,
                 coalesce(d.assist_cnt, 0) as assist_cnt,
                 coalesce(b.quarter_cnt, 0) as quarter_cnt
@@ -27,11 +36,12 @@ def get_user_all_stats(db: Session = Depends(get_db)):
                     u.name,
                     u.back_number,
                     u.position,
-                    u.role,                    
+                    u.role,
+                    u.image_url,                    
                     count(distinct m.match_idx) as max_match_cnt
             from users u  	 	 	
-                left join matches m on m.dt >= u.join_date  
-            group by 1,2,3,4,5            
+                left join matches m on m.dt >= DATE(u.join_date)
+            group by 1,2,3,4,5,6            
 
         ) a
         left join
@@ -102,7 +112,7 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
             group by 1,2,3
         ) a
         join users u on a.user_idx = u.user_idx 
-        where a.dt >= u.join_date 
+        where a.dt >= DATE(u.join_date)
     """
 
     result = db.execute(text(sql)).mappings().all()

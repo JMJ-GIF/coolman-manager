@@ -196,6 +196,7 @@ function PlayerDetails() {
         <div className="gray-background">
             <NavigationBar />
             <div className="content">
+                {loading && <LoadingSpinner />}
                 <div className="profile">                    
                     <div className={`profile-section ${cardClass}`} style={{
                         backgroundImage: `url(${user.image_url || userProfile})`,
@@ -355,8 +356,7 @@ function PlayerDetails() {
                         )
                     )}                                                            
                 </div>                             
-            </div>            
-            {loading && <LoadingSpinner />}          
+            </div>                                  
         </div>      
     );
 }

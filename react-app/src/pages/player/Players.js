@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "../../components/NavigationBar";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import defaultImage from "../../assets/images/coolman-profile.png";
+import coolman_logo from "../../assets/images/coolman-logo-transparent.png";
 import userProfile from "../../assets/images/transparent-profile.png";
 
 function Players() {
@@ -45,6 +45,9 @@ function Players() {
         <div className="gray-background">
             <NavigationBar />
             <div className="content">
+                {loading && (
+                        <LoadingSpinner/>
+                    )}
                 <div className='user-container'>
                     {sortedUserStats.map((user, index) => {
                         let cardClass = "bronze"; 
@@ -57,7 +60,7 @@ function Players() {
                                     navigate(`/players/${user.user_idx}/${cardClass}`)
                                 }>  
                                 <div className='profile-section' style={{
-                                    backgroundImage: `url(${user.image_url || userProfile})`,
+                                    backgroundImage: `url(${user.image_url || coolman_logo})`,
                                 }}>
                                     <div className='vertical-info'>
                                         <div className='score'>{Math.round(user.ratio * 100)}</div>
@@ -95,8 +98,7 @@ function Players() {
                         );
                     })}
                 </div>                                
-            </div>
-            {loading && <LoadingSpinner />}
+            </div>            
         </div>      
     );
 }

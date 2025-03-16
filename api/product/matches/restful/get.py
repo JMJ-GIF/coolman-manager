@@ -55,7 +55,7 @@ def get_lineups_in_match(match_idx: int, db: Session = Depends(get_db)):
         l.lineup_idx,
         q.match_idx, q.quarter_idx, q.quarter_number, q.tactics, 
         l.lineup_idx, p.name AS position_name, p.position_idx, p.top_coordinate, p.left_coordinate, 
-        u.back_number, u.name AS user_name, u.user_idx, l.lineup_status
+        u.back_number, u.name AS user_name, u.user_idx, l.lineup_status, u.image_url, u.role
     FROM quarters q
     JOIN quarters_lineup l ON q.quarter_idx = l.quarter_idx
     LEFT JOIN positions p ON l.position_idx = p.position_idx

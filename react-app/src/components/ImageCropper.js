@@ -37,10 +37,10 @@ const ImageCropper = ({ onCrop, onClose }) => {
         height: 150,
       });
       croppedCanvas.toBlob((blob) => {
-        const previewUrl = croppedCanvas.toDataURL();
+        const previewUrl = croppedCanvas.toDataURL("image/png", 0.8); // 0.8은 압축 품질 (0-1)
         onCrop(blob, previewUrl);
         onClose();
-      });
+      }, "image/png", 0.8);
     }
   };
 
