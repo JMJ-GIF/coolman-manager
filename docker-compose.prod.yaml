@@ -1,0 +1,31 @@
+# docker-compose.prod.yml
+version: '3.8'
+
+services:
+  react-app:
+    image: minjejin/coolman-manager-react:latest
+    ports:
+      - "3000:3000"    
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  api:
+    image: minjejin/coolman-manager-api:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  db:
+    image: minjejin/coolman-manager-db:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: jmj
+      POSTGRES_PASSWORD: a12345
+      POSTGRES_DB: coolman
+
+volumes:
+  pg_data:
