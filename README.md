@@ -6,12 +6,12 @@
 ```
 docker login
 
-docker build -t minjejin/coolman-manager-react:latest .
+docker build --platform=linux/amd64 -t minjejin/coolman-manager-react:latest .
 docker push minjejin/coolman-manager-react:latest
 
-docker build -t minjejin/coolman-manager-api:latest .
+docker build --platform=linux/amd64 -t minjejin/coolman-manager-api:latest .
 docker push minjejin/coolman-manager-api:latest
 
-docker build -t minjejin/coolman-manager-db:latest .
+docker build --platform=linux/amd64 -t minjejin/coolman-manager-db:latest .
 docker push minjejin/coolman-manager-db:latest
 ```

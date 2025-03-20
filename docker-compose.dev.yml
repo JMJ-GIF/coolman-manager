@@ -5,7 +5,7 @@ services:
     build:
       context: ./react-app
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - ./react-app:/usr/src/app    # 로컬 디렉토리를 컨테이너와 동기화
       - /usr/src/app/node_modules  # node_modules는 컨테이너에서만 유지
