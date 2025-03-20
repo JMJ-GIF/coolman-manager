@@ -5,12 +5,13 @@ services:
     build:
       context: ./react-app
     ports:
-      - "3000:80"
+      - "3000:3000"  # React 개발 서버 (핫 리로드 지원)
     volumes:
-      - ./react-app:/usr/src/app    # 로컬 디렉토리를 컨테이너와 동기화
-      - /usr/src/app/node_modules  # node_modules는 컨테이너에서만 유지
+      - ./react-app:/usr/src/app  # 로컬 코드와 동기화
+      - /usr/src/app/node_modules
     environment:
-      - CHOKIDAR_USEPOLLING=true  # 핫 리로드 활성화
+      - CHOKIDAR_USEPOLLING=true
+    command: ["npm", "start"]  # 개발용 React 서버 실행
 
   api:
     build:
@@ -18,17 +19,17 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./api:/usr/src/app          # 로컬 디렉토리를 컨테이너와 동기화
+      - ./api:/usr/src/app
     environment:
-      - PYTHONUNBUFFERED=1         # Django 로그 실시간 출력
+      - PYTHONUNBUFFERED=1
 
   db:
     build:
-      context: ./db                # db 폴더의 Dockerfile 사용
+      context: ./db
     ports:
       - "5432:5432"
     volumes:
-      - pg_data:/var/lib/postgresql/data # 데이터 유지
+      - pg_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: jmj
       POSTGRES_PASSWORD: a12345
