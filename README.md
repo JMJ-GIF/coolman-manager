@@ -6,7 +6,7 @@
 ```
 docker login
 
-docker build --platform=linux/amd64 -t minjejin/coolman-manager-react:latest -f react-app/Dockerfile.prod ./react-app
+docker build --platform=linux/amd64 -t minjejin/coolman-manager-react:latest -f react-app/Dockerfile.prod .
 docker push minjejin/coolman-manager-react:latest
 
 docker build --platform=linux/amd64 -t minjejin/coolman-manager-api:latest ./api
