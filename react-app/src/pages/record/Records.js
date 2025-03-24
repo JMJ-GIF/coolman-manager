@@ -21,7 +21,7 @@ function Records() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const userStatsResponse = await axios.get(`${API_URL}/rank/`);
+            const userStatsResponse = await axios.get(`${API_URL}/rank`);
             const OpposingTeamStatsResponse = await axios.get(`${API_URL}/rank/opposing_team`);
             setUserStats(userStatsResponse.data);
             setOpposingTeamStats(OpposingTeamStatsResponse.data)

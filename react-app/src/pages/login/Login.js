@@ -10,9 +10,10 @@ function LoginPage() {
   const STATE = 'coolman';
   const navigate = useNavigate();  
   const CLIENT_ID = process.env.REACT_APP_LOGIN_CLIENT_ID;   
-  const NAVER_REDIRECT_URI = "http://127.0.0.1:3000/callback";
-  const NAVER_AUTH_URL = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${CLIENT_ID}&state=${STATE}&redirect_uri=${NAVER_REDIRECT_URI}`;
-  
+  const NAVER_REDIRECT_URL = process.env.REACT_APP_LOGIN_REDIRECT_URL;
+  const NAVER_AUTH_URL = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${CLIENT_ID}&state=${STATE}&redirect_uri=${NAVER_REDIRECT_URL}`;
+  console.log(NAVER_AUTH_URL)
+
   const handleNaverLogin = (e) => {
     window.location.href = NAVER_AUTH_URL;
   };

@@ -70,7 +70,7 @@ def get_lineups_in_match(match_idx: int, db: Session = Depends(get_db)):
 
     return result
 
-@router.get("/", response_model=List[Match])
+@router.get("", response_model=List[Match])
 def get_match_for_pagination(
     last_item_id: int = None, last_item_dt: str = None,  
     page_size: int = 10, db: Session = Depends(get_db)

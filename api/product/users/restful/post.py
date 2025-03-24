@@ -10,7 +10,7 @@ from product.users.router import router
 
 logging.basicConfig(level=logging.ERROR)
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 async def create_user(
     social_uuid: str = Form(...),
     name: str = Form(...),
@@ -61,7 +61,8 @@ async def create_user(
         # 이미지 업로드 및 URL 반환
         image_url = None
         if image:
-            image_url = upload_image(image.file, user_idx)
+            raw_image_url = upload_image(image.file, user_idx)
+            image_url = f"{raw_image_url}?v={int(datetime.utcnow().timestamp())}"
 
 
         # 이미지 URL 업데이트

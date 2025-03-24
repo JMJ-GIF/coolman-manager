@@ -18,7 +18,7 @@ def get_position(position_idx: int, db: Session = Depends(get_db)):
     return result
 
 
-@router.get("/", response_model=List[Position])
+@router.get("", response_model=List[Position])
 def get_positions(
     position_ids: Optional[str] = Query(
         None, description="Comma-separated list of position IDs to fetch"

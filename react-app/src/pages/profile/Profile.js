@@ -59,8 +59,6 @@ function Profile() {
         fetchData();
     }, [authUser, navigate]);
 
-    console.log(authUser)
-
     return (
         <div className="gray-background">
             <div className="content">

@@ -19,7 +19,7 @@ def get_user(user_idx: int, db: Session = Depends(get_db)):
     return result
 
 
-@router.get("/", response_model=List[User])
+@router.get("", response_model=List[User])
 def get_users(
     user_list: Optional[str] = Query(None, description="Comma-separated list of user IDs to fetch"),
     db: Session = Depends(get_db),

@@ -16,7 +16,7 @@ function Players() {
     const fetchData = async () => {
         setLoading(true);
         try {                
-            const userStatsResponse = await axios.get(`${API_URL}/rank/`);
+            const userStatsResponse = await axios.get(`${API_URL}/rank`);
             setUserStats(userStatsResponse.data);
         } catch (error) {
             console.error("Error fetching Users:", error);
@@ -39,7 +39,6 @@ function Players() {
             return a.name.localeCompare(b.name);
         });
     
-    console.log(sortedUserStats)
 
     return (
         <div className="gray-background">

@@ -9,7 +9,7 @@ from db import get_db
 from product.matches.router import router
 from product.matches.schema import *
 
-@router.post("/")
+@router.post("")
 def create_match(match_data: MatchCreate, db: Session = Depends(get_db)):
     try:
         with db.begin():  # 트랜잭션 시작

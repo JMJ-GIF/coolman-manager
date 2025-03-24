@@ -25,7 +25,7 @@ function Matches() {
         if (loading) return;
         setLoading(true);        
         try {            
-            const response = await axios.get(`${API_URL}/matches/`, {
+            const response = await axios.get(`${API_URL}/matches`, {
                 params: {
                     page_size: batchSize,
                     ...(lastItemId && {last_item_id: lastItemId}),
@@ -88,7 +88,7 @@ function Matches() {
         setLoading(true);
     
         try {            
-            const response = await axios.delete(`${API_URL}/matches/`, {
+            const response = await axios.delete(`${API_URL}/matches`, {
                 params: selectedCards.reduce((acc, id) => {
                     acc["match_ids"] = acc["match_ids"] ? [...acc["match_ids"], id] : [id];
                     return acc;
@@ -127,8 +127,6 @@ function Matches() {
             prev.includes(cardId) ? prev.filter(id => id !== cardId) : [...prev, cardId]
         );
     };
-
-    console.log('selectedCards', selectedCards)
 
     return (
         <div className="gray-background">
@@ -182,10 +180,7 @@ function Matches() {
                             </div>
                         </div>
                     ))}
-                </div>
-                {loading && (
-                    <LoadingSpinner/>
-                )}                
+                </div>              
             </div>
         </div>
     );

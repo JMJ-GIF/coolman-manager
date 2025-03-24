@@ -6,8 +6,9 @@ services:
     image: minjejin/coolman-manager-react:latest
     ports:
       - "80:80"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+      - "443:443"
+    volumes:      
+      - ./nginx/certs:/etc/nginx/certs    
 
   api:
     image: minjejin/coolman-manager-api:latest
@@ -17,11 +18,12 @@ services:
       - PYTHONUNBUFFERED=1
 
   db:
-    image: minjejin/coolman-manager-db:latest
-    ports:
-      - "5432:5432"
+    image: postgres:15
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./db/init.prod.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"    
     environment:
       POSTGRES_USER: jmj
       POSTGRES_PASSWORD: a12345

@@ -50,6 +50,7 @@ function ProfileEdit() {
                 setValue("back_number", response.data.back_number || "");
                 setValue("position", response.data.position || "");
                 setValue("image_url", response.data.image_url || "");
+                setUserImageUrl(response.data.image_url);
             } catch (error) {
                 console.error("❌ 프로필 정보 불러오기 실패:", error);
             } finally {
@@ -125,8 +126,8 @@ function ProfileEdit() {
       };
     
     const handleCroppedImage = (file, previewUrl) => {
-        setCroppedImage(previewUrl);  
-        setUserImageUrl(previewUrl);  
+        setCroppedImage(previewUrl);
+        setUserImageUrl(previewUrl); 
         setShowCropper(false);
     };
     

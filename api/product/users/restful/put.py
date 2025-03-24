@@ -45,7 +45,8 @@ async def update_user(
 
             image_url = existing_user.image_url
             if image:
-                image_url = upload_image(image.file, user_idx)
+                raw_image_url = upload_image(image.file, user_idx)
+                image_url = f"{raw_image_url}?v={int(datetime.utcnow().timestamp())}"
   
             update_query = """
                 UPDATE users

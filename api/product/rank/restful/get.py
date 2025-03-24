@@ -10,7 +10,7 @@ from product.rank.schema import (
     UserStatsPosition, OpposingTeamAllStats
 )
 
-@router.get("/", response_model=List[UserAllStats])
+@router.get("", response_model=List[UserAllStats])
 def get_user_all_stats(db: Session = Depends(get_db)):
     sql = """
         select

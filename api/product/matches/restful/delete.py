@@ -7,7 +7,7 @@ from db import get_db
 from product.matches.router import router
 from product.matches.schema import *
 
-@router.delete("/")
+@router.delete("")
 def delete_matches(match_ids: List[int] = Query(...), db: Session = Depends(get_db)):
     try:
         with db.begin():

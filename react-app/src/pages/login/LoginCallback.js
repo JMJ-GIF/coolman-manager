@@ -44,8 +44,7 @@ const RedirectURI = () => {
         headers: {
           Authorization: `Bearer ${accessToken}`, 
         },
-      });
-      console.log(response.data.id)
+      });      
       
       checkUserExists(response.data.id, response.data.name);
 

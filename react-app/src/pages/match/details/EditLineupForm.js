@@ -151,8 +151,8 @@ const EditLineupForm = ({
                 </div>   
                 <div className="quarter-tactics">
                     <select value={selectedTactics} onChange={handleTacticsChange}>                    
-                    {Array.from(new Set(positions.map((item) => item.tactics))).map((tactic) => (
-                        <option key={tactic} value={tactic}>
+                    {Array.from(new Set(positions.map((item) => item.tactics))).map((tactic, index) => (
+                        <option key={`${tactic}-${index}`} value={tactic}>
                             {tactic}
                         </option>
                     ))}

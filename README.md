@@ -6,12 +6,22 @@
 ```
 docker login
 
-docker build --platform=linux/amd64 -t minjejin/coolman-manager-react:latest .
+docker build --platform=linux/amd64 -t minjejin/coolman-manager-react:latest -f react-app/Dockerfile.prod ./react-app
 docker push minjejin/coolman-manager-react:latest
 
-docker build --platform=linux/amd64 -t minjejin/coolman-manager-api:latest .
+docker build --platform=linux/amd64 -t minjejin/coolman-manager-api:latest ./api
 docker push minjejin/coolman-manager-api:latest
 
-docker build --platform=linux/amd64 -t minjejin/coolman-manager-db:latest .
+docker build --platform=linux/amd64 -t minjejin/coolman-manager-db:latest ./db
 docker push minjejin/coolman-manager-db:latest
+```
+
+# Local SSL
+```
+-- 처음 한번만
+brew install mkcert
+mkcert -install
+
+-- 인증서 발급
+mkcert 127.0.0.1 localhost
 ```
