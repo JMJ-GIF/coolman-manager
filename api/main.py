@@ -12,7 +12,7 @@ app = FastAPI()
 # CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://127.0.0.1", "https://coolman-manager.com"], 
+    allow_origins=["https://127.0.0.1", "https://coolman-manager.com", "https://www.coolman-manager.com"], 
     allow_credentials=True,
     allow_methods=["*"],  # 모든 HTTP 메서드 허용 (GET, POST 등)
     allow_headers=["*"],  # 모든 헤더 허용

@@ -11,9 +11,6 @@ docker push minjejin/coolman-manager-react:latest
 
 docker build --platform=linux/amd64 -t minjejin/coolman-manager-api:latest ./api
 docker push minjejin/coolman-manager-api:latest
-
-docker build --platform=linux/amd64 -t minjejin/coolman-manager-db:latest ./db
-docker push minjejin/coolman-manager-db:latest
 ```
 
 # Local SSL
@@ -24,4 +21,11 @@ mkcert -install
 
 -- 인증서 발급
 mkcert 127.0.0.1 localhost
+```
+
+# .env 파일 서버에서도 생성해주기
+
+# Server SSL
+```
+
 ```

@@ -1,15 +1,3 @@
--- 사용자 생성 (존재 여부 확인 후 생성)
-DO
-$$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'jmj') THEN
-      CREATE ROLE jmj WITH LOGIN PASSWORD 'a12345';
-      ALTER ROLE jmj CREATEDB;
-
-   END IF;
-END
-$$;
-
 -- 데이터베이스 생성 (존재 여부 확인)
 DO
 $$
