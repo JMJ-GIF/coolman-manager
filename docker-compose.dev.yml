@@ -18,6 +18,7 @@ services:
       - REACT_APP_API_URL=${REACT_APP_API_URL}
       - REACT_APP_LOGIN_REDIRECT_URL=${REACT_APP_LOGIN_REDIRECT_URL}
       - REACT_APP_LOGIN_CLIENT_ID=${REACT_APP_LOGIN_CLIENT_ID} 
+      - REACT_APP_STAGE=${REACT_APP_STAGE} 
     command: ["npm", "start"]  # 개발용 React 서버 실행
 
   api:
@@ -43,6 +44,7 @@ services:
       - AWS_REGION_NAME=${AWS_REGION_NAME}
       - S3_ENDPOINT_URL=${S3_ENDPOINT_URL}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - API_STAGE=${API_STAGE}
 
   db:
     image: postgres:15

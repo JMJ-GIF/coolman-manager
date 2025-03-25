@@ -6,6 +6,11 @@ WORKDIR /usr/src/app
 COPY react-app/package.json ./
 RUN npm install --only=production
 
+ENV REACT_APP_API_URL="/api"
+ENV REACT_APP_LOGIN_REDIRECT_URL="https://coolman-manager.com/callback"
+ENV REACT_APP_LOGIN_CLIENT_ID="VMV0OxeKinTAuz6qK0QO"
+ENV REACT_APP_STAGE='prod'
+
 # 전체 소스 복사 & 빌드
 COPY react-app ./
 RUN npm run build
