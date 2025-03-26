@@ -38,7 +38,7 @@ def upload_image(image: bytes, user_idx: int) -> str:
 
 def delete_image(user_idx: int) -> dict:
     
-    object_name = f'{os.getenv('API_STAGE')}/{user_idx}.png'
+    object_name = f"{os.getenv('API_STAGE')}/{user_idx}.png"
     s3.delete_object(Bucket=BUCKET_NAME, Key=object_name)
 
     return {"message": "Image deleted successfully!"}
