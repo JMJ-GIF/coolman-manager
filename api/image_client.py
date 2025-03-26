@@ -30,7 +30,7 @@ def upload_image(image: bytes, user_idx: int) -> str:
             ExtraArgs={"ACL": "public-read"} 
         )
 
-        image_url = f"{os.getenv('S3_ENDPOINT_URL')}/{BUCKET_NAME}/{STAGE}/{object_name}"
+        image_url = f"{os.getenv('S3_ENDPOINT_URL')}/{BUCKET_NAME}/{object_name}"
         print(f"Image uploaded successfully: {image_url}")
         return image_url
     except Exception as e:
