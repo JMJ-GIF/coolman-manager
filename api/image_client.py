@@ -18,9 +18,10 @@ s3 = session.client(
 )
 
 BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+STAGE = os.getenv('API_STAGE')
 
 def upload_image(image: bytes, user_idx: int) -> str:
-    object_name = f'{user_idx}.png'
+    object_name = f'{STAGE}/{user_idx}.png'
     try:
         s3.upload_fileobj(
             Fileobj = image, 
@@ -29,7 +30,7 @@ def upload_image(image: bytes, user_idx: int) -> str:
             ExtraArgs={"ACL": "public-read"} 
         )
 
-        image_url = f"{os.getenv('S3_ENDPOINT_URL')}/{BUCKET_NAME}/{os.getenv('API_STAGE')}/{object_name}"
+        image_url = f"{os.getenv('S3_ENDPOINT_URL')}/{BUCKET_NAME}/{STAGE}/{object_name}"
         print(f"Image uploaded successfully: {image_url}")
         return image_url
     except Exception as e:
@@ -38,7 +39,7 @@ def upload_image(image: bytes, user_idx: int) -> str:
 
 def delete_image(user_idx: int) -> dict:
     
-    object_name = f"{os.getenv('API_STAGE')}/{user_idx}.png"
+    object_name = f"{STAGE}/{user_idx}.png"
     s3.delete_object(Bucket=BUCKET_NAME, Key=object_name)
 
     return {"message": "Image deleted successfully!"}
