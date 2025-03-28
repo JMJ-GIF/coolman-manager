@@ -2,13 +2,15 @@ import './PlayerDetails.scss';
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../../components/NavigationBar";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import userProfile from "../../assets/images/transparent-profile.png";
+import coolman_logo from "../../assets/images/coolman-logo-transparent.png";
 import x_svg from "../../assets/icons/x.svg"
 import gold_svg from "../../assets/icons/gold.svg"
 import silver_svg from "../../assets/icons/silver.svg"
 import bronze_svg from "../../assets/icons/bronze.svg"
+import back_arrow from "../../assets/icons/back_arrow.svg";
 
 function formatDate(isoString) {
     if (!isoString) return ""; 
@@ -17,13 +19,16 @@ function formatDate(isoString) {
 }
 
 function PlayerDetails() {    
+    const navigate = useNavigate();
     const { user_idx, cardClass } = useParams(); 
     const [loading, setLoading] = useState(false);    
-    const API_URL = process.env.REACT_APP_API_URL;
+    const API_URL = process.env.REACT_APP_API_URL;    
     const [user, setUser] = useState([]);
     const [userPosition, setUserPosition] = useState([]); 
     const [userParticipation, setUserParticipation] = useState([]);
-    const [userStatOpposingTeam, setUserStatsOpposingTeam] = useState([]);       
+    const [userStatOpposingTeam, setUserStatsOpposingTeam] = useState([]);   
+    const [validImageUrl, setValidImageUrl] = useState(coolman_logo);
+    
         
     const [matchCnt, setMatchCnt] = useState(0);        
     const [maxMatchCnt, setMaxMatchCnt] = useState(0);
@@ -37,15 +42,34 @@ function PlayerDetails() {
     const [firstDayWeekday, setFirstDayWeekday] = useState(0);    
     const [selectedTable, setSelectedTable] = useState("opposingTeam");
 
+    const checkImageExists = (url) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+        });
+    };
+    
+
     const fetchData = async () => {
         setLoading(true);
     
         try {
             const userResponse = await axios.get(`${API_URL}/users/${user_idx}`);
-            setUser(userResponse.data);
+            const userData = userResponse.data;
+            setUser(userData);
+
+            if (userData.image_url) {
+                const exists = await checkImageExists(userData.image_url);
+                setValidImageUrl(exists ? userData.image_url : coolman_logo);
+            } else {
+                setValidImageUrl(coolman_logo);
+            }
         } catch (error) {
             console.error("Error fetching user data:", error);
             setUser(null);
+            setValidImageUrl(coolman_logo);
         }
     
         try {
@@ -193,14 +217,16 @@ function PlayerDetails() {
     
     
     return (
-        <div className="gray-background">
-            <NavigationBar />
+        <div className="gray-background">            
             <div className="content">
                 {loading && <LoadingSpinner />}
+                <div className="top-floating-area">
+                    <img src={back_arrow} alt="back" onClick={() => navigate("/players")} />
+                </div>
                 <div className="profile">                    
                     <div className={`profile-section ${cardClass}`} style={{
-                        backgroundImage: `url(${user.image_url || userProfile})`,
-                    }}></div>        
+                    backgroundImage: `url(${validImageUrl})`,
+                    }}></div>      
                     <div className="name-section">
                         {cardClass === "gold" && <img src={gold_svg} alt="Gold Rank" className="rank-icon" />}
                         {cardClass === "silver" && <img src={silver_svg} alt="Silver Rank" className="rank-icon" />}
@@ -275,7 +301,7 @@ function PlayerDetails() {
                         })}
                     </div>                                        
                     <div className="calendar-info">
-                        <span>가입한 <strong>{formatDate(user.join_date)}</strong> 이후</span>
+                        <span>가입일은 <strong>{formatDate(user.join_date)}</strong> 이며,</span>
                         <span><strong>{maxMatchCnt}</strong> 번 중에 <strong>{matchCnt}</strong> 번 출석하셨어요! ✅</span>                        
                     </div>
                 </div>

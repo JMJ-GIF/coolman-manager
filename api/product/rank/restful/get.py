@@ -72,7 +72,7 @@ def get_user_all_stats(db: Session = Depends(get_db)):
             from goals g 
             where goal_type = '득점'
             group by 1
-        ) d on d.user_idx = c.user_idx
+        ) d on a.user_idx = d.user_idx
     """
     
     result = db.execute(text(sql)).mappings().all()
@@ -111,8 +111,7 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
                 ) ql on ql.quarter_idx = q.quarter_idx
             group by 1,2,3
         ) a
-        join users u on a.user_idx = u.user_idx 
-        where a.dt >= DATE(u.join_date)
+        join users u on a.user_idx = u.user_idx         
     """
 
     result = db.execute(text(sql)).mappings().all()

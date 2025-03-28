@@ -1,21 +1,35 @@
 import './Details.scss';
-import React, { useState } from "react";
+import React from "react";
+import Select from "react-select";
+import { Controller } from "react-hook-form";
 
 const EditResultForm = ({
     setValue,
     register,
     errors,
     watch,
+    onSubmit,
+    control, 
     positions,    
-    onSubmit, 
+    
 }) => {
     const winningPoint = watch("winning_point");
     const losingPoint = watch("losing_point");
     const uniqueTactics = Array.from(
         new Set(positions.map((item) => item.tactics))
-    );
-    
-    const weatherOptions = ["맑음", "흐림", "눈", "비", "안개", "바람"];
+      ).map((tactic) => ({
+        value: tactic,
+        label: tactic,
+    }));    
+    const weatherOptions = [
+        { value: "맑음", label: "맑음" },
+        { value: "흐림", label: "흐림" },
+        { value: "눈", label: "눈" },
+        { value: "비", label: "비" },
+        { value: "안개", label: "안개" },
+        { value: "바람", label: "바람" },
+      ];
+      
 
     return (
         <form onSubmit={onSubmit}>
@@ -113,24 +127,42 @@ const EditResultForm = ({
                     {/* 경기 날씨 */}
                     <div className="card">
                         <span>날씨</span>
-                        <input
-                            type="text"
-                            list="weather-options"
-                            placeholder="날씨 선택"
-                            {...register("weather", {
+                        <Controller
+                            name="weather"
+                            control={control}
+                            rules={{
                                 required: "날씨를 선택하세요",
-                                validate: (value) => weatherOptions.includes(value) || "올바른 날씨를 선택하세요",
-                            })}
-                            onFocus={() => setValue("weather", "")}
-                            className={`text-input ${errors.weather ? "error" : ""}`}
+                                validate: (value) =>
+                                    weatherOptions.map((opt) => opt.value).includes(value) ||
+                                    "올바른 날씨를 선택하세요",
+                            }}
+                            render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={weatherOptions}
+                                onChange={(selectedOption) => field.onChange(selectedOption?.value)}
+                                value={weatherOptions.find((opt) => opt.value === field.value) || null}
+                                placeholder="날씨 선택"
+                                className={`react-select-container ${errors.weather ? "error" : ""}`}
+                                classNamePrefix="custom-select"
+                                isClearable={false}
+                                isSearchable={false}
+                                components={{ DropdownIndicator: null }}                                
+                                menuPortalTarget={document.body} 
+                                styles={{
+                                menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 99999, 
+                                }),
+                                }}
+                            />
+                            )}
                         />
-                        <datalist id="weather-options">
-                            {weatherOptions.map((weather, index) => (
-                                <option key={index} value={weather} />
-                            ))}
-                        </datalist>
-                        {errors.weather && <p className="result-error-message">{errors.weather.message}</p>}
+                        {errors.weather && (
+                            <p className="result-error-message">{errors.weather.message}</p>
+                        )}
                     </div>
+
 
                     {/* 경기 장소 */}
                     <div className="card">
@@ -162,23 +194,39 @@ const EditResultForm = ({
                     {/* 메인 전술 */}
                     <div className="card">
                         <span>메인전술</span>
-                        <input
-                            type="text"
-                            list="tactics-options"
-                            placeholder="전술 선택"
-                            {...register("main_tactics", {
-                                required: "전술을 선택하세요",
-                                validate: (value) => uniqueTactics.includes(value) || "올바른 전술을 선택하세요",
-                            })}
-                            onFocus={() => setValue("main_tactics", "")}
-                            className={`text-input ${errors.main_tactics ? "error" : ""}`}
+                        <Controller
+                            name="main_tactics"
+                            control={control}
+                            rules={{
+                            required: "전술을 선택하세요",
+                            validate: (value) =>
+                                uniqueTactics.map((opt) => opt.value).includes(value) || "올바른 전술을 선택하세요",
+                            }}
+                            render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={uniqueTactics}
+                                onChange={(selectedOption) => field.onChange(selectedOption?.value)}
+                                value={uniqueTactics.find((opt) => opt.value === field.value) || null}
+                                placeholder="전술 선택"
+                                className={`react-select-container ${errors.main_tactics ? "error" : ""}`}
+                                classNamePrefix="custom-select"
+                                isClearable={false}
+                                isSearchable={false}
+                                components={{ DropdownIndicator: null }}
+                                menuPortalTarget={document.body}
+                                styles={{
+                                  menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 99999,
+                                  }),
+                                }}
+                            />                              
+                            )}
                         />
-                        <datalist id="tactics-options">
-                            {uniqueTactics.map((tactic, index) => (
-                                <option key={index} value={tactic} />
-                            ))}
-                        </datalist>
-                        {errors.main_tactics && <p className="result-error-message">{errors.main_tactics.message}</p>}
+                        {errors.main_tactics && (
+                            <p className="result-error-message">{errors.main_tactics.message}</p>
+                        )}
                     </div>
                 </div>                
             </div>

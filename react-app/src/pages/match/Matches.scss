@@ -5,6 +5,12 @@
     flex-direction: column;
     gap: 20px;
 
+    .no-data {
+        font-size: 18px;
+        color: gray;
+        margin-top: 20px;
+    }
+
     .card {
         background-color: #fff;
         border: 1px solid #ddd;

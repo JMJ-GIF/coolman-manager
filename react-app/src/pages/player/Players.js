@@ -8,16 +8,43 @@ import coolman_logo from "../../assets/images/coolman-logo-transparent.png";
 import userProfile from "../../assets/images/transparent-profile.png";
 
 function Players() {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
     const [userStats, setUserStats] = useState([]); 
     const [loading, setLoading] = useState(false);    
     const API_URL = process.env.REACT_APP_API_URL;    
+    const [validImageUrls, setValidImageUrls] = useState({});
 
+    const checkImageExists = (url) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+        });
+    };
+    
+    const validateAllImages = async (users) => {
+        const result = {};
+    
+        await Promise.all(users.map(async (user) => {
+            if (user.image_url) {
+                const exists = await checkImageExists(user.image_url);
+                result[user.user_idx] = exists ? user.image_url : coolman_logo;
+            } else {
+                result[user.user_idx] = coolman_logo;
+            }
+        }));
+    
+        setValidImageUrls(result);
+    };
+    
     const fetchData = async () => {
         setLoading(true);
         try {                
             const userStatsResponse = await axios.get(`${API_URL}/rank`);
             setUserStats(userStatsResponse.data);
+
+            await validateAllImages(userStatsResponse.data);
         } catch (error) {
             console.error("Error fetching Users:", error);
             setUserStats([]); 
@@ -58,9 +85,12 @@ function Players() {
                                 onClick={() =>
                                     navigate(`/players/${user.user_idx}/${cardClass}`)
                                 }>  
-                                <div className='profile-section' style={{
-                                    backgroundImage: `url(${user.image_url || coolman_logo})`,
-                                }}>
+                                <div
+                                    className='profile-section'
+                                    style={{
+                                        backgroundImage: `url(${validImageUrls[user.user_idx] || coolman_logo})`,
+                                }}
+                                >
                                     <div className='vertical-info'>
                                         <div className='score'>{Math.round(user.ratio * 100)}</div>
                                         <div className="position">{user.position}</div>                                    

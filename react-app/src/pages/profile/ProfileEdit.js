@@ -39,6 +39,15 @@ function ProfileEdit() {
         mode: "onChange",
     });
 
+    const checkImageExists = (url) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+        });
+    };
+    
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -50,7 +59,13 @@ function ProfileEdit() {
                 setValue("back_number", response.data.back_number || "");
                 setValue("position", response.data.position || "");
                 setValue("image_url", response.data.image_url || "");
-                setUserImageUrl(response.data.image_url);
+                
+                if (response.data.image_url) {
+                    const exists = await checkImageExists(response.data.image_url);
+                    setUserImageUrl(exists ? response.data.image_url : coolman_logo);
+                } else {
+                    setUserImageUrl(coolman_logo);
+                }                
             } catch (error) {
                 console.error("❌ 프로필 정보 불러오기 실패:", error);
             } finally {

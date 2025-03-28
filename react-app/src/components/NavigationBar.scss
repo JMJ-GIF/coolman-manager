@@ -52,7 +52,7 @@
             font-weight: 300;
             color: black;
             cursor: pointer;
-            padding: 0 20px;
+            padding: 0 40px;
             transition: color 0.3s ease;
             
             &:hover {
@@ -112,7 +112,7 @@
         .page-navigator {
             .nav-item {
                 font-size: 12px; /* 네비게이션 항목 폰트 축소 */
-                padding: 0 10px; /* 패딩 축소 */
+                padding: 0 30px; /* 패딩 축소 */
             }
         }
 
@@ -145,7 +145,7 @@
             }
             .nav-item {
                 font-size: 11px; /* 폰트 크기 축소 */
-                padding: 0 8px; /* 패딩 축소 */
+                padding: 0 20px; /* 패딩 축소 */
             }
         }
 

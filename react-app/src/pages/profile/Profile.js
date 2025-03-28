@@ -23,15 +23,34 @@ function Profile() {
     const navigate = useNavigate();
     const [user, setUser] = useState([]);
     const [loading, setLoading] = useState(false);  
-        
+    const [validImageUrl, setValidImageUrl] = useState(coolman_logo);
+
+    const checkImageExists = (url) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+        });
+    };
+    
     const fetchData = async () => {
         setLoading(true);
         try {
             const userResponse = await axios.get(`${API_URL}/users/${authUser.user_idx}`);   
-            setUser(userResponse.data);
+            const userData = userResponse.data;
+            setUser(userData);
+            
+            if (userData.image_url) {
+                const exists = await checkImageExists(userData.image_url);
+                setValidImageUrl(exists ? userData.image_url : coolman_logo);
+            } else {
+                setValidImageUrl(coolman_logo);
+            }
         } catch (error) {
             console.error("Error fetching user participation:", error);
-            setUser([]);       
+            setUser([]);     
+            setValidImageUrl(coolman_logo);  
         } finally {
             setLoading(false);
         }
@@ -68,7 +87,7 @@ function Profile() {
                 </div>
                 <div className="profile-container">                    
                     <div className="user-image" style={{
-                        backgroundImage: `url(${user.image_url || coolman_logo})`,
+                        backgroundImage: `url(${validImageUrl})`,
                     }}></div>
                     <div className='user-name'>{user.name}</div>
                     <div className="form-container">

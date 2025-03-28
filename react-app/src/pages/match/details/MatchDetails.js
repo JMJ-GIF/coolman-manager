@@ -26,6 +26,16 @@ function MatchDetails() {
     const [goals, setGoals] = useState([]);
     const [lineups, setLineups] = useState([]);     
     const [selectedQuarter, setSelectedQuarter] = useState(1);
+    const [validPlayerImages, setValidPlayerImages] = useState({});
+    
+    const checkImageExists = (url) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+        });
+    };    
     
     const fetchData = async () => {
         setLoading(true);
@@ -59,10 +69,26 @@ function MatchDetails() {
 
             // Lineups API 결과 처리
             if (lineupResponse.status === "fulfilled") {
-                setLineups(lineupResponse.value.data);
+                const lineupsData = lineupResponse.value.data;
+                console.log(lineupsData)
+                setLineups(lineupsData);                
+
+                const imageMap = {};
+                await Promise.all(
+                    lineupsData.map(async (player) => {
+                        if (player.image_url) {
+                            const exists = await checkImageExists(player.image_url);
+                            imageMap[player.lineup_idx] = exists ? player.image_url : coolman_logo;
+                        } else {
+                            imageMap[player.lineup_idx] = coolman_logo;
+                        }
+                    })
+                );
+                setValidPlayerImages(imageMap);
             } else {
                 console.warn("Lineups API failed:", lineupResponse.reason);
                 setLineups([]);
+                setValidPlayerImages({});
             }
                 
         } catch (error) {
@@ -200,10 +226,13 @@ function MatchDetails() {
                                 left: `${player.left_coordinate}%`,
                             }}>
                             <div className="position-label">{player.position_name}</div>
-                            <div className="player-circle"
-                                style={{
-                                    backgroundImage: `url(${player.image_url || coolman_logo})`,
-                                }}></div>
+                            <div
+                            className="player-circle"
+                            style={{
+                                backgroundImage: `url(${validPlayerImages[player.lineup_idx] || coolman_logo})`,
+                            }}
+                            ></div>
+                                
                             <div className="player-name">{player.user_name}</div>
                         </div>
                     ))}

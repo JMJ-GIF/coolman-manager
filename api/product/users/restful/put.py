@@ -39,9 +39,6 @@ async def update_user(
                     status_code=409,
                     detail={"error_code": "DUPLICATE_BACK_NUMBER", "error_message": "이미 사용 중인 등번호입니다."}
                 )
-            
-            if existing_user.image_url:
-                delete_image(user_idx)
 
             image_url = existing_user.image_url
             if image:

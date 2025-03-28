@@ -142,45 +142,51 @@ function Matches() {
                         <LoadingSpinner/>
                     )}
                 <div className="card-container">
-                    {visibleCards.map((card) => (
-                        <div key={card.match_idx} className={`card ${isEditMode ? "editable" : ""}`}>
-                            {isEditMode && (
-                                <input
-                                    type="checkbox"
-                                    className="card-checkbox"
-                                    checked={selectedCards.includes(card.match_idx)}
-                                    onChange={() => toggleCardSelection(card.match_idx)}
-                                />
-                            )}
-                            <div
-                                className="card-content"
-                                onClick={() =>
-                                    !isEditMode && navigate(`/matches/${card.match_idx}`)
-                                }
-                            >                                
-                                <div className='flag-info' data-result={card.result}>
-                                    <p>{card.dt}</p>
-                                    <p>{card.result}</p> 
-                                </div>
-                                <div>
-                                    <p>vs</p>
-                                </div>                                
-                                <div className='team-info'>                                                                    
-                                    <p>{card.opposing_team}</p>
-                                </div>
-                                <div className="score-info" data-result={card.result}>
-                                    <p>{card.winning_point}</p> 
-                                    <p>:</p> 
-                                    <p>{card.losing_point}</p>                                    
-                                </div> 
-                                <div className='location-info'>
-                                    <img src={location_svg} alt="Location" />
-                                    <p>{card.location}</p>  
-                                </div>                                                                                                                              
-                            </div>
+                {visibleCards.length === 0 && !loading ? (
+                    <div className="no-data">
+                        매치 정보가 없습니다. 새롭게 매치를 생성해주세요!
+                    </div>
+                ) : (
+                    visibleCards.map((card) => (
+                    <div key={card.match_idx} className={`card ${isEditMode ? "editable" : ""}`}>
+                        {isEditMode && (
+                        <input
+                            type="checkbox"
+                            className="card-checkbox"
+                            checked={selectedCards.includes(card.match_idx)}
+                            onChange={() => toggleCardSelection(card.match_idx)}
+                        />
+                        )}
+                        <div
+                        className="card-content"
+                        onClick={() =>
+                            !isEditMode && navigate(`/matches/${card.match_idx}`)
+                        }
+                        >
+                        <div className='flag-info' data-result={card.result}>
+                            <p>{card.dt}</p>
+                            <p>{card.result}</p> 
                         </div>
-                    ))}
-                </div>              
+                        <div>
+                            <p>vs</p>
+                        </div>                                
+                        <div className='team-info'>                                                                    
+                            <p>{card.opposing_team}</p>
+                        </div>
+                        <div className="score-info" data-result={card.result}>
+                            <p>{card.winning_point}</p> 
+                            <p>:</p> 
+                            <p>{card.losing_point}</p>                                    
+                        </div> 
+                        <div className='location-info'>
+                            <img src={location_svg} alt="Location" />
+                            <p>{card.location}</p>  
+                        </div>                                                                                                                              
+                        </div>
+                    </div>
+                    ))
+                )}
+                </div>      
             </div>
         </div>
     );

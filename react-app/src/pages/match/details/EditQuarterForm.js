@@ -1,5 +1,6 @@
 import './Details.scss';
 import React from "react";
+import Select from "react-select";
 import { useParams } from "react-router-dom";
 import { useFieldArray } from "react-hook-form";
 import shoes from "../../../assets/icons/shoes.svg";
@@ -22,7 +23,14 @@ const EditQuarterForm = ({
     const { fields: quarterFields, append: appendQuarter, remove: removeQuarter } = useFieldArray({
         control,
         name: "quarters",
-    });    
+    });
+    
+    const goalTypeOptions = [
+        { value: "득점", label: "득점" },
+        { value: "실점", label: "실점" },
+        { value: "자살골", label: "자살골" },
+      ];
+      
 
     const addGoal = (quarterIndex) => {
         const goalsPath = `quarters.${quarterIndex}.goals`;
@@ -105,107 +113,141 @@ const EditQuarterForm = ({
 
                                 return (
                                     <div key={goalIndex} className='goal-item'>
-                                        <input
-                                            type="text"
-                                            list={`goal-type-options-${goalIndex}`}                                            
-                                            value={watch(`${goalsPath}.${goalIndex}.goal_type`, "득점")}
-                                            onChange={(e) => {
-                                                const selectedValue = e.target.value;
-                                                const validOptions = ["득점", "실점", "자살골"];
-
-                                                if (validOptions.includes(selectedValue)) {
-                                                    setValue(`${goalsPath}.${goalIndex}.goal_type`, selectedValue);
-                                                } else {
-                                                    setValue(`${goalsPath}.${goalIndex}.goal_type`, "");
+                                        <div className="react-select-container">
+                                            <Select
+                                                options={goalTypeOptions}
+                                                value={
+                                                goalTypeOptions.find(
+                                                    (opt) => opt.value === watch(`${goalsPath}.${goalIndex}.goal_type`)
+                                                ) || null
                                                 }
-                                            }}
-                                            onFocus={() => {
-                                                setValue(`${goalsPath}.${goalIndex}.goal_type`, "");
-                                            }}
-                                            className={isGoalTypeInvalid ? "error" : ""}                                            
-                                        />
-                                        <datalist id={`goal-type-options-${goalIndex}`}>
-                                            <option value="득점" />
-                                            <option value="실점" />
-                                            <option value="자살골" />
-                                        </datalist>
-
-                                        <img src={football_ball} alt="goal" />
-                                        <input
-                                            type="text"
-                                            list={`goal-players-${quarterIndex}-${goalIndex}`}
-                                            placeholder="골"
-                                            value={watch(`${goalsPath}.${goalIndex}.goal_player_name`, "")}
-                                            disabled={goalType === "실점"}
-                                            onFocus={(e) => {                                                
-                                                setValue(`${goalsPath}.${goalIndex}.goal_player_name`, "");
-                                                setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, "");
-                                                setValue(`${goalsPath}.${goalIndex}.goal_player_id`, null);
-                                            }}                                            
-                                            onInput={(e) => {
-                                                const selectedValue = e.target.value;
-                                                const match = selectedValue.match(/^(.*) \((\d+)\)$/);
-                                                if (match) {
-                                                    const [_, name, backNumber] = match;                                                    
-                                                    const user = users.find(
-                                                        (u) => u.name === name && u.back_number.toString() === backNumber
-                                                    );
-                                        
-                                                    if (user) {                                                        
-                                                        setValue(`${goalsPath}.${goalIndex}.goal_player_name`, user.name);
-                                                        setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, user.back_number);
-                                                        setValue(`${goalsPath}.${goalIndex}.goal_player_id`, user.user_idx);
-                                                    }
+                                                onChange={(selectedOption) =>
+                                                setValue(`${goalsPath}.${goalIndex}.goal_type`, selectedOption?.value)
                                                 }
-                                            }}
-                                            className={isGoalPlayerInvalid ? "error" : ""}
-                                        />
-                                        <datalist id={`goal-players-${quarterIndex}-${goalIndex}`}>
-                                            {users.map((user) => (
-                                                <option 
-                                                key={user.user_idx} 
-                                                value={`${user.name} (${user.back_number})`} 
+                                                placeholder="선택"
+                                                classNamePrefix="custom-select"
+                                                className={isGoalTypeInvalid ? "error" : ""}
+                                                isClearable={false}
+                                                isSearchable={false}
+                                                components={{ DropdownIndicator: null }}
+                                                menuPortalTarget={document.body}
+                                                styles={{
+                                                menuPortal: (base) => ({
+                                                    ...base,
+                                                    zIndex: 99999,
+                                                }),
+                                                }}
                                             />
-                                            ))}
-                                        </datalist>
+                                        </div>
+                                        <img src={football_ball} alt="goal" />
+                                        <Select
+                                        className={`react-select-container ${isGoalPlayerInvalid ? "error" : ""}`}
+                                        classNamePrefix="custom-select"
+                                        placeholder="골"
+                                        isClearable={false}
+                                        isSearchable={false}
+                                        components={{
+                                            DropdownIndicator: null,
+                                        }}
+                                        menuPortalTarget={document.body}
+                                        styles={{
+                                            menuPortal: (base) => ({
+                                            ...base,
+                                            zIndex: 99999,
+                                            }),
+                                        }}
+                                        value={users
+                                            .map((u) => ({
+                                            label: `${u.name} (${u.back_number})`,
+                                            value: u.user_idx,
+                                            name: u.name,
+                                            back_number: u.back_number,
+                                            }))
+                                            .find((opt) => opt.value === watch(`${goalsPath}.${goalIndex}.goal_player_id`)) || null}
+                                        options={users.map((u) => ({
+                                            label: `${u.name} (${u.back_number})`,
+                                            value: u.user_idx,
+                                            name: u.name,
+                                            back_number: u.back_number,
+                                        }))}
+                                        formatOptionLabel={(data, { context }) =>
+                                            context === "menu"
+                                            ? `${data.name} (${data.back_number})` // 드롭다운에 보일 값
+                                            : data.name // 선택됐을 때 보일 값
+                                        }
+                                        onChange={(selected) => {
+                                            if (!selected) {
+                                            setValue(`${goalsPath}.${goalIndex}.goal_player_name`, "");
+                                            setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, "");
+                                            setValue(`${goalsPath}.${goalIndex}.goal_player_id`, null);
+                                            return;
+                                            }
+
+                                            setValue(`${goalsPath}.${goalIndex}.goal_player_name`, selected.name);
+                                            setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, selected.back_number);
+                                            setValue(`${goalsPath}.${goalIndex}.goal_player_id`, selected.value);
+                                        }}
+                                        isDisabled={goalType === "실점"}
+                                        />
+
 
                                         <img src={shoes} alt="assist" />
-                                        <input
-                                            type="text"
-                                            list={`assist-players-${quarterIndex}-${goalIndex}`}
-                                            placeholder="어시"
-                                            value={watch(`${goalsPath}.${goalIndex}.assist_player_name`, "")}
-                                            disabled={goalType === "실점"}
-                                            onFocus={(e) => {                                                
-                                                setValue(`${goalsPath}.${goalIndex}.assist_player_name`, "");
-                                                setValue(`${goalsPath}.${goalIndex}.assist_player_back_number`, "");
-                                                setValue(`${goalsPath}.${goalIndex}.assist_player_id`, null);
-                                            }}  
-                                            onInput={(e) => {
-                                                const selectedValue = e.target.value;
-                                                const match = selectedValue.match(/^(.*) \((\d+)\)$/);
-                                                if (match) {
-                                                    const [_, name, backNumber] = match;                                                    
-                                                    const user = users.find(
-                                                        (u) => u.name === name && u.back_number.toString() === backNumber
-                                                    );
-                                        
-                                                    if (user) {                                                        
-                                                        setValue(`${goalsPath}.${goalIndex}.assist_player_name`, user.name);
-                                                        setValue(`${goalsPath}.${goalIndex}.assist_player_back_number`, user.back_number);
-                                                        setValue(`${goalsPath}.${goalIndex}.assist_player_id`, user.user_idx);
-                                                    }
-                                                }
-                                            }}
+                                        <Select
+                                        className={`react-select-container`}
+                                        classNamePrefix="custom-select"
+                                        placeholder="어시"
+                                        isClearable={false}
+                                        isSearchable={false}
+                                        components={{ DropdownIndicator: null }}
+                                        menuPortalTarget={document.body}
+                                        styles={{
+                                            menuPortal: (base) => ({
+                                            ...base,
+                                            zIndex: 99999,
+                                            }),
+                                        }}
+                                        value={
+                                            users
+                                            .map((u) => ({
+                                                label: `${u.name} (${u.back_number})`,
+                                                value: u.user_idx,
+                                                name: u.name,
+                                                back_number: u.back_number,
+                                            }))
+                                            .find(
+                                                (opt) =>
+                                                opt.value === watch(`${goalsPath}.${goalIndex}.assist_player_id`)
+                                            ) || null
+                                        }
+                                        options={users.map((u) => ({
+                                            label: `${u.name} (${u.back_number})`,
+                                            value: u.user_idx,
+                                            name: u.name,
+                                            back_number: u.back_number,
+                                        }))}
+                                        formatOptionLabel={(data, { context }) =>
+                                            context === "menu"
+                                            ? `${data.name} (${data.back_number})` // 드롭다운에 보이는 값
+                                            : data.name // 선택 후 보이는 값
+                                        }
+                                        onChange={(selected) => {
+                                            if (!selected) {
+                                            setValue(`${goalsPath}.${goalIndex}.assist_player_name`, "");
+                                            setValue(`${goalsPath}.${goalIndex}.assist_player_back_number`, "");
+                                            setValue(`${goalsPath}.${goalIndex}.assist_player_id`, null);
+                                            return;
+                                            }
+
+                                            setValue(`${goalsPath}.${goalIndex}.assist_player_name`, selected.name);
+                                            setValue(
+                                            `${goalsPath}.${goalIndex}.assist_player_back_number`,
+                                            selected.back_number
+                                            );
+                                            setValue(`${goalsPath}.${goalIndex}.assist_player_id`, selected.value);
+                                        }}
+                                        isDisabled={goalType === "실점"}
                                         />
-                                        <datalist id={`assist-players-${quarterIndex}-${goalIndex}`}>
-                                            {users.map((user) => (
-                                                <option 
-                                                key={user.user_idx} 
-                                                value={`${user.name} (${user.back_number})`} 
-                                            />
-                                            ))}
-                                        </datalist>
+
 
                                         <button
                                             type="button"

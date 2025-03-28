@@ -86,7 +86,12 @@ function NavigationBar() {
 
             <div className="profile-section" onClick={() => navigate("/profile")}>
                 <div className="profile-photo">
-                    <img src={user.image_url || coolman_logo} alt="Profile Photo" />
+                    <img src={user.image_url || coolman_logo} 
+                        alt="Profile Photo"
+                        onError={(e) => {
+                        e.target.onerror = null; 
+                        e.target.src = coolman_logo;
+                    }} />
                 </div>
                 <div className="profile-info">
                     <span className="name">진민제</span>

@@ -110,7 +110,8 @@
                     text-align: center;      
                     appearance: none; 
                     -webkit-appearance: none;
-                    -moz-appearance: none;              
+                    -moz-appearance: none;   
+                    font-weight: bold;           
                 
                     &:focus {
                         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
@@ -141,7 +142,8 @@
                         border-radius: 4px; 
                         outline: none;
                         transition: all 0.3s ease;   
-                        appearance: none;                 
+                        appearance: none; 
+                        font-weight: bold;                
         
                         &:focus {
                             border-color: #007bff; 
@@ -176,6 +178,7 @@
                         border-radius: 4px;
                         outline: none;
                         transition: all 0.3s ease;
+                        font-weight: bold;
         
                         &:focus {
                             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
@@ -192,7 +195,95 @@
                         color: #666;
                     }
                 }
+
+                .react-select-container {
+                    width: 100%;
                 
+                    .custom-select__control {
+                      width: 100%;
+                      min-height: unset;
+                      height: 31px;
+                      padding: 8px;                                            
+                      font-size: 1.0em;
+                      background-color: #f8f8f8;
+                      border: none;
+                      border-bottom: 2px solid #ccc;
+                      border-radius: 4px;                    
+                      appearance: none;
+                      box-shadow: none;
+                      transition: all 0.3s ease;
+                      box-sizing: border-box; 
+                      font-weight: bold;   
+                      display: flex;          
+                      align-items: center;    
+                      justify-content: center;                     
+                
+                      &--is-focused {
+                        border-color: #007bff;
+                        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+                      }
+                    }
+                
+                    .custom-select__value-container {
+                        height: 100%;
+                        padding: 0;
+                        display: flex;             
+                        align-items: center;
+                        justify-content: center;
+                        overflow: hidden;                        
+       
+                    }              
+                      
+                    .custom-select__single-value {
+                      font-size: 0.7em;
+                      color: #333;
+                    }
+                
+                    .custom-select__placeholder {
+                      font-size: 0.7em;
+                      color: #aaa;
+                      text-align: center;
+                    }
+                
+                    .custom-select__indicator-separator,
+                    .custom-select__dropdown-indicator,
+                    .custom-select__clear-indicator {
+                      display: none; 
+                    }
+                
+                    .custom-select__menu {
+                      display: flex;
+                      font-size: 0.7em;                                         
+                      align-items: center;       
+                      justify-content: center;   
+                    }
+                
+                    .custom-select__option {                      
+                      display: flex;  
+                      padding: 8px;
+                      font-size: 0.7em;
+                      text-align: center;                      
+                      font-weight: normal;                                   
+                      align-items: center;       
+                      justify-content: center;   
+                
+                      &--is-focused {
+                        background-color: #eee;
+                      }
+                
+                      &--is-selected {
+                        background-color: #007bff;
+                        color: white;
+                      }
+                    }
+                                    
+                    &.error {
+                      .custom-select__control {
+                        border: 2px solid red;
+                        background-color: #ffe6e6;
+                      }
+                    }
+                  }     
             }                
         }
     }
@@ -406,7 +497,67 @@
                     justify-content: center;
                     gap: 10px;
                     margin-bottom: 10px;
-                    border: 1px solid #e0e0e0;            
+                    border: 1px solid #e0e0e0;
+                    
+                    .react-select-container {
+                        flex: 1;
+                        width: 100%;
+                        height: 30px;                        
+                        display: flex;
+                        align-items: center;
+                        justify-content: center; 
+                        
+
+                        .custom-select__control {
+                            width: 100%;                                                      
+                            box-sizing: border-box;
+                            font-size: 14px;
+                            
+                            border-radius: 4px;
+                            background-color: #fff;
+                            box-shadow: none;
+                            min-height: unset;  
+                                          
+                      
+                            &--is-focused {
+                              border-color: #007bff;
+                              box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+                            }
+                        }
+                  
+                        .custom-select__single-value,
+                        .custom-select__placeholder {
+                            font-size: 14px;                            
+                            width : 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            text-align: center;
+                        }
+
+                        .custom-select__menu {
+                            z-index: 99999;
+                            font-size: 12px; 
+                        }
+                        
+                        .custom-select__option {
+                            font-size: 12px; 
+                            text-align: center;
+                            padding: 6px;
+                        
+                        &--is-focused {
+                            background-color: #eee;
+                        }
+                        
+                        &--is-selected {
+                            background-color: #007bff;
+                            color: white;
+                        }
+                        }
+                          
+                    
+                    }
         
                     input,
                     select {
@@ -628,10 +779,10 @@
                 position: absolute;
                 display: flex;
                 flex-direction: column;
-                min-width: 40px;
-                max-width: 73px;    
+                min-width: 50px;
+                max-width: 80px;    
                 max-height: 150px;
-                width: 22%;                 
+                width: 28%;                 
                 background: white;
                 border: 1px solid #ccc;
                 border-radius: 4px;
@@ -643,13 +794,13 @@
                 transform: translate(-50%, -50%); 
                 
                 @media screen and (max-width: 768px) {
-                    width: 15%; 
+                    width: 20%; 
                     min-width: 30px; 
                 }
 
                 .dropdown-item {      
                  
-                    padding: 3px 0px;
+                    padding: 10px 5px;
                     margin: 0px;
                     cursor: pointer;
                     font-size: 0.8em; 
