@@ -332,7 +332,8 @@ function MatchDetailsAdd() {
                             errors={errors}
                             watch={watch}
                             onSubmit={handleFormSubmit}
-                            positions={positions}
+                            control={control}
+                            positions={positions}                            
                         />
                         <div className="match-details">
                             <div className="header-card">
