@@ -69,7 +69,7 @@ function Records() {
     };
 
     const sortedUserStats = processData(userStats, sortConfig, 
-        user => !(user.name === "용병" && user.back_number === 0),
+        user => !(user.name === "용병" && user.back_number === 999),
         item => ({ totalPoints: item.goal_cnt + item.assist_cnt })
     );
 

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import NavigationBar from "../../components/NavigationBar";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import coolman_logo from "../../assets/images/coolman-logo-transparent.png";
-import userProfile from "../../assets/images/transparent-profile.png";
+
 
 function Players() {
     const navigate = useNavigate(); 
@@ -58,7 +58,7 @@ function Players() {
     }, []); 
     
     const sortedUserStats = [...userStats]
-        .filter(user => !(user.name === "용병" && user.back_number === 0)) 
+        .filter(user => !(user.name === "용병" && user.back_number === 999)) 
         .sort((a, b) => {
             if (b.ratio !== a.ratio) {
                 return b.ratio - a.ratio; 
