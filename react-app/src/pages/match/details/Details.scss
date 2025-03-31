@@ -76,16 +76,8 @@
             }
             
             .card {
-                display: flex;
-                flex-direction: column;
-                padding: 15px;
-                background-color: #fff;
-                border-radius: 10px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);        
-                font-weight: bold;
-                margin-bottom: 10px; 
-                align-items: center; 
-                justify-content: center;  
+                
+                min-width: 0;
                 
                 &:hover {
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
@@ -100,7 +92,7 @@
                 .text-input {
                     width: 100%;
                     padding: 8px;
-                    font-size: 0.7em;
+                    font-size: 16px;
                     background-color: #f8f8f8;
                     border: none;
                     border-bottom: 2px solid #ccc; 
@@ -111,7 +103,7 @@
                     appearance: none; 
                     -webkit-appearance: none;
                     -moz-appearance: none;   
-                    font-weight: bold;           
+                    font-weight: normal;           
                 
                     &:focus {
                         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
@@ -134,7 +126,7 @@
                         width: 100%;
                         min-width: 0;                    
                         padding: 8px;
-                        font-size: 0.7em;
+                        font-size: 16px;
                         text-align: center;
                         background-color: #f8f8f8;
                         border: none;
@@ -143,7 +135,7 @@
                         outline: none;
                         transition: all 0.3s ease;   
                         appearance: none; 
-                        font-weight: bold;                
+                        font-weight: normal;                
         
                         &:focus {
                             border-color: #007bff; 
@@ -171,14 +163,14 @@
                         width: 100%;
                         min-width: 0; 
                         padding: 8px;
-                        font-size: 0.7em;
+                        font-size: 16px;
                         background-color: #f8f8f8;
                         border: none;
                         border-bottom: 2px solid #ccc;
                         border-radius: 4px;
                         outline: none;
                         transition: all 0.3s ease;
-                        font-weight: bold;
+                        font-weight: normal;
         
                         &:focus {
                             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
@@ -202,9 +194,9 @@
                     .custom-select__control {
                       width: 100%;
                       min-height: unset;
-                      height: 31px;
+                      height: 36px;
                       padding: 8px;                                            
-                      font-size: 1.0em;
+                      font-size: 16px;
                       background-color: #f8f8f8;
                       border: none;
                       border-bottom: 2px solid #ccc;
@@ -213,7 +205,7 @@
                       box-shadow: none;
                       transition: all 0.3s ease;
                       box-sizing: border-box; 
-                      font-weight: bold;   
+                      font-weight: normal; 
                       display: flex;          
                       align-items: center;    
                       justify-content: center;                     
@@ -235,12 +227,12 @@
                     }              
                       
                     .custom-select__single-value {
-                      font-size: 0.7em;
+                      font-size: 16px;
                       color: #333;
                     }
                 
                     .custom-select__placeholder {
-                      font-size: 0.7em;
+                      font-size: 16px;
                       color: #aaa;
                       text-align: center;
                     }
@@ -261,7 +253,7 @@
                     .custom-select__option {                      
                       display: flex;  
                       padding: 8px;
-                      font-size: 0.7em;
+                      font-size: 16px;
                       text-align: center;                      
                       font-weight: normal;                                   
                       align-items: center;       
@@ -523,6 +515,12 @@
                               border-color: #007bff;
                               box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
                             }
+
+                            &--is-disabled {
+                                background-color: #f5f5f5;
+                                border-color: #ddd;
+                                cursor: not-allowed;
+                            }
                         }
                   
                         .custom-select__single-value,
@@ -660,25 +658,40 @@
                 color: white;
             }
         }
-    
+
         .quarter-tactics {
             display: flex;
             justify-content: center;
-            font-size: 1.0em;
+            font-size: 16px;
             font-weight: bold;
-
-            select {
+          
+            .react-select-container {
+              width: 90px;
+          
+              .custom-select__control {
                 padding: 5px;
                 border: 1px solid #ccc;
                 border-radius: 4px;
-                font-size: 1.0em;
-                font-weight: bold;                
+                font-size: 16px;
+                font-weight: bold;
                 text-align: center;
-                width: auto; 
-                height: auto;     
+                width: auto;
+                height: auto;
+                min-height: auto;
+              }
+          
+              .custom-select__single-value {
+                text-align: center;
+                font-weight: bold;
+              }
+          
+              .custom-select__option {
+                font-size: 16px;
+                text-align: center;
+              }
             }
-            
-        }
+          }
+          
 
         .soccer-field {
             position: relative;
@@ -774,6 +787,7 @@
                     }
                 }
             }
+            
 
             .dropdown-menu {
                 position: absolute;
@@ -897,7 +911,7 @@
                             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);                                
 
                             .dropdown-item {
-                                padding: 5px;
+                                padding: 10px 5px;
                                 cursor: pointer;
                                 font-size: 1.0em;
                                 text-align: center;

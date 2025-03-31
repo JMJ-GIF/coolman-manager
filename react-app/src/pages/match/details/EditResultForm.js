@@ -150,10 +150,16 @@ const EditResultForm = ({
                                 components={{ DropdownIndicator: null }}                                
                                 menuPortalTarget={document.body} 
                                 styles={{
-                                menuPortal: (base) => ({
-                                    ...base,
-                                    zIndex: 99999, 
-                                }),
+                                    menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                                    option: (base) => ({
+                                      ...base,
+                                      fontSize: "16px",  
+                                      textAlign: "center",
+                                    }),
+                                    menu: (base) => ({
+                                      ...base,
+                                      fontSize: "16px",  
+                                    }),
                                 }}
                             />
                             )}
@@ -216,10 +222,16 @@ const EditResultForm = ({
                                 components={{ DropdownIndicator: null }}
                                 menuPortalTarget={document.body}
                                 styles={{
-                                  menuPortal: (base) => ({
-                                    ...base,
-                                    zIndex: 99999,
-                                  }),
+                                    menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                                    option: (base) => ({
+                                      ...base,
+                                      fontSize: "16px",  
+                                      textAlign: "center",
+                                    }),
+                                    menu: (base) => ({
+                                      ...base,
+                                      fontSize: "16px",  
+                                    }),
                                 }}
                             />                              
                             )}

@@ -1,11 +1,12 @@
 import "./Profile.scss";
 import axios from "axios";
-import { useForm } from "react-hook-form";
+import Select from 'react-select';
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import img_box from "../../assets/icons/img_box.svg";
 import { useAlert } from "../../context/AlertContext";
+import { useForm, Controller } from "react-hook-form";
 import FloatingBar from "../../components/FloatingBar";
 import ImageCropper from "../../components/ImageCropper";
 import back_arrow from "../../assets/icons/back_arrow.svg";
@@ -34,10 +35,16 @@ function ProfileEdit() {
         handleSubmit,
         setValue,
         watch,
+        control,
         formState: { errors, isValid },
     } = useForm({
         mode: "onChange",
     });
+
+    const positionOptions = positions.map((pos) => ({
+        value: pos.name,
+        label: pos.name,
+      }));
 
     const checkImageExists = (url) => {
         return new Promise((resolve) => {
@@ -195,11 +202,38 @@ function ProfileEdit() {
                         </div>                                    
                         <div className="info-box">
                             <label className="label">포지션</label>
-                            <select {...register("position")} className="input-field">
-                                {positions.map((pos, index) => (
-                                    <option key={index} value={pos.name}>{pos.name}</option>
-                                ))}
-                            </select>
+                            <Controller
+                                control={control}
+                                name="position"
+                                render={({ field }) => (
+                                    <Select
+                                        {...field}
+                                        value={positionOptions.find(option => option.value === field.value) || null}
+                                        options={positionOptions}
+                                        className='react-select-container'
+                                        classNamePrefix="custom-select"
+                                        placeholder="선택"
+                                        isClearable={false}
+                                        isSearchable={false}
+                                        components={{ DropdownIndicator: null }}                                                                    
+                                        onChange={(selectedOption) =>
+                                            field.onChange(selectedOption?.value || '')
+                                        }
+                                        styles={{
+                                            menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                                            option: (base) => ({
+                                            ...base,
+                                            fontSize: "16px",  
+                                            textAlign: "center",
+                                            }),
+                                            menu: (base) => ({
+                                            ...base,
+                                            fontSize: "16px",  
+                                            }),
+                                        }}
+                                    />
+                                )}
+                            />
                         </div>
                         {errors.back_number && <p className="error-text">{errors.back_number.message}</p>}                            
                     </form>

@@ -206,8 +206,8 @@ function MatchDetailsEdit() {
                         return true;
                     }
         
-                    // 용병과 등번호가 0인 경우 중복 허용
-                    if (userName === "용병" && backNumber === 0) {
+                    // 용병과 등번호가 999인 경우 중복 허용
+                    if (userName === "용병" && backNumber === 999) {
                         return false; // 중복 검사 건너뛰기
                     }
         

@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS quarters_lineup (
 );
 
 INSERT INTO users (name, position, back_number, join_date, role, social_uuid, image_url) VALUES
-('용병','GK', 0, '2023-11-02 15:15:00', '용병', '12', NULL);
+('용병','GK', 999, '2023-11-02 15:15:00', '용병', '12', NULL);
 
 INSERT INTO positions (tactics, name, description, top_coordinate, left_coordinate)
 VALUES

@@ -102,7 +102,7 @@ INSERT INTO users (name, position, back_number, join_date, role, social_uuid, im
 ('장준호','RW', 22, '2023-10-05 17:25:00', '감독', '10', 'https://kr.object.ncloudstorage.com/coolman-storage/dev/10.png'),
 ('진민제','RW', 35, '2023-10-05 17:25:00', '선수', 'xx', 'https://kr.object.ncloudstorage.com/coolman-storage/dev/11.png'),
 ('장준호','ST', 99, '2023-11-01 15:15:00', '선수', '11', 'https://kr.object.ncloudstorage.com/coolman-storage/dev/12.png'),
-('용병','GK', 0, '2023-11-02 15:15:00', '용병', '12', NULL);
+('용병','GK', 999, '2023-11-02 15:15:00', '용병', '12', NULL);
 
 INSERT INTO matches (dt, result, winning_point, losing_point, opposing_team, location, start_time, end_time, weather, num_players, main_tactics, status)
 VALUES 

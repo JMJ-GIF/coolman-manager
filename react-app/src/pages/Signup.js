@@ -1,13 +1,13 @@
 import axios from "axios";
 import "./Signup.scss";
-import { useForm } from "react-hook-form";
+import Select from "react-select";
 import { useAuth } from "../context/AuthContext";
 import React, { useState, useEffect } from "react";
 import { useAlert } from "../context/AlertContext";
 import ImageCropper from "../components/ImageCropper";
+import { useForm, Controller } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner"; // LoadingSpinner 임포트
-
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -22,7 +22,7 @@ const SignupPage = () => {
   const [showCropper, setShowCropper] = useState(false);
   const [croppedImage, setCroppedImage] = useState(null);
   const [loading, setLoading] = useState(false); 
-  const {register, handleSubmit, setValue, watch, formState: { errors, isValid },} = useForm({ mode: "onChange" });
+  const {register, handleSubmit, setValue, watch, control,formState: { errors, isValid },} = useForm({ mode: "onChange" });
 
   useEffect(() => {
     const fetchPositions = async () => {
@@ -126,12 +126,37 @@ const SignupPage = () => {
 
             <div className="position">
               <label>선호 포지션</label>
-              <select {...register("position", { required: "포지션을 선택하세요." })}>
-                <option value="">포지션을 선택하세요</option>
-                {positions.map((pos, index) => (
-                  <option key={index} value={pos.name}>{pos.name}</option>
-                ))}
-              </select>
+              <Controller
+                name="position"
+                control={control}
+                rules={{ required: "포지션을 선택하세요." }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    options={positions.map(pos => ({
+                      value: pos.name,
+                      label: pos.name,
+                    }))}
+                    classNamePrefix="custom-select"
+                    className="react-select-position"
+                    placeholder="포지션을 선택하세요"
+                    value={positions.find(p => p.name === field.value) ? { value: field.value, label: field.value } : null}
+                    onChange={(selected) => field.onChange(selected?.value || "")}
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                      option: (base) => ({
+                        ...base,
+                        fontSize: "16px",  
+                        textAlign: "center",
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        fontSize: "16px",  
+                      }),
+                  }}
+                  />
+                )}
+              />
               {errors.position && <p className="error">{errors.position.message}</p>}
             </div>
 

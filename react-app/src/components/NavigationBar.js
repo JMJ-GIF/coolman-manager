@@ -25,7 +25,6 @@ function NavigationBar() {
 
     const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));    
     
-    // 스크롤 이벤트 핸들러
     const handleScroll = () => {
         const currentScrollY = window.scrollY; // window 기준 스크롤 위치
 
@@ -94,8 +93,8 @@ function NavigationBar() {
                     }} />
                 </div>
                 <div className="profile-info">
-                    <span className="name">진민제</span>
-                    <span className="position">선수</span>
+                    <span className="name">{user.name}</span>
+                    <span className="position">{user.role}</span>
                 </div>
             </div>
         </div>

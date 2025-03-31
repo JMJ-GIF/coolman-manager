@@ -1,4 +1,5 @@
 import './Details.scss';
+import Select from "react-select";
 import { useFieldArray } from "react-hook-form";
 import React, { useState, useEffect } from "react";
 import x_square_svg from "../../../assets/icons/x_square.svg";
@@ -33,6 +34,13 @@ const EditLineupForm = ({
     const filteredLineups = filteredQuarter ? filteredQuarter.lineups : [];
     const startingPlayers = filteredLineups.filter(player => player.lineup_status === '선발');
     const substitutePlayers = filteredLineups.filter(player => player.lineup_status === '후보');
+
+    const uniqueTacticOptions = Array.from(new Set(positions.map((item) => item.tactics))).map(
+        (tactic) => ({
+          value: tactic,
+          label: tactic,
+        })
+      );
     
     useEffect(() => {
         if (filteredQuarter && filteredQuarter.tactics) {
@@ -149,15 +157,50 @@ const EditLineupForm = ({
                         </button>
                     ))}
                 </div>   
+
                 <div className="quarter-tactics">
-                    <select value={selectedTactics} onChange={handleTacticsChange}>                    
-                    {Array.from(new Set(positions.map((item) => item.tactics))).map((tactic, index) => (
-                        <option key={`${tactic}-${index}`} value={tactic}>
-                            {tactic}
-                        </option>
-                    ))}
-                    </select>
-                </div>             
+                <Select
+                    options={uniqueTacticOptions}
+                    value={uniqueTacticOptions.find((opt) => opt.value === selectedTactics) || null}
+                    onChange={(selectedOption) => setSelectedTactics(selectedOption?.value)}
+                    placeholder="전술 선택"
+                    className="react-select-container"
+                    classNamePrefix="custom-select"
+                    isClearable={false}
+                    isSearchable={false}
+                    components={{ DropdownIndicator: null }}
+                    menuPortalTarget={document.body}
+                    styles={{
+                    control: (base) => ({
+                        ...base,
+                        padding: "5px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        width: "auto",
+                        height: "auto",
+                        minHeight: "auto",
+                    }),
+                    singleValue: (base) => ({
+                        ...base,
+                        textAlign: "center",
+                        fontWeight: "bold",
+                    }),
+                    menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 99999,
+                    }),
+                    option: (base) => ({
+                        ...base,
+                        fontSize: "16px",
+                        textAlign: "center",
+                    }),
+                    }}
+                />
+                </div>
+            
                 <div className="soccer-field">
                     {startingPlayers.map((lineup, index) => {
                         const selectedUserIdx = watch(`${filteredQuarterPath}.lineups.${index}.user_idx`, "");

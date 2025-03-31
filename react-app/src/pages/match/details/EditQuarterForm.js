@@ -132,120 +132,138 @@ const EditQuarterForm = ({
                                                 components={{ DropdownIndicator: null }}
                                                 menuPortalTarget={document.body}
                                                 styles={{
-                                                menuPortal: (base) => ({
-                                                    ...base,
-                                                    zIndex: 99999,
-                                                }),
-                                                }}
+                                                    menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                                                    option: (base) => ({
+                                                      ...base,
+                                                      fontSize: "14px",  
+                                                      textAlign: "center",
+                                                    }),
+                                                    menu: (base) => ({
+                                                      ...base,
+                                                      fontSize: "14px",  
+                                                    }),
+                                                  }}
                                             />
                                         </div>
                                         <img src={football_ball} alt="goal" />
                                         <Select
-                                        className={`react-select-container ${isGoalPlayerInvalid ? "error" : ""}`}
-                                        classNamePrefix="custom-select"
-                                        placeholder="골"
-                                        isClearable={false}
-                                        isSearchable={false}
-                                        components={{
-                                            DropdownIndicator: null,
-                                        }}
-                                        menuPortalTarget={document.body}
-                                        styles={{
-                                            menuPortal: (base) => ({
-                                            ...base,
-                                            zIndex: 99999,
-                                            }),
-                                        }}
-                                        value={users
-                                            .map((u) => ({
-                                            label: `${u.name} (${u.back_number})`,
-                                            value: u.user_idx,
-                                            name: u.name,
-                                            back_number: u.back_number,
-                                            }))
-                                            .find((opt) => opt.value === watch(`${goalsPath}.${goalIndex}.goal_player_id`)) || null}
-                                        options={users.map((u) => ({
-                                            label: `${u.name} (${u.back_number})`,
-                                            value: u.user_idx,
-                                            name: u.name,
-                                            back_number: u.back_number,
-                                        }))}
-                                        formatOptionLabel={(data, { context }) =>
-                                            context === "menu"
-                                            ? `${data.name} (${data.back_number})` // 드롭다운에 보일 값
-                                            : data.name // 선택됐을 때 보일 값
-                                        }
-                                        onChange={(selected) => {
-                                            if (!selected) {
-                                            setValue(`${goalsPath}.${goalIndex}.goal_player_name`, "");
-                                            setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, "");
-                                            setValue(`${goalsPath}.${goalIndex}.goal_player_id`, null);
-                                            return;
+                                            className={`react-select-container ${isGoalPlayerInvalid ? "error" : ""}`}
+                                            classNamePrefix="custom-select"
+                                            placeholder="골"
+                                            isClearable={false}
+                                            isSearchable={false}
+                                            components={{
+                                                DropdownIndicator: null,
+                                            }}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                                                option: (base) => ({
+                                                  ...base,
+                                                  fontSize: "12px",  
+                                                  textAlign: "center",
+                                                }),
+                                                menu: (base) => ({
+                                                  ...base,
+                                                  fontSize: "12px",  
+                                                }),
+                                              }}
+                                            value={users
+                                                .map((u) => ({
+                                                label: `${u.name} (${u.back_number})`,
+                                                value: u.user_idx,
+                                                name: u.name,
+                                                back_number: u.back_number,
+                                                }))
+                                                .find((opt) => opt.value === watch(`${goalsPath}.${goalIndex}.goal_player_id`)) || null}
+                                            options={users.map((u) => ({
+                                                label: `${u.name} (${u.back_number})`,
+                                                value: u.user_idx,
+                                                name: u.name,
+                                                back_number: u.back_number,
+                                            }))}
+                                            formatOptionLabel={(data, { context }) =>
+                                                context === "menu"
+                                                ? `${data.name} (${data.back_number})` // 드롭다운에 보일 값
+                                                : data.name // 선택됐을 때 보일 값
                                             }
+                                            onChange={(selected) => {
+                                                if (!selected) {
+                                                setValue(`${goalsPath}.${goalIndex}.goal_player_name`, "");
+                                                setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, "");
+                                                setValue(`${goalsPath}.${goalIndex}.goal_player_id`, null);
+                                                return;
+                                                }
 
-                                            setValue(`${goalsPath}.${goalIndex}.goal_player_name`, selected.name);
-                                            setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, selected.back_number);
-                                            setValue(`${goalsPath}.${goalIndex}.goal_player_id`, selected.value);
-                                        }}
-                                        isDisabled={goalType === "실점"}
+                                                setValue(`${goalsPath}.${goalIndex}.goal_player_name`, selected.name);
+                                                setValue(`${goalsPath}.${goalIndex}.goal_player_back_number`, selected.back_number);
+                                                setValue(`${goalsPath}.${goalIndex}.goal_player_id`, selected.value);
+                                            }}
+                                            isDisabled={goalType === "실점"}
                                         />
 
 
                                         <img src={shoes} alt="assist" />
                                         <Select
-                                        className={`react-select-container`}
-                                        classNamePrefix="custom-select"
-                                        placeholder="어시"
-                                        isClearable={false}
-                                        isSearchable={false}
-                                        components={{ DropdownIndicator: null }}
-                                        menuPortalTarget={document.body}
-                                        styles={{
-                                            menuPortal: (base) => ({
-                                            ...base,
-                                            zIndex: 99999,
-                                            }),
-                                        }}
-                                        value={
-                                            users
-                                            .map((u) => ({
+                                            className={`react-select-container`}
+                                            classNamePrefix="custom-select"
+                                            placeholder="어시"
+                                            isClearable={false}
+                                            isSearchable={false}
+                                            components={{ DropdownIndicator: null }}
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                                menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                                                option: (base) => ({
+                                                  ...base,
+                                                  fontSize: "12px",  
+                                                  textAlign: "center",
+                                                }),
+                                                menu: (base) => ({
+                                                  ...base,
+                                                  fontSize: "12px",  
+                                                }),
+                                              }}
+                                            value={
+                                                users
+                                                .map((u) => ({
+                                                    label: `${u.name} (${u.back_number})`,
+                                                    value: u.user_idx,
+                                                    name: u.name,
+                                                    back_number: u.back_number,
+                                                }))
+                                                .find(
+                                                    (opt) =>
+                                                    opt.value === watch(`${goalsPath}.${goalIndex}.assist_player_id`)
+                                                ) || null
+                                            }
+                                            options={users.map((u) => ({
                                                 label: `${u.name} (${u.back_number})`,
                                                 value: u.user_idx,
                                                 name: u.name,
                                                 back_number: u.back_number,
-                                            }))
-                                            .find(
-                                                (opt) =>
-                                                opt.value === watch(`${goalsPath}.${goalIndex}.assist_player_id`)
-                                            ) || null
-                                        }
-                                        options={users.map((u) => ({
-                                            label: `${u.name} (${u.back_number})`,
-                                            value: u.user_idx,
-                                            name: u.name,
-                                            back_number: u.back_number,
-                                        }))}
-                                        formatOptionLabel={(data, { context }) =>
-                                            context === "menu"
-                                            ? `${data.name} (${data.back_number})` // 드롭다운에 보이는 값
-                                            : data.name // 선택 후 보이는 값
-                                        }
-                                        onChange={(selected) => {
-                                            if (!selected) {
-                                            setValue(`${goalsPath}.${goalIndex}.assist_player_name`, "");
-                                            setValue(`${goalsPath}.${goalIndex}.assist_player_back_number`, "");
-                                            setValue(`${goalsPath}.${goalIndex}.assist_player_id`, null);
-                                            return;
+                                            }))}
+                                            formatOptionLabel={(data, { context }) =>
+                                                context === "menu"
+                                                ? `${data.name} (${data.back_number})` // 드롭다운에 보이는 값
+                                                : data.name // 선택 후 보이는 값
                                             }
+                                            onChange={(selected) => {
+                                                if (!selected) {
+                                                setValue(`${goalsPath}.${goalIndex}.assist_player_name`, "");
+                                                setValue(`${goalsPath}.${goalIndex}.assist_player_back_number`, "");
+                                                setValue(`${goalsPath}.${goalIndex}.assist_player_id`, null);
+                                                return;
+                                                }
 
-                                            setValue(`${goalsPath}.${goalIndex}.assist_player_name`, selected.name);
-                                            setValue(
-                                            `${goalsPath}.${goalIndex}.assist_player_back_number`,
-                                            selected.back_number
-                                            );
-                                            setValue(`${goalsPath}.${goalIndex}.assist_player_id`, selected.value);
-                                        }}
-                                        isDisabled={goalType === "실점"}
+                                                setValue(`${goalsPath}.${goalIndex}.assist_player_name`, selected.name);
+                                                setValue(
+                                                `${goalsPath}.${goalIndex}.assist_player_back_number`,
+                                                selected.back_number
+                                                );
+                                                setValue(`${goalsPath}.${goalIndex}.assist_player_id`, selected.value);
+                                            }}
+                                            isDisabled={goalType === "실점"}
                                         />
 
 
