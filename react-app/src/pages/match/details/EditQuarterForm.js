@@ -121,9 +121,25 @@ const EditQuarterForm = ({
                                                     (opt) => opt.value === watch(`${goalsPath}.${goalIndex}.goal_type`)
                                                 ) || null
                                                 }
-                                                onChange={(selectedOption) =>
-                                                setValue(`${goalsPath}.${goalIndex}.goal_type`, selectedOption?.value)
-                                                }
+                                                onChange={(selectedOption) => {
+                                                    const path = `${goalsPath}.${goalIndex}`;
+                                                    setValue(`${path}.goal_type`, selectedOption?.value);
+                                                                                                
+                                                    if (selectedOption?.value === "실점") {
+                                                        setValue(`${path}.goal_player_name`, "");
+                                                        setValue(`${path}.goal_player_back_number`, "");
+                                                        setValue(`${path}.goal_player_id`, null);
+                                                        setValue(`${path}.assist_player_name`, "");
+                                                        setValue(`${path}.assist_player_back_number`, "");
+                                                        setValue(`${path}.assist_player_id`, null);
+                                                    }
+
+                                                    if (selectedOption?.value === "자살골") {                                                        
+                                                        setValue(`${path}.assist_player_name`, "");
+                                                        setValue(`${path}.assist_player_back_number`, "");
+                                                        setValue(`${path}.assist_player_id`, null);
+                                                    }
+                                                }}
                                                 placeholder="선택"
                                                 classNamePrefix="custom-select"
                                                 className={isGoalTypeInvalid ? "error" : ""}
@@ -133,30 +149,46 @@ const EditQuarterForm = ({
                                                 menuPortalTarget={document.body}
                                                 styles={{
                                                     menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                                                    singleValue: (base) => ({
+                                                        ...base,
+                                                        color:
+                                                            goalType === "득점"
+                                                                ? "#007bff"
+                                                                : goalType === "실점" || goalType === "자살골"
+                                                                ? "#ff4d4f"
+                                                                : base.color,
+                                                        fontWeight: "bold",
+                                                    }),
                                                     option: (base) => ({
-                                                      ...base,
-                                                      fontSize: "14px",  
-                                                      textAlign: "center",
+                                                        ...base,
+                                                        fontSize: "14px",
+                                                        textAlign: "center",
                                                     }),
                                                     menu: (base) => ({
-                                                      ...base,
-                                                      fontSize: "14px",  
+                                                        ...base,
+                                                        fontSize: "14px",
                                                     }),
-                                                  }}
+                                                }}
                                             />
                                         </div>
                                         <img src={football_ball} alt="goal" />
                                         <Select
                                             className={`react-select-container ${isGoalPlayerInvalid ? "error" : ""}`}
                                             classNamePrefix="custom-select"
-                                            placeholder="골"
+                                            placeholder={goalType === "실점" ? "" : "골"}
                                             isClearable={false}
-                                            isSearchable={false}
+                                            isSearchable={false}                                            
                                             components={{
                                                 DropdownIndicator: null,
                                             }}
                                             menuPortalTarget={document.body}
                                             styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: goalType === "실점" ? "#fff" : "gray",
+                                                    opacity: goalType === "실점" ? 0.9 : 1,
+                                                    
+                                                }),
                                                 menuPortal: (base) => ({ ...base, zIndex: 99999 }),
                                                 option: (base) => ({
                                                   ...base,
@@ -207,12 +239,17 @@ const EditQuarterForm = ({
                                         <Select
                                             className={`react-select-container`}
                                             classNamePrefix="custom-select"
-                                            placeholder="어시"
+                                            placeholder={goalType === "실점" || goalType === "자살골" ? "" : "어시"}
                                             isClearable={false}
                                             isSearchable={false}
                                             components={{ DropdownIndicator: null }}
                                             menuPortalTarget={document.body}
                                             styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: goalType === "실점" || goalType === "자살골" ? "#fff" : "gray",
+                                                    opacity: goalType === "실점" || goalType === "자살골" ? 0.9 : 1,
+                                                }),
                                                 menuPortal: (base) => ({ ...base, zIndex: 99999 }),
                                                 option: (base) => ({
                                                   ...base,
@@ -263,7 +300,7 @@ const EditQuarterForm = ({
                                                 );
                                                 setValue(`${goalsPath}.${goalIndex}.assist_player_id`, selected.value);
                                             }}
-                                            isDisabled={goalType === "실점"}
+                                            isDisabled={goalType === "실점" || goalType === "자살골"}
                                         />
 
 

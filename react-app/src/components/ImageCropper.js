@@ -32,17 +32,35 @@ const ImageCropper = ({ onCrop, onClose }) => {
 
   const cropImage = () => {
     if (cropperRef.current) {
-      const croppedCanvas = cropperRef.current.cropper.getCroppedCanvas({
-        width: 200,
-        height: 150,
-      });
-      croppedCanvas.toBlob((blob) => {
-        const previewUrl = croppedCanvas.toDataURL("image/png", 0.8); // 0.8은 압축 품질 (0-1)
+      const cropper = cropperRef.current.cropper;
+      const croppedCanvas = cropper.getCroppedCanvas();
+  
+      // 원본 크기 기준 비율 유지
+      const originalWidth = croppedCanvas.width;
+      const originalHeight = croppedCanvas.height;
+  
+      // 최소 보장 해상도 (예: 너비 최소 400px)
+      const minWidth = 400;
+      const scale = originalWidth < minWidth ? minWidth / originalWidth : 1;
+  
+      // 고품질 새 캔버스 생성
+      const scaledCanvas = document.createElement("canvas");
+      scaledCanvas.width = originalWidth * scale;
+      scaledCanvas.height = originalHeight * scale;
+  
+      const ctx = scaledCanvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(croppedCanvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
+  
+      scaledCanvas.toBlob((blob) => {
+        const previewUrl = scaledCanvas.toDataURL("image/png", 0.9); // 압축 품질 향상
         onCrop(blob, previewUrl);
         onClose();
-      }, "image/png", 0.8);
+      }, "image/png", 0.9);
     }
   };
+  
 
   if (!image) return null; 
 

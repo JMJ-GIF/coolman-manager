@@ -19,12 +19,21 @@ const determineResult = (winningPoint, losingPoint) => {
 };
 
 const formatDateTime = (date, timeString) => {
-    const dateObj = new Date(date);  
-    const [hours, minutes] = timeString.split(":").map(Number); 
+    const dateObj = new Date(date);
+    const [hours, minutes] = timeString.split(":").map(Number);
+    dateObj.setHours(hours, minutes, 0, 0);
 
-    dateObj.setHours(hours, minutes, 0, 0); 
-    return dateObj.toISOString(); 
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const year = dateObj.getFullYear();
+    const month = pad(dateObj.getMonth() + 1);
+    const day = pad(dateObj.getDate());
+    const hoursStr = pad(dateObj.getHours());
+    const minutesStr = pad(dateObj.getMinutes());
+
+    return `${year}-${month}-${day}T${hoursStr}:${minutesStr}:00`;
 };
+
 
 function formatTime(isoString) {
     const date = new Date(isoString);
@@ -128,8 +137,28 @@ function MatchDetailsEdit() {
     const handleFormSubmit = handleSubmit(async (data) => {
         const { dt, start_time, end_time, winning_point, losing_point, quarters } = data;
 
-        data.start_time = formatDateTime(dt, start_time);
-        data.end_time = formatDateTime(dt, end_time);
+        let formattedStart = formatDateTime(dt, start_time);
+        let formattedEnd = formatDateTime(dt, end_time);
+
+        const startDate = new Date(formattedStart);
+        const endDate = new Date(formattedEnd);
+
+        if (startDate > endDate) {
+            endDate.setDate(endDate.getDate() + 1);
+            
+            const pad = (n) => String(n).padStart(2, "0");
+            const yyyy = endDate.getFullYear();
+            const MM = pad(endDate.getMonth() + 1);
+            const dd = pad(endDate.getDate());
+            const HH = pad(endDate.getHours());
+            const mm = pad(endDate.getMinutes());
+
+            formattedEnd = `${yyyy}-${MM}-${dd}T${HH}:${mm}:00`;
+        }
+
+        data.start_time = formattedStart;
+        data.end_time = formattedEnd;
+
         data.result = determineResult(winning_point, losing_point);
     
         // 0. 골 유형이 빈값인지 확인

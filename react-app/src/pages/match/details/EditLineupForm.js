@@ -134,11 +134,12 @@ const EditLineupForm = ({
     };
     
     
-    const handleTacticsChange = (event) => {
-        const newTactics = event.target.value;
+    const handleTacticsChange = (selectedOption) => {
+        const newTactics = selectedOption?.value;
         setSelectedTactics(newTactics);
         updateLineups(newTactics);        
     };
+    
 
     const [openDropdown, setOpenDropdown] = useState(null);
     
@@ -162,7 +163,7 @@ const EditLineupForm = ({
                 <Select
                     options={uniqueTacticOptions}
                     value={uniqueTacticOptions.find((opt) => opt.value === selectedTactics) || null}
-                    onChange={(selectedOption) => setSelectedTactics(selectedOption?.value)}
+                    onChange={handleTacticsChange}
                     placeholder="전술 선택"
                     className="react-select-container"
                     classNamePrefix="custom-select"

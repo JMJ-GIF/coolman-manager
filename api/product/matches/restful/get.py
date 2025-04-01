@@ -40,6 +40,7 @@ def get_goals_in_match(match_idx: int, db: Session = Depends(get_db)):
     LEFT JOIN users goal_user ON g.goal_player_id = goal_user.user_idx
     LEFT JOIN users assist_user ON g.assist_player_id = assist_user.user_idx
     WHERE g.match_idx = :match_idx
+    ORDER BY goal_idx
     """
     result = db.execute(text(sql), {"match_idx": match_idx}).mappings().all()
     
