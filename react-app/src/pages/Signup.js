@@ -14,7 +14,6 @@ const rawNames = process.env.REACT_APP_VALID_NAME_LIST || "";
 const validNameList = rawNames
   .split(",")
   .map(name => name.replace(/\s/g, ""));
-console.log(validNameList)
 
 
 const SignupPage = () => {
@@ -78,7 +77,7 @@ const SignupPage = () => {
       if (croppedImage) {
         const response = await fetch(croppedImage);
         const blob = await response.blob();
-        formData.append("image", blob, "profile.png");
+        formData.append("image", blob, "profile.jpeg");
       }
       
       const response = await axios.post(`${API_URL}/users`, formData, {

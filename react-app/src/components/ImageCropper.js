@@ -74,10 +74,10 @@ const ImageCropper = ({ onCrop, onClose }) => {
   
       // PNG로 toBlob (알파 채널 유지)
       scaledCanvas.toBlob((blob) => {
-        const previewUrl = scaledCanvas.toDataURL("image/png");
+        const previewUrl = URL.createObjectURL(blob); // → 변경됨
         onCrop(blob, previewUrl);
         onClose();
-      }, "image/png");
+      }, "image/jpeg", 0.8); // ← 여기가 포인트      
     }
   };
   
