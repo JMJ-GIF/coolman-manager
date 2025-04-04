@@ -35,29 +35,49 @@ const ImageCropper = ({ onCrop, onClose }) => {
       const cropper = cropperRef.current.cropper;
       const croppedCanvas = cropper.getCroppedCanvas();
   
-      // 원본 크기 기준 비율 유지
+      // 원본 크기
       const originalWidth = croppedCanvas.width;
       const originalHeight = croppedCanvas.height;
   
-      // 최소 보장 해상도 (예: 너비 최소 400px)
-      const minWidth = 400;
-      const scale = originalWidth < minWidth ? minWidth / originalWidth : 1;
+      // 최대 크기 설정 (4:3 기준: 800×600 예시)
+      const maxWidth = 800;
+      const maxHeight = 600;
   
-      // 고품질 새 캔버스 생성
+      // 일단 원본 크기를 할당
+      let targetWidth = originalWidth;
+      let targetHeight = originalHeight;
+  
+      // 1) 가로가 800을 넘으면 비율에 맞춰 축소
+      if (targetWidth > maxWidth) {
+        const ratio = maxWidth / targetWidth;
+        targetWidth = maxWidth;
+        targetHeight = targetHeight * ratio;
+      }
+  
+      // 2) 축소 후에도 세로가 600을 넘으면 또 축소
+      if (targetHeight > maxHeight) {
+        const ratio = maxHeight / targetHeight;
+        targetHeight = maxHeight;
+        targetWidth = targetWidth * ratio;
+      }
+  
+      // 새 캔버스에 그리기
       const scaledCanvas = document.createElement("canvas");
-      scaledCanvas.width = originalWidth * scale;
-      scaledCanvas.height = originalHeight * scale;
+      scaledCanvas.width = targetWidth;
+      scaledCanvas.height = targetHeight;
   
       const ctx = scaledCanvas.getContext("2d");
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(croppedCanvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
   
+      ctx.drawImage(croppedCanvas, 0, 0, targetWidth, targetHeight);
+  
+      // PNG로 toBlob (알파 채널 유지)
       scaledCanvas.toBlob((blob) => {
-        const previewUrl = scaledCanvas.toDataURL("image/png", 0.9); // 압축 품질 향상
+        const previewUrl = scaledCanvas.toDataURL("image/png");
         onCrop(blob, previewUrl);
         onClose();
-      }, "image/png", 0.9);
+      }, "image/png");
     }
   };
   

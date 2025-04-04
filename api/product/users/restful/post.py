@@ -1,5 +1,7 @@
+import os
 import logging
 from datetime import datetime
+from dotenv import load_dotenv
 from sqlalchemy.sql import text
 from sqlalchemy.orm import Session  
 from fastapi import UploadFile, File, Form, HTTPException, Depends
@@ -9,6 +11,10 @@ from image_client import upload_image
 from product.users.router import router
 
 logging.basicConfig(level=logging.ERROR)
+
+load_dotenv()
+raw_name_list = os.getenv("VALID_NAME_LIST", "")
+VALID_NAME_LIST = [name.replace(" ", "") for name in raw_name_list.split(",") if name.strip()]
 
 @router.post("", status_code=201)
 async def create_user(
@@ -22,6 +28,16 @@ async def create_user(
 ):
     try:
         join_date = datetime.utcnow()
+
+        cleaned_name = name.replace(" ", "")
+        if cleaned_name not in VALID_NAME_LIST:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error_code": "INVALID_NAME",
+                    "error_message": "쾌남FC 등록된 멤버만 가입이 가능합니다."
+                }
+            )
         
         sql_check_uuid = "SELECT * FROM users WHERE social_uuid = :social_uuid"
         existing_user = db.execute(text(sql_check_uuid), {"social_uuid": social_uuid}).mappings().fetchone()

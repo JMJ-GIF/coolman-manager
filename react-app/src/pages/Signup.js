@@ -7,9 +7,14 @@ import { useAlert } from "../context/AlertContext";
 import ImageCropper from "../components/ImageCropper";
 import { useForm, Controller } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import LoadingSpinner from "../components/LoadingSpinner"; // LoadingSpinner 임포트
+import LoadingSpinner from "../components/LoadingSpinner"; 
 
 const API_URL = process.env.REACT_APP_API_URL;
+const rawNames = process.env.REACT_APP_VALID_NAME_LIST || "";
+const validNameList = rawNames
+  .split(",")
+  .map(name => name.replace(/\s/g, "")); 
+
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -48,6 +53,14 @@ const SignupPage = () => {
 
   const handleSignupClick = (e) => {
     e.preventDefault(); 
+    
+    const cleanedName = name.replace(/\s/g, "");
+
+    if (!validNameList.includes(cleanedName)) {
+      showAlert("warning", "쾌남FC 멤버만 가입이 가능합니다.");
+      return;
+    }
+
     handleSubmit(onSubmit)(); 
   };
   
@@ -137,6 +150,7 @@ const SignupPage = () => {
                       value: pos.name,
                       label: pos.name,
                     }))}
+                    isSearchable={false} 
                     classNamePrefix="custom-select"
                     className="react-select-position"
                     placeholder="포지션을 선택하세요"

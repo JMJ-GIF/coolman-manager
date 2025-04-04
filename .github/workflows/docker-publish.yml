@@ -1,0 +1,47 @@
+name: Build and push Docker images
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: linux/amd64
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set IMAGE_TAG output
+        run: echo "IMAGE_TAG=${{ github.run_number }}" >> $GITHUB_OUTPUT
+        shell: bash
+        id: set_tag
+      
+      - name: Build React image
+        run: |
+          export IMAGE_TAG=${{ github.run_number }}          
+          docker build --platform=linux/amd64 \
+            -t minjejin/coolman-manager-react:${IMAGE_TAG} \
+            -f react-app/Dockerfile.prod .          
+          docker push minjejin/coolman-manager-react:${IMAGE_TAG}
+
+      - name: Build API image
+        run: |
+          IMAGE_TAG=${{ github.run_number }}    
+
+          docker build --platform=linux/amd64 \
+            -t minjejin/coolman-manager-api:${IMAGE_TAG} \
+            ./api
+          
+          docker push minjejin/coolman-manager-api:${IMAGE_TAG}

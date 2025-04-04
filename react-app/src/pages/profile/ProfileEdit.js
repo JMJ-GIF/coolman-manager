@@ -106,7 +106,7 @@ function ProfileEdit() {
             if (croppedImage) {
                 const response = await fetch(croppedImage);
                 const blob = await response.blob();
-                formData.append("image", blob, "profile.jpg");
+                formData.append("image", blob, "profile.png");
             }
             
             await axios.put(`${API_URL}/users/${authUser.user_idx}`, formData, {
