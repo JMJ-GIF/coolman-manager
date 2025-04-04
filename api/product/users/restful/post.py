@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.ERROR)
 load_dotenv()
 raw_name_list = os.getenv("VALID_NAME_LIST", "")
 VALID_NAME_LIST = [name.replace(" ", "") for name in raw_name_list.split(",") if name.strip()]
+print(VALID_NAME_LIST)
 
 @router.post("", status_code=201)
 async def create_user(

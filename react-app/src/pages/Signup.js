@@ -13,7 +13,8 @@ const API_URL = process.env.REACT_APP_API_URL;
 const rawNames = process.env.REACT_APP_VALID_NAME_LIST || "";
 const validNameList = rawNames
   .split(",")
-  .map(name => name.replace(/\s/g, "")); 
+  .map(name => name.replace(/\s/g, ""));
+console.log(validNameList)
 
 
 const SignupPage = () => {

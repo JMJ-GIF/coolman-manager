@@ -100,3 +100,5 @@ aws s3 cp backup_2025_03_31.sql s3://coolman-storage/db-backup/backup_2025_03_31
 ```
 cat backup_2025_03_31.sql | docker exec -i coolman-manager-db-1 psql -U jmj -d coolman
 ```
+
+## SSH Setup For Github Action
