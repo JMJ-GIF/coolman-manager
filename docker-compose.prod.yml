@@ -1,6 +1,6 @@
 services:
   react-app:
-    image: minjejin/coolman-manager-react:5
+    image: minjejin/coolman-manager-react:6
     ports:
       - "80:80"
       - "443:443"
@@ -14,7 +14,7 @@ services:
       - REACT_APP_VALID_NAME_LIST=${REACT_APP_VALID_NAME_LIST}
 
   api:
-    image: minjejin/coolman-manager-api:5
+    image: minjejin/coolman-manager-api:6
     ports:
       - "8000:8000"
     environment:
