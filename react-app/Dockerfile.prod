@@ -10,6 +10,7 @@ ENV REACT_APP_API_URL="/api"
 ENV REACT_APP_LOGIN_REDIRECT_URL="https://coolman-manager.com/callback"
 ENV REACT_APP_LOGIN_CLIENT_ID="VMV0OxeKinTAuz6qK0QO"
 ENV REACT_APP_STAGE='prod'
+ENV REACT_APP_VALID_NAME_LIST=진민제,장협수,조무열,김석환,강전근,강주은,고경덕,권형준,김경일,김대식,김준성,김진희,김태수,김호진,마진석,문용민,박진형,배시안,소철,송용욱,윤성현,윤한솔,이승환,이호석,이효식,조영래,조이래,황경태,황인건,문경영,이정훈
 
 # 전체 소스 복사 & 빌드
 COPY react-app ./

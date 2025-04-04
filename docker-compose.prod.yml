@@ -1,9 +1,6 @@
-# docker-compose.prod.yml
-version: '3.8'
-
 services:
   react-app:
-    image: minjejin/coolman-manager-react:${IMAGE_TAG} 
+    image: minjejin/coolman-manager-react:3
     ports:
       - "80:80"
       - "443:443"
@@ -17,7 +14,7 @@ services:
       - REACT_APP_VALID_NAME_LIST=${REACT_APP_VALID_NAME_LIST}
 
   api:
-    image: minjejin/coolman-manager-api:${IMAGE_TAG} 
+    image: minjejin/coolman-manager-api:3
     ports:
       - "8000:8000"
     environment:
