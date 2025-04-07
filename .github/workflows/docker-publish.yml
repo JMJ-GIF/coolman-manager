@@ -84,7 +84,7 @@ jobs:
 
       - name: Add GitHub Actions IP to Security Group
         run: |
-          ~/ncloud-cli/ncloud vserver addAccessControlGroupInboundRule \
+          ./ncloud vserver addAccessControlGroupInboundRule \
             --regionCode KR \
             --vpcNo ${{ secrets.NCP_VPC_NO }} \
             --accessControlGroupNo ${{ secrets.NCP_ACG_NO }} \
@@ -124,7 +124,9 @@ jobs:
       
       - name: Remove GitHub Actions IP from Security Group
         run: |
-          ~/ncloud-cli/ncloud vserver removeAccessControlGroupInboundRule \
+          chmod -R 777 ~/cli_linux
+          cd ~/cli_linux
+          ./ncloud vserver removeAccessControlGroupInboundRule \
             --regionCode KR \
             --vpcNo ${{ secrets.NCP_VPC_NO }} \
             --accessControlGroupNo ${{ secrets.NCP_ACG_NO }} \
