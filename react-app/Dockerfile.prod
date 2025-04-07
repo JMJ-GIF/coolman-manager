@@ -11,7 +11,8 @@ ARG REACT_APP_VALID_NAME_LIST
 
 # package.json만 복사 후 의존성 설치
 COPY react-app/package.json ./
-RUN npm install --only=production
+RUN npm install
+# RUN npm install --only=production
 
 # ARG를 ENV로 세팅 (npm run build가 인식 가능)
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
