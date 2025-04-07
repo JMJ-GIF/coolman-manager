@@ -74,7 +74,7 @@ jobs:
           wget https://www.ncloud.com/api/support/download/5/65
           unzip 65
           mkdir ~/.ncloud
-          echo -e "[DEFAULT]\nncloud_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}\nncloud_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}\nncloud_api_url = https://ncloud.apigw.ntruss.com > ~/.ncloud/configure
+          echo -e "[DEFAULT]\nncloud_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}\nncloud_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}\nncloud_api_url = https://ncloud.apigw.ntruss.com" > ~/.ncloud/configure
           chmod +x ~/ncloud-cli/ncloud
 
       - name: Add GitHub Actions IP to Security Group
