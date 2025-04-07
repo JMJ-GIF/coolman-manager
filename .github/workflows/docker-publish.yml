@@ -84,6 +84,7 @@ jobs:
 
       - name: Add GitHub Actions IP to Security Group
         run: |
+          cd ~/cli_linux
           ./ncloud vserver addAccessControlGroupInboundRule \
             --regionCode KR \
             --vpcNo ${{ secrets.NCP_VPC_NO }} \
