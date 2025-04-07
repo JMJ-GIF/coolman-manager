@@ -80,7 +80,7 @@ jobs:
           ncloud_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           ncloud_api_url = https://ncloud.apigw.ntruss.com
           EOF
-          chmod +x ~/ncloud-cli/ncloud
+          chmod -R 777 ~/cli_linux
 
       - name: Add GitHub Actions IP to Security Group
         run: |
