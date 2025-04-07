@@ -24,6 +24,7 @@ const SignupPage = () => {
   const name = location.state?.name || "";
   const social_uuid = location.state?.uuid || "";
   const [positions, setPositions] = useState([]);  
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
   const [croppedImage, setCroppedImage] = useState(null);
   const [loading, setLoading] = useState(false); 
@@ -41,14 +42,25 @@ const SignupPage = () => {
     fetchPositions();
   }, []);
 
-  const handleCropperOpen = () => {
-    setShowCropper(false);
-    setTimeout(() => setShowCropper(true), 10);
+  const handleOpenFilePicker = () => {
+    
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        setSelectedFile(file);    
+        setShowCropper(true);     
+      }
+    };
+    input.click();
   };
   
-  const handleCroppedImage = (file, previewUrl) => {
+  const handleCroppedImage = (blob, previewUrl) => {
     setCroppedImage(previewUrl);
-    setValue("image", file);
+    setValue("image", blob); 
+    setShowCropper(false);
   };
 
   const handleSignupClick = (e) => {
@@ -202,7 +214,7 @@ const SignupPage = () => {
               <label>프로필 이미지</label>
               <div className="profile-preview-container">
                 {croppedImage ? (
-                  <div className="card-gold" onClick={handleCropperOpen}>
+                  <div className="card-gold" onClick={handleOpenFilePicker}>
                     <div className="profile-section" style={{ backgroundImage: `url(${croppedImage})` }}>
                       <div className="vertical-info">
                         <div className="score">100</div>
@@ -218,14 +230,14 @@ const SignupPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="image-upload-box" onClick={() => setShowCropper(true)}>
+                  <div className="image-upload-box" onClick={handleOpenFilePicker}>
                     <span>+</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {showCropper && <ImageCropper onCrop={handleCroppedImage} onClose={() => setShowCropper(false)} />}
+            {showCropper && <ImageCropper file={selectedFile} onCrop={handleCroppedImage} onClose={() => setShowCropper(false)} />}
 
             <button type="submit" disabled={!isValid} onClick={handleSignupClick}>가입하기</button>
           </form>

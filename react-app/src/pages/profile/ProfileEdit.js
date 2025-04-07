@@ -27,9 +27,10 @@ function ProfileEdit() {
     const navigate = useNavigate();
     const [positions, setPositions] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [showCropper, setShowCropper] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [croppedImage, setCroppedImage] = useState(null);
     const [userImageUrl, setUserImageUrl] = useState(coolman_logo);
+    const [showCropper, setShowCropper] = useState(false);
     const {
         register,
         handleSubmit,
@@ -136,18 +137,30 @@ function ProfileEdit() {
         }
     });
 
+    const handleOpenFilePicker = () => {        
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        
+        input.onchange = (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (file) {
+            
+            setSelectedFile(file);            
+            setShowCropper(true);
+          }
+        };
+    
+        input.click(); 
+      };
+
     const handleConfirmSubmit = () => {
         showAlert("confirm", "프로필 정보를 수정하시겠습니까?", async () => {
             await handleFormSubmit();
         });
     };
 
-    const handleCropperOpen = () => {
-        setShowCropper(false);
-        setTimeout(() => setShowCropper(true), 10);
-      };
-    
-    const handleCroppedImage = (file, previewUrl) => {
+    const handleCroppedImage = (blob, previewUrl) => {
         setCroppedImage(previewUrl);
         setUserImageUrl(previewUrl); 
         setShowCropper(false);
@@ -172,9 +185,9 @@ function ProfileEdit() {
                     <div 
                         className="user-image" 
                         style={{ backgroundImage: `url(${userImageUrl || coolman_logo})` }} 
-                        onClick={handleCropperOpen}
+                        onClick={handleOpenFilePicker}
                     >                        
-                        <img src={img_box} alt="Edit" className="edit-icon" onClick={() => setShowCropper(true)}/>                   
+                        <img src={img_box} alt="Edit" className="edit-icon"/>                   
                     </div>                                         
                     <div className="user-name">{name}</div>
 
@@ -244,7 +257,7 @@ function ProfileEdit() {
                 onConfirm={handleConfirmSubmit}
                 onCancel={handleCancel}
             />            
-            {showCropper && <ImageCropper onCrop={handleCroppedImage} onClose={() => setShowCropper(false)} />}
+            {showCropper && <ImageCropper file={selectedFile} onCrop={handleCroppedImage} onClose={() => setShowCropper(false)} />}
         </div>
     );
 }

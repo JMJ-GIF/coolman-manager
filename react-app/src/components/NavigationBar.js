@@ -24,18 +24,6 @@ function NavigationBar() {
     ];
 
     const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));    
-    
-    const handleScroll = () => {
-        const currentScrollY = window.scrollY; // window 기준 스크롤 위치
-
-        if (currentScrollY > lastScrollY.current) {
-            setIsVisible(false); // 스크롤 내릴 때 숨김
-        } else if (currentScrollY < lastScrollY.current) {
-            setIsVisible(true); // 스크롤 올릴 때 보임
-        }
-
-        lastScrollY.current = currentScrollY;
-    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -53,15 +41,8 @@ function NavigationBar() {
         fetchData();
     }, [authUser]);
 
-    useEffect(() => {
-        window.addEventListener("scroll", handleScroll); // window 기준 스크롤 이벤트 등록
-        return () => {
-            window.removeEventListener("scroll", handleScroll); // 클린업
-        };
-    }, []);
-
     return (
-        <div className={`navigation-bar ${isVisible ? "visible" : "hidden"}`}>
+        <div className="navigation-bar">
             <ul className="page-navigator">
                 <div
                     className="active-indicator"

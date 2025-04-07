@@ -9,15 +9,15 @@ services:
       - ./react-app:/usr/src/app  # 로컬 코드와 동기화
       - /usr/src/app/node_modules
     environment:
+      - REACT_APP_VALID_NAME_LIST=${REACT_APP_VALID_NAME_LIST} 
+      - REACT_APP_LOGIN_CLIENT_ID=${REACT_APP_LOGIN_CLIENT_ID} 
       - CHOKIDAR_USEPOLLING=true
       - WDS_SOCKET_HTTPS=true  # ws 대신 wss 통신 사용
       - WDS_SOCKET_PORT=443    # https 통신 포트
-      - WDS_SOCKET_PATH=/ws/   # websocket 통신 경로 (-> react-app:3000 으로 접속)   
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
-      - REACT_APP_LOGIN_REDIRECT_URL=${REACT_APP_LOGIN_REDIRECT_URL}
-      - REACT_APP_LOGIN_CLIENT_ID=${REACT_APP_LOGIN_CLIENT_ID} 
-      - REACT_APP_STAGE=${REACT_APP_STAGE}
-      - REACT_APP_VALID_NAME_LIST=${REACT_APP_VALID_NAME_LIST} 
+      - WDS_SOCKET_PATH=/ws/   # websocket 통신 경로 (-> react-app:3000 으로 접속)               
+      - REACT_APP_STAGE=dev
+      - REACT_APP_API_URL=/api      
+      - REACT_APP_LOGIN_REDIRECT_URL=https://127.0.0.1/callback            
     command: ["npm", "start"]  # 개발용 React 서버 실행
 
   api:
@@ -30,21 +30,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
-      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
-      - NAVER_REDIRECT_URI=${NAVER_REDIRECT_URI}
-      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY}
-      - AUTH_ALGORITHM=${AUTH_ALGORITHM}
-      - AUTH_ACCESS_TOKEN_EXPIRE_MINUTES=${AUTH_ACCESS_TOKEN_EXPIRE_MINUTES}
-      - AUTH_REFRESH_TOKEN_EXPIRE_DAYS=${AUTH_REFRESH_TOKEN_EXPIRE_DAYS}
-      - AUTH_COOKIE_NAME=${AUTH_COOKIE_NAME}
-      - AUTH_REFRESH_COOKIE_NAME=${AUTH_REFRESH_COOKIE_NAME}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}      
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION_NAME=${AWS_REGION_NAME}
-      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL}
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
-      - API_STAGE=${API_STAGE}
       - VALID_NAME_LIST=${VALID_NAME_LIST}
+      - API_STAGE=dev
+      - S3_BUCKET_NAME=coolman-storage            
+      - NAVER_REDIRECT_URI=https://127.0.0.1/callback
+      - S3_ENDPOINT_URL=https://kr.object.ncloudstorage.com      
 
   db:
     image: postgres:15

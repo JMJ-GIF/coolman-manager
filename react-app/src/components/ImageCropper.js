@@ -3,21 +3,19 @@ import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import "./ImageCropper.scss";
 
-const ImageCropper = ({ onCrop, onClose }) => {
+const ImageCropper = ({ file, onCrop, onClose }) => {
   const cropperRef = useRef(null);
   const [image, setImage] = useState(null);
 
-  useEffect(() => {   
-    openFilePicker();
-  }, []);
-
-  const openFilePicker = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => onSelectImage(e);
-    input.click();
-  };
+  useEffect(() => {
+    if (!file) {
+      onClose();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setImage(reader.result);
+    reader.readAsDataURL(file);
+  }, [file, onClose]);
 
   const onSelectImage = (e) => {
     const file = e.target.files[0];
@@ -99,8 +97,7 @@ const ImageCropper = ({ onCrop, onClose }) => {
           zoomable={true} 
           guides={true} 
         />
-        <p className="cropper-instruction">사진은 4:3 비율만 허용됩니다</p>
-        <p className="cropper-instruction">배경을 투명으로 만들어 업로드 하는것을 권장합니다</p>
+        <p className="cropper-instruction">사진은 4:3 비율만 허용됩니다</p>        
         <div className="button-group">
           <button onClick={onClose}>취소</button>
           <button onClick={cropImage}>자르기</button>

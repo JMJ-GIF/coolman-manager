@@ -13,8 +13,8 @@ const EditResultForm = ({
     positions,    
     
 }) => {
-    const winningPoint = watch("winning_point");
-    const losingPoint = watch("losing_point");
+    // const winningPoint = watch("winning_point");
+    // const losingPoint = watch("losing_point");
     const uniqueTactics = Array.from(
         new Set(positions.map((item) => item.tactics))
       ).map((tactic) => ({
@@ -35,45 +35,9 @@ const EditResultForm = ({
         <form onSubmit={onSubmit}>
             <div className="match-results">
                 <div className="header-card">
-                    <h2>경기결과</h2>
-                    <p data-result={winningPoint > losingPoint ? "승리" : winningPoint < losingPoint ? "패배" : "무승부"}>
-                        {winningPoint > losingPoint
-                            ? "승리"
-                            : winningPoint < losingPoint
-                            ? "패배"
-                            : "무승부"}
-                    </p>
+                    <h2>경기결과</h2>          
                 </div>
-                <div className="card-container edit">
-                    {/* 스코어 카드 */}
-                    <div className="card">
-                        <span>스코어</span>
-                        <div className="score-input-container">
-                            <input
-                                type="number"
-                                {...register("winning_point", {
-                                    required: "승리 점수를 입력하세요",
-                                    validate: (value) => value >= 0 || "0 이상의 값을 입력하세요",
-                                })}
-                                placeholder="승리 점수"
-                                className={`score-input ${errors.winning_point ? "error" : ""}`}
-                            />                            
-                            <span className="colon">:</span>
-                            <input
-                                type="number"
-                                {...register("losing_point", {
-                                    required: "패배 점수를 입력하세요",
-                                    validate: (value) => value >= 0 || "0 이상의 값을 입력하세요",
-                                })}
-                                placeholder="패배 점수"
-                                className={`score-input ${errors.losing_point ? "error" : ""}`}
-                            />
-                        </div>
-                        {errors.winning_point && <p className="result-error-message">{errors.winning_point.message}</p>}
-                        {errors.losing_point && <p className="result-error-message">{errors.losing_point.message}</p>}
-                    </div>
-
-                    {/* 경기 상대 */}
+                <div className="card-container edit">                    
                     <div className="card">
                         <span>상대</span>
                         <input
@@ -183,19 +147,7 @@ const EditResultForm = ({
                             className={`text-input ${errors.location ? "error" : ""}`}                            
                         />
                         {errors.location && <p className="result-error-message">{errors.location.message}</p>}
-                    </div>
-
-                    {/* 경기 인원 */}
-                    <div className="card">
-                        <span>참가인원 (용병제외)</span>
-                        <input
-                            type="text"
-                            {...register("num_players", { required: "인원을 입력하세요" })}
-                            placeholder="참가인원"
-                            className={`text-input ${errors.num_players ? "error" : ""}`}
-                        />
-                        {errors.num_players && <p className="result-error-message">{errors.num_players.message}</p>}
-                    </div>
+                    </div>     
 
                     {/* 메인 전술 */}
                     <div className="card">

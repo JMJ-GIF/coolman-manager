@@ -12,7 +12,7 @@ from auth.jwt import verify_token
 load_dotenv()
 
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
-AUTH_COOKIE_NAME = os.getenv("AUTH_COOKIE_NAME")
+AUTH_COOKIE_NAME = "access_token"
 NAVER_REDIRECT_URI = os.getenv("NAVER_REDIRECT_URI")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 

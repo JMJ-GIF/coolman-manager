@@ -5,9 +5,16 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
+    outputs:
+      IMAGE_TAG: ${{ steps.set_tag.outputs.IMAGE_TAG }}
+
+    env:      
+      REACT_APP_LOGIN_CLIENT_ID: ${{ secrets.REACT_APP_LOGIN_CLIENT_ID }}
+      REACT_APP_VALID_NAME_LIST: ${{ secrets.REACT_APP_VALID_NAME_LIST }}      
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,24 +31,96 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set IMAGE_TAG output
-        run: echo "IMAGE_TAG=${{ github.run_number }}" >> $GITHUB_OUTPUT
-        shell: bash
         id: set_tag
+        run: echo "IMAGE_TAG=${{ github.run_number }}" >> $GITHUB_OUTPUT
       
       - name: Build React image
         run: |
-          export IMAGE_TAG=${{ github.run_number }}          
+          export IMAGE_TAG=${{ github.run_number }}
           docker build --platform=linux/amd64 \
+            --build-arg REACT_APP_API_URL="/api" \
+            --build-arg REACT_APP_LOGIN_REDIRECT_URL="https://coolman-manager.com/callback" \
+            --build-arg REACT_APP_LOGIN_CLIENT_ID="${REACT_APP_LOGIN_CLIENT_ID}" \
+            --build-arg REACT_APP_STAGE="prod" \
+            --build-arg REACT_APP_VALID_NAME_LIST="${REACT_APP_VALID_NAME_LIST}" \
             -t minjejin/coolman-manager-react:${IMAGE_TAG} \
-            -f react-app/Dockerfile.prod .          
+            -f react-app/Dockerfile.prod \
+            .
           docker push minjejin/coolman-manager-react:${IMAGE_TAG}
-
+      
       - name: Build API image
         run: |
-          IMAGE_TAG=${{ github.run_number }}    
-
+          export IMAGE_TAG=${{ github.run_number }}    
           docker build --platform=linux/amd64 \
             -t minjejin/coolman-manager-api:${IMAGE_TAG} \
             ./api
           
-          docker push minjejin/coolman-manager-api:${IMAGE_TAG}      
+          docker push minjejin/coolman-manager-api:${IMAGE_TAG}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ needs.build.outputs.IMAGE_TAG }}
+
+    steps:
+      - name: Get Github Actions IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Install NCP CLI and configure credentials
+        run: |
+          cd ~
+          wget https://www.ncloud.com/api/support/download/5/65
+          unzip 65
+          mkdir ~/.ncloud
+          echo -e "[DEFAULT]\nncloud_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}\nncloud_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}\nncloud_api_url = https://ncloud.apigw.ntruss.com > ~/.ncloud/configure
+          chmod +x ~/ncloud-cli/ncloud
+
+      - name: Add GitHub Actions IP to Security Group
+        run: |
+          ~/ncloud-cli/ncloud vserver addAccessControlGroupInboundRule \
+            --regionCode KR \
+            --vpcNo ${{ secrets.NCP_VPC_NO }} \
+            --accessControlGroupNo ${{ secrets.NCP_ACG_NO }} \
+            --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.ipv4 }}/32', portRange='${{ secrets.SSH_PORT }}'"
+      
+      - name: NCP login and docker image pull and run
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USERNAME }}
+          password: ${{ secrets.NCP_PASSWORD }}
+          port: ${{ secrets.NCP_PORT }}
+          script: |
+            cd /root/coolman-manager
+
+            git pull
+
+            cat <<EOF > .env
+            IMAGE_TAG=${IMAGE_TAG}
+            NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+            NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION_NAME=${{ secrets.AWS_REGION_NAME }}
+            VALID_NAME_LIST=${{ secrets.VALID_NAME_LIST }}
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            EOF
+
+            docker compose -f docker-compose.prod.yml --env-file .env stop react-app api
+            docker compose -f docker-compose.prod.yml --env-file .env rm -f react-app api
+            docker compose -f docker-compose.prod.yml --env-file .env pull react-app api
+            docker compose -f docker-compose.prod.yml --env-file .env up -d react-app api
+            
+            docker images --format "{{.Repository}}:{{.Tag}}" | grep "minjejin/coolman-manager-" | grep -v "${IMAGE_TAG}" | xargs -r docker rmi -f
+      
+      - name: Remove GitHub Actions IP from Security Group
+        run: |
+          ~/ncloud-cli/ncloud vserver removeAccessControlGroupInboundRule \
+            --regionCode KR \
+            --vpcNo ${{ secrets.NCP_VPC_NO }} \
+            --accessControlGroupNo ${{ secrets.NCP_ACG_NO }} \
+            --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.ipv4 }}/32', portRange='${{ secrets.SSH_PORT }}'"

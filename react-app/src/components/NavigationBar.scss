@@ -18,16 +18,6 @@
     z-index: 1000;
     transition: transform 0.3s ease, opacity 0.3s ease;     
 
-    &.hidden {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-
-    &.visible {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
     .page-navigator {
         display: flex;
         list-style: none;

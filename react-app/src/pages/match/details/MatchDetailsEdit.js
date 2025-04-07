@@ -1,4 +1,3 @@
-
 import './Details.scss';
 import axios from "axios";
 import {useForm} from "react-hook-form";
@@ -135,11 +134,30 @@ function MatchDetailsEdit() {
 
     
     const handleFormSubmit = handleSubmit(async (data) => {
-        const { dt, start_time, end_time, winning_point, losing_point, quarters } = data;
+        const { dt, start_time, end_time, quarters } = data;
 
+        // 승리점수, 패배점수 계산하기
+        const goals = quarters.flatMap((quarter) => quarter.goals || []);
+        const winning_point = goals.filter((goal) => goal.goal_type === "득점").length;
+        const losing_point = goals.filter(
+            (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
+        ).length;
+        data.winning_point = winning_point
+        data.losing_point = losing_point
+
+        // 인원수 계산하기
+        const allLineups = quarters.flatMap((quarter) => quarter.lineups || []);            
+        const uniquePlayers = new Set(
+            allLineups
+                .filter(({ user_name, back_number }) => user_name !== "용병" && user_name && back_number) // "용병" 제외
+                .map(({ user_name, back_number }) => `${user_name}-${back_number}`) // 고유 키 생성
+        );         
+        const num_players = uniquePlayers.size;
+        data.num_players = num_players
+        
+        // 시간 KST 로 포맷팅하기
         let formattedStart = formatDateTime(dt, start_time);
         let formattedEnd = formatDateTime(dt, end_time);
-
         const startDate = new Date(formattedStart);
         const endDate = new Date(formattedEnd);
 
@@ -155,10 +173,10 @@ function MatchDetailsEdit() {
 
             formattedEnd = `${yyyy}-${MM}-${dd}T${HH}:${mm}:00`;
         }
-
         data.start_time = formattedStart;
         data.end_time = formattedEnd;
 
+        // 결과값 입력하기
         data.result = determineResult(winning_point, losing_point);
     
         // 0. 골 유형이 빈값인지 확인
@@ -174,22 +192,9 @@ function MatchDetailsEdit() {
                 .map((quarter) => quarter.quarter_number)
                 .sort((a, b) => a - b);
             return quarterNumbers.every((num, index) => num === index + 1);
-        };        
-    
-        // 2. 스코어와 골 수가 일치하는지 확인
-        const areScoresValid = () => {
-            const goals = quarters.flatMap((quarter) => quarter.goals || []);
-            const totalWinningGoals = goals.filter((goal) => goal.goal_type === "득점").length;
-            const totalLosingGoals = goals.filter(
-                (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
-            ).length;
-            return (
-                parseInt(winning_point, 10) === totalWinningGoals &&
-                parseInt(losing_point, 10) === totalLosingGoals
-            );
-        };        
+        };             
 
-        // 3. 유저 이름이 유효한지 검증
+        // 2. 유저 이름이 유효한지 검증
         const validateGoalUserNames = () => {
             const allGoals = quarters.flatMap((quarter) => quarter.goals || []);            
         
@@ -216,8 +221,7 @@ function MatchDetailsEdit() {
             return invalidGoals.length === 0;
         };
         
-
-        // 4. 쿼터별 라인업에서 중복 유저 이름 + 등번호 조합 확인
+        // 3. 쿼터별 라인업에서 중복 유저 이름 + 등번호 조합 확인
         const validateUniqueLineupPlayers = () => {
             const invalidQuarters = quarters.filter((quarter) => {
                 const uniquePlayers = new Set();
@@ -255,21 +259,6 @@ function MatchDetailsEdit() {
             return invalidQuarters.length === 0;
         };
 
-        // 5. 참가 인원 확인
-        const validateNumPlayers = () => {            
-            const allLineups = quarters.flatMap((quarter) => quarter.lineups || []);            
-            const uniquePlayers = new Set(
-                allLineups
-                    .filter(({ user_name, back_number }) => user_name !== "용병" && user_name && back_number) // "용병" 제외
-                    .map(({ user_name, back_number }) => `${user_name}-${back_number}`) // 고유 키 생성
-            );         
-            const lineupNumPlayers = uniquePlayers.size;
-            const ResultNumPlayers = parseInt(data.num_players, 10)
-            
-            return ResultNumPlayers === lineupNumPlayers;
-            
-        };
-
         if (!quarters || quarters.length === 0){
             showAlert("warning", '최소 하나의 쿼터가 필요합니다.');
             return;
@@ -288,22 +277,9 @@ function MatchDetailsEdit() {
             showAlert("warning", '골 플레이어는 반드시 유효한 이름이어야 하며, 어시스트 플레이어는 빈 값이거나 유효한 이름이어야 합니다.');            
             return;
         }
-        if (!areScoresValid()) {
-            const totalWinningGoals = quarters.flatMap((q) => q.goals || []).filter(
-                (goal) => goal.goal_type === "득점"
-            ).length;
-            const totalLosingGoals = quarters.flatMap((q) => q.goals || []).filter(
-                (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
-            ).length;
-            showAlert("warning",  `스코어(${winning_point}:${losing_point})와 골 수(${totalWinningGoals}:${totalLosingGoals})가 일치하지 않습니다. 폼을 수정해주세요.`);                        
-            return;
-        }
+
         if (!validateUniqueLineupPlayers()) {
             showAlert("warning", '라인업 내에서 중복된 선수가 있거나, 빈 값이 있습니다');                        
-            return;
-        }
-        if (!validateNumPlayers()) {
-            showAlert("warning", '참가 인원 수가 라인업에서 계산된 고유 인원과 일치하지 않습니다.');                        
             return;
         }
 

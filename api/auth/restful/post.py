@@ -8,8 +8,8 @@ from auth.jwt import create_access_token, create_refresh_token, verify_token
 
 load_dotenv()
 
-AUTH_COOKIE_NAME = os.getenv("AUTH_COOKIE_NAME")
-AUTH_REFRESH_COOKIE_NAME = os.getenv("AUTH_REFRESH_COOKIE_NAME")
+AUTH_COOKIE_NAME = "access_token"
+AUTH_REFRESH_COOKIE_NAME = "refresh_token"
 
 @router.post("/login")
 async def login(response: Response, login_data: LoginRequest):

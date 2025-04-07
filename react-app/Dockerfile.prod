@@ -2,15 +2,23 @@
 FROM node:22.12.0 AS builder
 WORKDIR /usr/src/app
 
-# package.json만 복사 후 의존성 설치 (prod 용)
+# build 시점에 받을 ARG 선언
+ARG REACT_APP_API_URL
+ARG REACT_APP_LOGIN_REDIRECT_URL
+ARG REACT_APP_LOGIN_CLIENT_ID
+ARG REACT_APP_STAGE
+ARG REACT_APP_VALID_NAME_LIST
+
+# package.json만 복사 후 의존성 설치
 COPY react-app/package.json ./
 RUN npm install --only=production
 
-ENV REACT_APP_API_URL="/api"
-ENV REACT_APP_LOGIN_REDIRECT_URL="https://coolman-manager.com/callback"
-ENV REACT_APP_LOGIN_CLIENT_ID="VMV0OxeKinTAuz6qK0QO"
-ENV REACT_APP_STAGE='prod'
-ENV REACT_APP_VALID_NAME_LIST=진민제,장협수,조무열,김석환,강전근,강주은,고경덕,권형준,김경일,김대식,김준성,김진희,김태수,김호진,마진석,문용민,박진형,배시안,소철,송용욱,윤성현,윤한솔,이승환,이호석,이효식,조영래,조이래,황경태,황인건,문경영
+# ARG를 ENV로 세팅 (npm run build가 인식 가능)
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_LOGIN_REDIRECT_URL=$REACT_APP_LOGIN_REDIRECT_URL
+ENV REACT_APP_LOGIN_CLIENT_ID=$REACT_APP_LOGIN_CLIENT_ID
+ENV REACT_APP_STAGE=$REACT_APP_STAGE
+ENV REACT_APP_VALID_NAME_LIST=$REACT_APP_VALID_NAME_LIST
 
 # 전체 소스 복사 & 빌드
 COPY react-app ./
@@ -19,7 +27,7 @@ RUN npm run build
 # --- 2단계: Nginx 실행 컨테이너 ---
 FROM nginx:alpine
 
-# Nginx 설정 덮어쓰기 (React 정적 + /api 프록시 + SSL 등)
+# Nginx 설정 덮어쓰기
 COPY nginx/nginx.prod.conf /etc/nginx/conf.d/default.conf
 
 # 빌드 산출물만 복사
@@ -27,4 +35,4 @@ COPY --from=builder /usr/src/app/build /usr/share/nginx/html
 
 EXPOSE 80
 EXPOSE 443
-CMD ["nginx", "-g", "daemon off;"]    
+CMD ["nginx", "-g", "daemon off;"]

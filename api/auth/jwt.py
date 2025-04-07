@@ -7,10 +7,9 @@ from datetime import datetime, timedelta
 load_dotenv()
 
 AUTH_SECRET_KEY = secrets.token_hex(32)  
-# AUTH_SECRET_KEY = os.getenv('AUTH_SECRET_KEY')
-AUTH_ALGORITHM = os.getenv('AUTH_ALGORITHM')
-AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('AUTH_ACCESS_TOKEN_EXPIRE_MINUTES'))
-AUTH_REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv('AUTH_REFRESH_TOKEN_EXPIRE_DAYS'))
+AUTH_ALGORITHM = 'HS256'
+AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = 30
+AUTH_REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 def create_access_token(user_idx: int):
     """
