@@ -238,7 +238,7 @@ function MatchDetails() {
                     ))}
                 </div>    
                 <div className="lineup-container">
-                    <div className="lineup-section">
+                    {/* <div className="lineup-section">
                         <h3 className="section-title">선발</h3>
                         <table className="lineup-table">
                             <thead>
@@ -260,7 +260,7 @@ function MatchDetails() {
                                 ))}
                             </tbody>
                         </table>
-                    </div>
+                    </div> */}
     
                     <div className="lineup-section">
                         <h3 className="section-title">후보</h3>
