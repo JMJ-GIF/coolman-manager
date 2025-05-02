@@ -173,6 +173,8 @@ function MatchDetailsEdit() {
 
             formattedEnd = `${yyyy}-${MM}-${dd}T${HH}:${mm}:00`;
         }
+        console.log('EDIT formattedStart', formattedStart)
+        console.log('EDIT formattedEnd', formattedEnd)
         data.start_time = formattedStart;
         data.end_time = formattedEnd;
 
@@ -283,7 +285,8 @@ function MatchDetailsEdit() {
             return;
         }
 
-        // 4. 데이터 제출        
+        // 4. 데이터 제출   
+        console.log("최종 제출 데이터:", data);     
         try {
             setLoading(true);
             const response = await axios.put(`${API_URL}/matches/${match_idx}`, data, {

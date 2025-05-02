@@ -21,11 +21,19 @@ const determineResult = (winningPoint, losingPoint) => {
 
 
 const formatDateTime = (date, timeString) => {
-    const dateObj = new Date(date);  
-    const [hours, minutes] = timeString.split(":").map(Number); 
+    const dateObj = new Date(date);
+    const [hours, minutes] = timeString.split(":").map(Number);
+    dateObj.setHours(hours, minutes, 0, 0);
 
-    dateObj.setHours(hours, minutes, 0, 0); 
-    return dateObj.toISOString(); 
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const year = dateObj.getFullYear();
+    const month = pad(dateObj.getMonth() + 1);
+    const day = pad(dateObj.getDate());
+    const hoursStr = pad(dateObj.getHours());
+    const minutesStr = pad(dateObj.getMinutes());
+
+    return `${year}-${month}-${day}T${hoursStr}:${minutesStr}:00`;
 };
 
 function MatchDetailsAdd() {
@@ -171,6 +179,8 @@ function MatchDetailsAdd() {
 
             formattedEnd = `${yyyy}-${MM}-${dd}T${HH}:${mm}:00`;
         }
+        console.log('ADD formattedStart', formattedStart)
+        console.log('ADD formattedEnd', formattedEnd)
         data.start_time = formattedStart;
         data.end_time = formattedEnd;
 

@@ -110,12 +110,11 @@ const EditLineupForm = ({
     const updateLineups = (newTactics) => {
         if (!filteredQuarter) return; 
                 
-        const filteredPositions = positions.filter((position) => position.tactics === newTactics);
-        const reversedPositions = [...filteredPositions].reverse();
+        const filteredPositions = positions.filter((position) => position.tactics === newTactics);        
             
-        const updatedLineups = filteredLineups.map((lineup, index) => {
+        const updatedLineups = filteredLineups.map((lineup, index) => {            
             if (lineup.lineup_status === "선발") {
-                const position = reversedPositions[index];
+                const position = filteredPositions[index];
                 return {
                     ...lineup,
                     tactics: newTactics,

@@ -70,7 +70,7 @@ function MatchDetails() {
             // Lineups API 결과 처리
             if (lineupResponse.status === "fulfilled") {
                 const lineupsData = lineupResponse.value.data;
-                console.log(lineupsData)
+                
                 setLineups(lineupsData);                
 
                 const imageMap = {};

@@ -38,11 +38,11 @@ jobs:
         run: |
           export IMAGE_TAG=${{ github.run_number }}
           docker build --platform=linux/amd64 \
-            --build-arg REACT_APP_API_URL="/api" \
-            --build-arg REACT_APP_LOGIN_REDIRECT_URL="https://coolman-manager.com/callback" \
-            --build-arg REACT_APP_LOGIN_CLIENT_ID="${REACT_APP_LOGIN_CLIENT_ID}" \
-            --build-arg REACT_APP_STAGE="prod" \
-            --build-arg REACT_APP_VALID_NAME_LIST="${REACT_APP_VALID_NAME_LIST}" \
+            --build-arg REACT_APP_API_URL=/api \
+            --build-arg REACT_APP_LOGIN_REDIRECT_URL=https://coolman-manager.com/callback \
+            --build-arg REACT_APP_LOGIN_CLIENT_ID=${REACT_APP_LOGIN_CLIENT_ID} \
+            --build-arg REACT_APP_STAGE=prod \
+            --build-arg REACT_APP_VALID_NAME_LIST=${REACT_APP_VALID_NAME_LIST} \
             -t minjejin/coolman-manager-react:${IMAGE_TAG} \
             -f react-app/Dockerfile.prod \
             .
@@ -117,10 +117,8 @@ jobs:
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             EOF
 
-            docker compose -f docker-compose.prod.yml --env-file .env stop react-app api
-            docker compose -f docker-compose.prod.yml --env-file .env rm -f react-app api
-            docker compose -f docker-compose.prod.yml --env-file .env pull react-app api
-            docker compose -f docker-compose.prod.yml --env-file .env up -d react-app api
+            docker compose -f docker-compose.prod.yml --env-file .env down
+            docker compose -f docker-compose.prod.yml --env-file .env up -d
             
             docker images --format "{{.Repository}}:{{.Tag}}" | grep "minjejin/coolman-manager-" | grep -v "${IMAGE_TAG}" | xargs -r docker rmi -f
       
