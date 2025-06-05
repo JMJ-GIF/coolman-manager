@@ -21,3 +21,4 @@ def get_db():
         logging.error("Database connection failed:", exc_info=True)
     finally:
         db.close()
+ 
