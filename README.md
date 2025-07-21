@@ -10,7 +10,7 @@ docker build --platform=linux/amd64 -t minjejin/coolman-manager-react:latest -f 
 docker push minjejin/coolman-manager-react:latest
 
 docker build --platform=linux/amd64 -t minjejin/coolman-manager-api:latest ./api
-docker push minjejin/coolman-manager-api:latest
+docker push minjejin/coolman-manager-api:latest 
 ```
 
 ## Local SSL
