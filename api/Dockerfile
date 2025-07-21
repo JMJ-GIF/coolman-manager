@@ -1,5 +1,5 @@
 # Python 기반 이미지
-FROM python:3.8.2-slim
+FROM python:3.10-slim
 
 # 필요한 시스템 패키지 설치
 RUN apt-get update && apt-get install -y \
