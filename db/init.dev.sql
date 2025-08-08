@@ -347,6 +347,19 @@ VALUES
 ('4-2-3-1', 'LAM', 'Left Attacking Midfielder', 30, 30),
 ('4-2-3-1', 'ST', 'Striker', 10, 50),
 
+-- 4-1-4-1 Formation
+('4-1-4-1', 'GK', 'Goalkeeper', 90, 50), 
+('4-1-4-1', 'RB', 'Right Back', 70, 80),
+('4-1-4-1', 'RCB', 'Right Center Back', 70, 60),
+('4-1-4-1', 'LCB', 'Left Center Back', 70, 40),
+('4-1-4-1', 'LB', 'Left Back', 70, 20),
+('4-1-4-1', 'CDM', 'Central Defensive Midfielder', 50, 50),
+('4-1-4-1', 'RAM', 'Right Attacking Midfielder', 30, 80),
+('4-1-4-1', 'RCAM', 'Right Central Attacking Midfielder', 30, 60),
+('4-1-4-1', 'LCAM', 'Left Central Attacking Midfielder', 30, 40),
+('4-1-4-1', 'LAM', 'Left Attacking Midfielder', 30, 20),
+('4-1-4-1', 'ST', 'Striker', 10, 50),
+
 -- 3-4-3 Formation
 ('3-4-3', 'GK', 'Goalkeeper', 90, 50), 
 ('3-4-3', 'LCB', 'Left Center Back', 70, 20),

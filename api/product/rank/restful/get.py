@@ -97,7 +97,7 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
                     
                     coalesce(ql.player_idx, {user_idx}) as user_idx,
                     m.dt,
-                    case when ql.player_idx is null then 0 else 1 end as is_participation,
+                    MAX(case when ql.player_idx is null then 0 else 1 end) as is_participation,
                     sum(case when ql.quarter_idx is null then 0 else 1 end) as quarter_cnt
             from matches m
                 join quarters q on m.match_idx = q.match_idx 
@@ -109,7 +109,7 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
                     from quarters_lineup ql
                     where player_idx = {user_idx}    
                 ) ql on ql.quarter_idx = q.quarter_idx
-            group by 1,2,3
+            group by 1,2
         ) a
         join users u on a.user_idx = u.user_idx         
     """
