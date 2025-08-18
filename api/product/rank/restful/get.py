@@ -130,7 +130,7 @@ def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)
             a.player_idx as user_idx,
             SUM(goal_cnt) as goal_cnt,
             SUM(assist_cnt) as assist_cnt,
-            count(distinct a.match_idx) as match_idx
+            count(distinct a.match_idx) as match_cnt
             
         from
         (
