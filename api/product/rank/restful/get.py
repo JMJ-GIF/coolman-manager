@@ -125,19 +125,46 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
 @router.get("/{user_idx}/opposing_team", response_model=List[UserStatsOpposingTeam])
 def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)):
     sql = f"""
-        select                 
-                m.opposing_team,
-                {user_idx} as user_idx,
-                sum(case when goal_player_id = {user_idx} and goal_type = '득점' then 1 else 0 end) as goal_cnt,
-                sum(case when assist_player_id = {user_idx} and goal_type = '득점' then 1 else 0 end) as assist_cnt,
-                count(distinct m.match_idx) as match_cnt
-        from matches m
-            join quarters q on m.match_idx = q.match_idx 
-            join quarters_lineup ql on q.quarter_idx = ql.quarter_idx
-            left join goals g on g.quarter_idx = q.quarter_idx
-            join positions p on ql.position_idx = p.position_idx
-         where
-            ql.player_idx = {user_idx}  
+        select
+            a.opposing_team,
+            a.player_idx as user_idx,
+            SUM(goal_cnt) as goal_cnt,
+            SUM(assist_cnt) as assist_cnt,
+            count(distinct a.match_idx) as match_idx
+            
+        from
+        (
+            select
+                    m.match_idx,
+                    m.opposing_team,
+                    ql.player_idx			
+            from matches m
+                join quarters q on m.match_idx = q.match_idx 
+                join quarters_lineup ql on q.quarter_idx = ql.quarter_idx
+            where ql.player_idx = {user_idx}
+            group by 1,2,3
+        ) a
+        left join
+        (
+            select  	
+                    match_idx,
+                    count(1) as goal_cnt
+            from goals g 
+            where goal_type = '득점'
+                and goal_player_id = {user_idx}
+            group by 1
+            
+        ) b on a.match_idx = b.match_idx
+        left join
+        (
+            select  	
+                    match_idx,
+                    count(1) as assist_cnt
+            from goals g 
+            where goal_type = '득점'
+                and assist_player_id = {user_idx}
+            group by 1
+        ) c on a.match_idx = c.match_idx
         group by 1,2
     """
 
