@@ -307,8 +307,12 @@ function MatchDetailsAdd() {
                 navigate(`/matches`);
             }
         } catch (error) {
-            showAlert("warning", '데이터 저장에 실패했습니다. 다시 시도해주세요.');
-            console.error("❌ 오류 발생:", error.response?.data || error.message);            
+            if (error.response?.status === 403) {
+                showAlert("warning", "로그인을 하지 않는 경우 데이터 수정 및 추가가 불가합니다.");
+            } else {
+                showAlert("warning", '데이터 저장에 실패했습니다. 다시 시도해주세요.');
+            }
+            console.error("❌ 오류 발생:", error.response?.data || error.message);
         } finally {
             setLoading(false); // 로딩 상태 해제
         }   

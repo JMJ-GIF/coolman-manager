@@ -68,18 +68,42 @@ async def get_user_data(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get(AUTH_COOKIE_NAME)
 
     # 🔥 쿠키 확인용 로그
-    print(f"🔍 요청된 쿠키: {request.cookies}")
+    print(f"�� 요청된 쿠키: {request.cookies}")
+    print(f"�� access_token 쿠키: {token}")
+    
     if not token:
+        print("❌ 토큰이 없습니다")
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     user = verify_token(token)
+    print(f"�� verify_token 결과: {user}")
+    
     if not user:
+        print("❌ 토큰 검증 실패")
         raise HTTPException(status_code=401, detail="Invalid token")
     
-    user_exists = db.execute(text("SELECT user_idx FROM users WHERE user_idx = :user_idx"), 
-                             {"user_idx": user["user_idx"]}).fetchone()
+    print(f"✅ 토큰 검증 성공: {user}")
     
-    if not user_exists:
-        raise HTTPException(status_code=401, detail="User does not exist")
-
-    return {"user_idx": user["user_idx"]}
+    session_type = user.get("session_type", "member")
+    print(f"🔍 session_type: {session_type}")
+    
+    if session_type == "demo":
+        print("✅ Demo 세션 확인")
+        return {"user_idx" : 1, "session_type": "demo"}
+    
+    print(f"🔍 데이터베이스에서 사용자 확인: user_idx = {user['user_idx']}")
+    try:
+        user_exists = db.execute(text("SELECT user_idx FROM users WHERE user_idx = :user_idx"), 
+                                 {"user_idx": user["user_idx"]}).fetchone()
+        
+        print(f"🔍 데이터베이스 조회 결과: {user_exists}")
+        
+        if not user_exists:
+            print(f"❌ 사용자가 데이터베이스에 존재하지 않음: user_idx = {user['user_idx']}")
+            raise HTTPException(status_code=401, detail="User does not exist")
+        
+        print(f"✅ 사용자 확인 성공: user_idx = {user['user_idx']}")
+        return {"user_idx": user["user_idx"], "session_type": "member"}
+    except Exception as e:
+        print(f"❌ 데이터베이스 오류: {e}")
+        raise HTTPException(status_code=500, detail="Database error")

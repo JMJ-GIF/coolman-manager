@@ -1,14 +1,19 @@
 from sqlalchemy.sql import text  
 from sqlalchemy.orm import Session 
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import HTTPException, Depends, Query
+from fastapi import HTTPException, Depends, Query, Request
 
 from db import get_db
-from product.matches.router import router
 from product.matches.schema import *
+from product.matches.router import router
+from auth.dependencies import check_member_permission
 
 @router.delete("")
-def delete_matches(match_ids: List[int] = Query(...), db: Session = Depends(get_db)):
+def delete_matches(request: Request, match_ids: List[int] = Query(...), db: Session = Depends(get_db)):
+    
+    # Demo 세션 체크 - demo 세션이면 403 에러
+    check_member_permission(request)
+    
     try:
         with db.begin():
             # 🔹 존재하는 match_idx 조회

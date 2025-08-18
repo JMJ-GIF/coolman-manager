@@ -1,14 +1,19 @@
 from sqlalchemy.sql import text  
 from sqlalchemy.orm import Session 
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, Request
 
 from db import get_db
-from product.matches.router import router
 from product.matches.schema import *
+from product.matches.router import router
+from auth.dependencies import check_member_permission
 
 @router.put("/{match_idx}")
-def update_match(match_idx: int, match_data: MatchUpdate, db: Session = Depends(get_db)):
+def update_match(match_idx: int, match_data: MatchUpdate, request: Request, db: Session = Depends(get_db)):
+    
+    # Demo 세션 체크 - demo 세션이면 403 에러
+    check_member_permission(request)
+    
     try:
         with db.begin(): 
             # ✅ 1. Match 업데이트

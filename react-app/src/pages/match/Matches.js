@@ -109,7 +109,11 @@ function Matches() {
 
             showAlert("success", '매치 삭제에 성공하였습니다.');
         } catch (error) {
-            showAlert("warning", '삭제에 실패했습니다. 다시 시도해주세요.');            
+            if (error.response?.status === 403) {
+                showAlert("warning", "로그인을 하지 않는 경우 데이터 수정 및 추가가 불가합니다.");
+            } else {
+                showAlert("warning", '삭제에 실패했습니다. 다시 시도해주세요.');
+            }
         } finally {
             setLoading(false);
         }

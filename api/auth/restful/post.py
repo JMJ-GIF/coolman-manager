@@ -22,8 +22,8 @@ async def login(response: Response, login_data: LoginRequest):
         raise HTTPException(status_code=400, detail="Invalid user data")
 
     # JWT 생성
-    access_token = create_access_token(user_idx)
-    refresh_token = create_refresh_token(user_idx)
+    access_token = create_access_token(user_idx, session_type="member")
+    refresh_token = create_refresh_token(user_idx, session_type="member")
 
     # JWT를 HttpOnly 쿠키에 저장
     response.set_cookie(
@@ -43,6 +43,69 @@ async def login(response: Response, login_data: LoginRequest):
 
     return {"message": "Login successful"}
 
+@router.post("/demo-login")
+async def demo_login(response: Response):
+    # 기존 쿠키 삭제 - 더 강력한 삭제 방법
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        path="/",
+        domain=None,  # 명시적으로 domain 설정
+        samesite="None",
+        secure=True,
+        httponly=True,  # httponly도 명시
+    )
+    response.delete_cookie(
+        key=AUTH_REFRESH_COOKIE_NAME,
+        path="/",
+        domain=None,  # 명시적으로 domain 설정
+        samesite="None",
+        secure=True,
+        httponly=True,  # httponly도 명시
+    )
+    
+    # 추가로 다른 가능한 경로들도 삭제
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        path="/api",
+        domain=None,
+        samesite="None",
+        secure=True,
+        httponly=True,
+    )
+    response.delete_cookie(
+        key=AUTH_REFRESH_COOKIE_NAME,
+        path="/api",
+        domain=None,
+        samesite="None",
+        secure=True,
+        httponly=True,
+    )
+    
+    # 새로운 Demo 토큰 생성
+    access_token = create_access_token(user_idx=1, session_type="demo")
+    refresh_token = create_refresh_token(user_idx=1, session_type="demo")
+
+    # JWT를 HttpOnly 쿠키에 저장 - max_age 추가
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=access_token,
+        httponly=True,
+        secure=True,  
+        samesite="None",
+        max_age=3600,  # 1시간
+        path="/",
+    )
+    response.set_cookie(
+        key=AUTH_REFRESH_COOKIE_NAME,
+        value=refresh_token,
+        httponly=True,
+        secure=True,  
+        samesite="None",
+        max_age=86400,  # 24시간
+        path="/",
+    )
+
+    return {"message": "Demo Login successful"}
 
 @router.post("/refresh")
 async def refresh_token(request: Request, response: Response):
@@ -61,7 +124,8 @@ async def refresh_token(request: Request, response: Response):
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     # 새로운 Access Token 발급
-    new_access_token = create_access_token(user_data["user_idx"])
+    session_type = user_data.get("session_type", "member")
+    new_access_token = create_access_token(user_data["user_idx"], session_type=session_type)
     print(f"✅ Issued new access_token: {new_access_token}")
 
     response.set_cookie(

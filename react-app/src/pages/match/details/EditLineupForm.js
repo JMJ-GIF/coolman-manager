@@ -1,7 +1,7 @@
 import './Details.scss';
 import Select from "react-select";
 import { useFieldArray } from "react-hook-form";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import x_square_svg from "../../../assets/icons/x_square.svg";
 import add_square_svg from "../../../assets/icons/add_square.svg";
 import coolman_logo from "../../../assets/images/coolman-logo-transparent.png";
@@ -41,6 +41,11 @@ const EditLineupForm = ({
           label: tactic,
         })
       );
+    
+    const sortedUsers = useMemo(
+        () => [...users].sort((a, b) => (a.name || "").localeCompare(b.name || "", "ko")),
+        [users]
+    );
     
     useEffect(() => {
         if (filteredQuarter && filteredQuarter.tactics) {
@@ -249,7 +254,7 @@ const EditLineupForm = ({
                                         top: `${lineup.top_coordinate}%`,
                                         left: `${lineup.left_coordinate}%`,                                                                                
                                     }}>
-                                        {users.map((user) => (
+                                        {sortedUsers.map((user) => (
                                             <li
                                                 key={user.user_idx}
                                                 className="dropdown-item"
@@ -311,7 +316,7 @@ const EditLineupForm = ({
                                                 />
                                                 {openDropdown === subIndex && (
                                                     <ul className="dropdown-menu">
-                                                        {users.map((user) => (
+                                                        {sortedUsers.map((user) => (
                                                             <li
                                                                 key={user.user_idx}
                                                                 className="dropdown-item"

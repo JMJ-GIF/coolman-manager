@@ -4,11 +4,12 @@ from datetime import datetime
 from dotenv import load_dotenv
 from sqlalchemy.sql import text
 from sqlalchemy.orm import Session  
-from fastapi import UploadFile, File, Form, HTTPException, Depends
+from fastapi import UploadFile, File, Form, HTTPException, Depends, Request
 
 from db import get_db
 from image_client import upload_image 
 from product.users.router import router
+from auth.dependencies import check_member_permission, get_session_type
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -17,7 +18,7 @@ raw_name_list = os.getenv("VALID_NAME_LIST", "")
 VALID_NAME_LIST = [name.replace(" ", "") for name in raw_name_list.split(",") if name.strip()]
 
 @router.post("", status_code=201)
-async def create_user(
+async def create_user(    
     social_uuid: str = Form(...),
     name: str = Form(...),
     position: str = Form(...),
@@ -25,7 +26,8 @@ async def create_user(
     role: str = Form(...),
     image: UploadFile = File(None),  # 이미지 파일 수신
     db: Session = Depends(get_db)
-):
+):    
+
     try:
         join_date = datetime.utcnow()
 
@@ -77,7 +79,7 @@ async def create_user(
         # 이미지 업로드 및 URL 반환
         image_url = None
         if image:
-            raw_image_url = upload_image(image.file, user_idx)
+            raw_image_url = upload_image(image.file, user_idx, session_type='member')
             image_url = f"{raw_image_url}?v={int(datetime.utcnow().timestamp())}"
 
 

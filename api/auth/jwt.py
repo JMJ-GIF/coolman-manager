@@ -11,22 +11,24 @@ AUTH_ALGORITHM = 'HS256'
 AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = 30
 AUTH_REFRESH_TOKEN_EXPIRE_DAYS = 7
 
-def create_access_token(user_idx: int):
+def create_access_token(user_idx: int, session_type: str = "member"):
     """
     Access Token 생성 (30분 만료)
     """
     payload = {
         "user_idx": user_idx,
+        "session_type": session_type,
         "exp": datetime.utcnow() + timedelta(minutes=AUTH_ACCESS_TOKEN_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, AUTH_SECRET_KEY, algorithm=AUTH_ALGORITHM)
 
-def create_refresh_token(user_idx: int):
+def create_refresh_token(user_idx: int, session_type: str = "member"):
     """
     Refresh Token 생성 (7일 만료)
     """
     payload = {
         "user_idx": user_idx,
+        "session_type": session_type,
         "exp": datetime.utcnow() + timedelta(days=AUTH_REFRESH_TOKEN_EXPIRE_DAYS),
         "type": "refresh"
     }

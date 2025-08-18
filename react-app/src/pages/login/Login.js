@@ -1,14 +1,20 @@
 import './Login.scss';
+import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../context/AuthContext";
 import CoolManLogo from '../../assets/images/coolman-logo-transparent.png';
 import BandLogo from '../../assets/icons/bandlogo.svg';
 import CoolManManager from '../../assets/icons/coolman.svg';
 import NaverLogin from '../../assets/icons/naver_login.svg';
 
+
+
 function LoginPage() {
   const STATE = 'coolman';
   const navigate = useNavigate();  
+  const { fetchUser } = useAuth();
+  const API_URL = process.env.REACT_APP_API_URL;
   const CLIENT_ID = process.env.REACT_APP_LOGIN_CLIENT_ID;   
   const NAVER_REDIRECT_URL = process.env.REACT_APP_LOGIN_REDIRECT_URL;
   const NAVER_AUTH_URL = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${CLIENT_ID}&state=${STATE}&redirect_uri=${NAVER_REDIRECT_URL}`;
@@ -17,10 +23,21 @@ function LoginPage() {
   const handleNaverLogin = (e) => {
     window.location.href = NAVER_AUTH_URL;
   };
-  // const handleDemoLogin = (e) => {
-  //   e.preventDefault(); 
-  //   navigate('/matches');
-  // }
+  const handleDemoLogin = async (e) => {
+    e.preventDefault(); 
+    try {
+      const response = await axios.post(`${API_URL}/auth/demo-login`, {}, {withCredentials: true});
+      console.log("✅ Demo 로그인 성공:", response.data);
+      
+      // AuthContext 상태 업데이트
+      await fetchUser();
+
+      // 상태 업데이트 후 페이지 이동
+      navigate('/matches');
+    } catch (error) {
+      console.error("❌ Demo 로그인 실패:", error);
+    }
+  }
 
   return (
     <div className="img-background">
@@ -35,10 +52,7 @@ function LoginPage() {
           <hr className="divider"/>
         </div>
         <div className="login-bottom">
-          {/* <p className="demo-link" onClick={handleDemoLogin}>로그인 없이 둘러보기</p>           */}
-          <a href="https://band.us/band/70861479/" target="_blank" rel="noopener noreferrer">
-            <img src={BandLogo} alt="밴드" className="logo-sns" />
-          </a>
+          <p className="demo-link" onClick={handleDemoLogin}>로그인 없이 둘러보기</p>                    
         </div>
       </div>
     </div>

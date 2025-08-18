@@ -38,7 +38,8 @@ services:
       - API_STAGE=dev
       - S3_BUCKET_NAME=coolman-storage            
       - NAVER_REDIRECT_URI=https://127.0.0.1/callback
-      - S3_ENDPOINT_URL=https://kr.object.ncloudstorage.com      
+      - S3_ENDPOINT_URL=https://kr.object.ncloudstorage.com 
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432           
 
   db:
     image: postgres:15

@@ -1,18 +1,20 @@
 import logging
 from datetime import datetime
 from typing import Optional
-from fastapi import HTTPException, Depends, Form, File, UploadFile
+from fastapi import HTTPException, Depends, Form, File, UploadFile, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text  
 from db import get_db
 from image_client import upload_image, delete_image
 from product.users.router import router
+from auth.dependencies import check_member_permission, get_session_type
 
 UPLOAD_DIR = "uploads/"
 
 @router.put("/{user_idx}")
 async def update_user(
     user_idx: int,
+    request: Request,
     name: str = Form(...),
     position: str = Form(...),
     back_number: int = Form(...),
@@ -21,6 +23,10 @@ async def update_user(
     image: Optional[UploadFile] = File(None), 
     db: Session = Depends(get_db)
 ):
+    # Demo 세션 체크 - demo 세션이면 403 에러
+    check_member_permission(request)
+    session_type = get_session_type(request)
+
     try:
         with db.begin():  # 🔹 트랜잭션 시작
             
@@ -42,7 +48,7 @@ async def update_user(
 
             image_url = existing_user.image_url
             if image:
-                raw_image_url = upload_image(image.file, user_idx)
+                raw_image_url = upload_image(image.file, user_idx, session_type)
                 image_url = f"{raw_image_url}?v={int(datetime.utcnow().timestamp())}"
   
             update_query = """

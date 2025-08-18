@@ -6,11 +6,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, Response, Request, Depends
 
 from db import get_db
-from product.matches.router import router
 from product.matches.schema import *
+from product.matches.router import router
+from auth.dependencies import check_member_permission
+
 
 @router.post("")
-def create_match(match_data: MatchCreate, db: Session = Depends(get_db)):
+def create_match(match_data: MatchCreate, request: Request, db: Session = Depends(get_db)):
+    # Demo 세션 체크 - demo 세션이면 403 에러
+    check_member_permission(request)
+    
     try:
         with db.begin():  # 트랜잭션 시작
             # ✅ 1. Match 테이블 삽입

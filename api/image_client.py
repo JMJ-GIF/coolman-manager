@@ -22,8 +22,8 @@ s3 = session.client(
 BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 STAGE = os.getenv('API_STAGE')
 
-def upload_image(image: bytes, user_idx: int) -> str:
-    object_name = f'{STAGE}/{user_idx}.jpeg'
+def upload_image(image: bytes, user_idx: int, session_type: str) -> str:
+    object_name = f'{STAGE}/{session_type}/{user_idx}.jpeg'
     try:
         s3.upload_fileobj(
             Fileobj = image, 
@@ -39,9 +39,9 @@ def upload_image(image: bytes, user_idx: int) -> str:
         print(f"Error uploading image: {e}")
         raise
 
-def delete_image(user_idx: int) -> dict:
+def delete_image(user_idx: int, session_type: str) -> dict:
     
-    object_name = f"{STAGE}/{user_idx}.jpeg"
+    object_name = f'{STAGE}/{session_type}/{user_idx}.jpeg'
     s3.delete_object(Bucket=BUCKET_NAME, Key=object_name)
 
     return {"message": "Image deleted successfully!"}

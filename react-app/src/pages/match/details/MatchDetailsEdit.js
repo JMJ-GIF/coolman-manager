@@ -299,11 +299,16 @@ function MatchDetailsEdit() {
                 navigate(`/matches/${match_idx}/`);
             }
         } catch (error) {
-            showAlert("warning", '수정에 실패했습니다. 입력값을 확인해주세요.');
+            // Demo 세션 에러 처리
+            if (error.response?.status === 403) {
+                showAlert("warning", "로그인을 하지 않는 경우 데이터 수정 및 추가가 불가합니다.");
+            } else {
+                showAlert("warning", '수정에 실패했습니다. 입력값을 확인해주세요.');
+            }
             console.error("❌ 오류 발생:", error.response?.data || error.message);                        
         } finally {
             setLoading(false); // 로딩 상태 해제
-        }   
+        }
 
     });
 

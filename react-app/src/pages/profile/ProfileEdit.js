@@ -120,6 +120,12 @@ function ProfileEdit() {
 
         } catch (error) {
             console.log(error)
+
+            if (error.response?.status === 403) {
+                showAlert("warning", "로그인을 하지 않는 경우 데이터 수정 및 추가가 불가합니다.");
+                return;
+            }
+
             if (error.response && error.response.data) {        
                 const errorCode = error.response.data.detail.error_code;
                 const message = error.response.data.detail.error_message;
@@ -131,7 +137,7 @@ function ProfileEdit() {
                     showAlert("warning", "알 수 없는 오류 발생: " + message);                          
                   }
             } else {   
-                showAlert("warning", "회원가입 중 오류가 발생했습니다.");                                               
+                showAlert("warning", "알수없는 오류가 발생했습니다.");                                                            
             }
             console.error("❌ 프로필 업데이트 실패:", error);
         }
