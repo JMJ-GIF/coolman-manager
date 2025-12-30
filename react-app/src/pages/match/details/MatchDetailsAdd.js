@@ -5,12 +5,14 @@ import {useForm} from "react-hook-form";
 import EditResultForm from "./EditResultForm";
 import EditLineupForm from "./EditLineupForm";
 import EditQuarterForm from "./EditQuarterForm";
+import EditMaterialsForm from "./EditMaterialsForm";
 import React, { useState, useEffect } from "react";
 import { useAlert } from "../../../context/AlertContext";
 import { useNavigate, useParams } from "react-router-dom";
 import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
-import LoadingSpinner from "../../../components/LoadingSpinner"; 
+import LoadingSpinner from "../../../components/LoadingSpinner";
+import ImageCropper from "../../../components/ImageCropper"; 
 
 
 const determineResult = (winningPoint, losingPoint) => {
@@ -38,19 +40,25 @@ const formatDateTime = (date, timeString) => {
 
 function MatchDetailsAdd() {
     // Config
-    const navigate = useNavigate();             
+    const navigate = useNavigate();
     const { showAlert } = useAlert();
-    const API_URL = process.env.REACT_APP_API_URL;       
-    const [loading, setLoading] = useState(false);    
+    const API_URL = process.env.REACT_APP_API_URL;
+    const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('goals');
 
     // API DATA
-    const [users, setUsers] = useState([]);;   
-    const [positions, setPositions] = useState([]);    
+    const [users, setUsers] = useState([]);;
+    const [positions, setPositions] = useState([]);
+
+    // Image Upload States
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [croppedImage, setCroppedImage] = useState(null);
+    const [matchPhotoUrl, setMatchPhotoUrl] = useState(null);
+    const [showCropper, setShowCropper] = useState(false);
 
     // Form Define
     const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm({
-        mode: "onChange",       
+        mode: "onChange",
     });
     
     const fetchData = async () => {
@@ -137,7 +145,34 @@ function MatchDetailsAdd() {
             initMatchData();
         }
     }, [positions]);
-    
+
+    const handleOpenFilePicker = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+
+        input.onchange = (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) {
+                setSelectedFile(file);
+                setShowCropper(true);
+            }
+        };
+
+        input.click();
+    };
+
+    const handleCroppedImage = (blob, previewUrl) => {
+        setCroppedImage(previewUrl);
+        setMatchPhotoUrl(previewUrl);
+        setShowCropper(false);
+    };
+
+    const handlePhotoDelete = () => {
+        setCroppedImage(null);
+        setMatchPhotoUrl(null);
+        setSelectedFile(null);
+    };
 
     const handleFormSubmit = handleSubmit(async (data) => {
         const { dt, start_time, end_time, quarters } = data;
@@ -295,12 +330,24 @@ function MatchDetailsAdd() {
         console.log("최종 제출 데이터:", data);
         try {
             setLoading(true);
-            const response = await axios.post(`${API_URL}/matches`, data, {
-                headers: { "Content-Type": "application/json" },
+
+            // FormData 생성
+            const formData = new FormData();
+            formData.append("data", JSON.stringify(data));
+
+            // 이미지가 있으면 추가
+            if (croppedImage) {
+                const response = await fetch(croppedImage);
+                const blob = await response.blob();
+                formData.append("photo", blob, "match.jpeg");
+            }
+
+            const response = await axios.post(`${API_URL}/matches`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
             });
             console.log("✅ 응답 상태 코드:", response.status);
-            console.log("✅ 성공:", response.data);            
-        
+            console.log("✅ 성공:", response.data);
+
             // ✅ 서버 응답이 정상적이라면 페이지 이동
             if (response.status === 200 || response.status === 201) {
                 showAlert("success", '매치가 성공적으로 생성되었습니다!');
@@ -336,19 +383,19 @@ function MatchDetailsAdd() {
                 {loading ? (
                     <LoadingSpinner />
                 ) : (
-                    <>   
-                        <EditResultForm 
+                    <>
+                        <EditResultForm
                             setValue={setValue}
                             register={register}
                             errors={errors}
                             watch={watch}
                             onSubmit={handleFormSubmit}
                             control={control}
-                            positions={positions}                            
+                            positions={positions}
                         />
                         <div className="match-details">
                             <div className="header-card">
-                                <h2>새 경기 추가</h2>
+                                <h2>경기상세</h2>
                                 <div className="tabs">
                                     <button
                                         className={`tab-button ${activeTab === 'goals' ? 'active' : ''}`}
@@ -386,6 +433,12 @@ function MatchDetailsAdd() {
                                 />
                             ) : null}
                         </div>
+                        <EditMaterialsForm
+                            register={register}
+                            matchPhotoUrl={matchPhotoUrl}
+                            onPhotoClick={handleOpenFilePicker}
+                            onPhotoDelete={handlePhotoDelete}
+                        />
                     </>
                 )}
             </div>
@@ -394,6 +447,13 @@ function MatchDetailsAdd() {
                 onConfirm={handleConfirmSubmit}
                 onCancel={handleCancel}
             />
+            {showCropper && (
+                <ImageCropper
+                    file={selectedFile}
+                    onCrop={handleCroppedImage}
+                    onClose={() => setShowCropper(false)}
+                />
+            )}
         </div>
     );
 }

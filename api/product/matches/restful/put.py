@@ -1,44 +1,101 @@
-from sqlalchemy.sql import text  
-from sqlalchemy.orm import Session 
+import json
+from io import BytesIO
+from sqlalchemy.sql import text
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import HTTPException, Depends, Request
+from fastapi import HTTPException, Depends, Request, File, UploadFile, Form
+from typing import Optional
 
 from db import get_db
 from product.matches.schema import *
 from product.matches.router import router
 from auth.dependencies import check_member_permission
+from auth.jwt import verify_token
+from image_client import upload_match_image
 
 @router.put("/{match_idx}")
-def update_match(match_idx: int, match_data: MatchUpdate, request: Request, db: Session = Depends(get_db)):
-    
+def update_match(
+    match_idx: int,
+    data: str = Form(...),
+    photo: Optional[UploadFile] = File(None),
+    request: Request = None,
+    db: Session = Depends(get_db)
+):
     # Demo 세션 체크 - demo 세션이면 403 에러
     check_member_permission(request)
-    
+
+    # JSON 데이터 파싱
     try:
-        with db.begin(): 
+        match_dict = json.loads(data)
+        match_data = MatchUpdate(**match_dict)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON data: {str(e)}")
+
+    # 세션 타입 확인
+    token = request.cookies.get("access_token")
+    payload = verify_token(token) or {}
+    session_type = "demo" if payload.get("session_type") == "demo" else "member"
+
+    try:
+        with db.begin():
+            # 이미지가 있으면 업로드
+            photo_url = None
+            if photo:
+                image_bytes = BytesIO(photo.file.read())
+                photo_url = upload_match_image(image_bytes, match_idx, session_type)
+
             # ✅ 1. Match 업데이트
-            match_query = """
-                UPDATE matches
-                SET dt = :dt, result = :result, winning_point = :winning_point, 
-                    losing_point = :losing_point, opposing_team = :opposing_team, 
-                    location = :location, start_time = :start_time, end_time = :end_time,
-                    weather = :weather, num_players = :num_players, main_tactics = :main_tactics
-                WHERE match_idx = :match_idx
-            """
-            match_values = {
-                "match_idx": match_idx,
-                "dt": match_data.dt,
-                "result": match_data.result,
-                "winning_point": match_data.winning_point,
-                "losing_point": match_data.losing_point,
-                "opposing_team": match_data.opposing_team,
-                "location": match_data.location,
-                "start_time": match_data.start_time,
-                "end_time": match_data.end_time,
-                "weather": match_data.weather,
-                "num_players": match_data.num_players,
-                "main_tactics": match_data.main_tactics
-            }
+            if photo_url:
+                match_query = """
+                    UPDATE matches
+                    SET dt = :dt, result = :result, winning_point = :winning_point,
+                        losing_point = :losing_point, opposing_team = :opposing_team,
+                        location = :location, start_time = :start_time, end_time = :end_time,
+                        weather = :weather, num_players = :num_players, main_tactics = :main_tactics,
+                        video_url = :video_url, photo_url = :photo_url
+                    WHERE match_idx = :match_idx
+                """
+                match_values = {
+                    "match_idx": match_idx,
+                    "dt": match_data.dt,
+                    "result": match_data.result,
+                    "winning_point": match_data.winning_point,
+                    "losing_point": match_data.losing_point,
+                    "opposing_team": match_data.opposing_team,
+                    "location": match_data.location,
+                    "start_time": match_data.start_time,
+                    "end_time": match_data.end_time,
+                    "weather": match_data.weather,
+                    "num_players": match_data.num_players,
+                    "main_tactics": match_data.main_tactics,
+                    "video_url": match_data.video_url,
+                    "photo_url": photo_url
+                }
+            else:
+                match_query = """
+                    UPDATE matches
+                    SET dt = :dt, result = :result, winning_point = :winning_point,
+                        losing_point = :losing_point, opposing_team = :opposing_team,
+                        location = :location, start_time = :start_time, end_time = :end_time,
+                        weather = :weather, num_players = :num_players, main_tactics = :main_tactics,
+                        video_url = :video_url
+                    WHERE match_idx = :match_idx
+                """
+                match_values = {
+                    "match_idx": match_idx,
+                    "dt": match_data.dt,
+                    "result": match_data.result,
+                    "winning_point": match_data.winning_point,
+                    "losing_point": match_data.losing_point,
+                    "opposing_team": match_data.opposing_team,
+                    "location": match_data.location,
+                    "start_time": match_data.start_time,
+                    "end_time": match_data.end_time,
+                    "weather": match_data.weather,
+                    "num_players": match_data.num_players,
+                    "main_tactics": match_data.main_tactics,
+                    "video_url": match_data.video_url
+                }
 
             db.execute(text(match_query), match_values)
 

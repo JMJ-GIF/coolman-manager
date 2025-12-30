@@ -39,8 +39,35 @@ def upload_image(image: bytes, user_idx: int, session_type: str) -> str:
         print(f"Error uploading image: {e}")
         raise
 
+def upload_match_image(image: bytes, match_idx: int, session_type: str) -> str:
+    object_name = f'{STAGE}/{session_type}/matches/{match_idx}.jpeg'
+    try:
+        s3.upload_fileobj(
+            Fileobj = image,
+            Bucket = BUCKET_NAME,
+            Key = object_name,
+            ExtraArgs={"ACL": "public-read"}
+        )
+
+        image_url = f"{os.getenv('S3_ENDPOINT_URL')}/{BUCKET_NAME}/{object_name}"
+        print(f"Match image uploaded successfully: {image_url}")
+        return image_url
+    except Exception as e:
+        print(f"Error uploading match image: {e}")
+        raise
+
+def delete_match_image(match_idx: int, session_type: str) -> dict:
+    object_name = f'{STAGE}/{session_type}/matches/{match_idx}.jpeg'
+    try:
+        s3.delete_object(Bucket=BUCKET_NAME, Key=object_name)
+        print(f"Match image deleted successfully: {object_name}")
+        return {"message": "Match image deleted successfully!"}
+    except Exception as e:
+        print(f"Error deleting match image: {e}")
+        raise
+
 def delete_image(user_idx: int, session_type: str) -> dict:
-    
+
     object_name = f'{STAGE}/{session_type}/{user_idx}.jpeg'
     s3.delete_object(Bucket=BUCKET_NAME, Key=object_name)
 

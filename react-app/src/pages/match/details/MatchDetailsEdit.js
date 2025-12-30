@@ -4,12 +4,14 @@ import {useForm} from "react-hook-form";
 import EditResultForm from "./EditResultForm";
 import EditLineupForm from "./EditLineupForm";
 import EditQuarterForm from "./EditQuarterForm";
+import EditMaterialsForm from "./EditMaterialsForm";
 import React, { useState, useEffect } from "react";
 import { useAlert } from "../../../context/AlertContext";
 import { useNavigate, useParams } from "react-router-dom";
 import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import ImageCropper from "../../../components/ImageCropper";
 
 const determineResult = (winningPoint, losingPoint) => {
     if (winningPoint > losingPoint) return "승리";
@@ -43,32 +45,41 @@ function formatTime(isoString) {
 
 function MatchDetailsEdit() {
     // Config
-    const navigate = useNavigate();         
+    const navigate = useNavigate();
     const { showAlert } = useAlert();
-    const { match_idx } = useParams();    
-    const API_URL = process.env.REACT_APP_API_URL;       
+    const { match_idx } = useParams();
+    const API_URL = process.env.REACT_APP_API_URL;
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('goals');
 
     // API DATA
-    const [users, setUsers] = useState([]);;   
-    const [positions, setPositions] = useState([]); 
-    const [matchDetails, setMatchDetails] = useState(null);        
+    const [users, setUsers] = useState([]);;
+    const [positions, setPositions] = useState([]);
+    const [matchDetails, setMatchDetails] = useState(null);
+
+    // Image Upload States
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [croppedImage, setCroppedImage] = useState(null);
+    const [matchPhotoUrl, setMatchPhotoUrl] = useState(null);
+    const [showCropper, setShowCropper] = useState(false);
 
     // Form Define
     const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm({
-        mode: "onChange",       
+        mode: "onChange",
     });  
     
     // Init Forms
     const initMatchForm = (matchResponse) => {
-        Object.entries(matchResponse.data).forEach(([key, value]) => {                
+        Object.entries(matchResponse.data).forEach(([key, value]) => {
             if (key === 'start_time' || key === 'end_time'){
                 setValue(key, formatTime(value))
+            } else if (key === 'photo_url' && value) {
+                setMatchPhotoUrl(value);
+                setValue(key, value);
             } else {
                 setValue(key, value);
-            }                                
-        });  
+            }
+        });
     };
     const initQuarterForm = (quarterResponse, goalsResponse, lineupResponse) => {
         if (
@@ -129,10 +140,49 @@ function MatchDetailsEdit() {
     };
     
     useEffect(() => {
-        fetchAndInitData();        
+        fetchAndInitData();
     }, [match_idx, setValue]);
 
-    
+    const handleOpenFilePicker = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+
+        input.onchange = (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) {
+                setSelectedFile(file);
+                setShowCropper(true);
+            }
+        };
+
+        input.click();
+    };
+
+    const handleCroppedImage = (blob, previewUrl) => {
+        setCroppedImage(previewUrl);
+        setMatchPhotoUrl(previewUrl);
+        setShowCropper(false);
+    };
+
+    const handlePhotoDelete = async () => {
+        try {
+            // Delete from storage if photo exists
+            if (matchPhotoUrl) {
+                await axios.delete(`${API_URL}/matches/${match_idx}/photo`);
+            }
+            // Clear local state
+            setCroppedImage(null);
+            setMatchPhotoUrl(null);
+            setSelectedFile(null);
+            setValue("photo_url", null);
+            showAlert("success", "사진이 삭제되었습니다.");
+        } catch (error) {
+            console.error("Error deleting photo:", error);
+            showAlert("warning", "사진 삭제에 실패했습니다.");
+        }
+    };
+
     const handleFormSubmit = handleSubmit(async (data) => {
         const { dt, start_time, end_time, quarters } = data;
 
@@ -285,14 +335,26 @@ function MatchDetailsEdit() {
             return;
         }
 
-        // 4. 데이터 제출   
-        console.log("최종 제출 데이터:", data);     
+        // 4. 데이터 제출
+        console.log("최종 제출 데이터:", data);
         try {
             setLoading(true);
-            const response = await axios.put(`${API_URL}/matches/${match_idx}`, data, {
-                headers: { "Content-Type": "application/json" },
-            });                     
-        
+
+            // FormData 생성
+            const formData = new FormData();
+            formData.append("data", JSON.stringify(data));
+
+            // 이미지가 있으면 추가
+            if (croppedImage) {
+                const response = await fetch(croppedImage);
+                const blob = await response.blob();
+                formData.append("photo", blob, "match.jpeg");
+            }
+
+            const response = await axios.put(`${API_URL}/matches/${match_idx}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
             // ✅ 서버 응답이 정상적이라면 페이지 이동
             if (response.status === 200 || response.status === 201) {
                 showAlert("success", '수정이 성공하였습니다!');
@@ -305,7 +367,7 @@ function MatchDetailsEdit() {
             } else {
                 showAlert("warning", '수정에 실패했습니다. 입력값을 확인해주세요.');
             }
-            console.error("❌ 오류 발생:", error.response?.data || error.message);                        
+            console.error("❌ 오류 발생:", error.response?.data || error.message);
         } finally {
             setLoading(false); // 로딩 상태 해제
         }
@@ -329,15 +391,15 @@ function MatchDetailsEdit() {
                 {loading ? (
                     <LoadingSpinner />
                 ) : matchDetails ? (
-                    <>   
-                        <EditResultForm 
+                    <>
+                        <EditResultForm
                             setValue={setValue}
                             register={register}
                             errors={errors}
                             watch={watch}
                             onSubmit={handleFormSubmit}
                             control={control}
-                            positions={positions}                            
+                            positions={positions}
                         />
                         <div className="match-details">
                             <div className="header-card">
@@ -379,6 +441,12 @@ function MatchDetailsEdit() {
                                 />
                             ) : null}
                         </div>
+                        <EditMaterialsForm
+                            register={register}
+                            matchPhotoUrl={matchPhotoUrl}
+                            onPhotoClick={handleOpenFilePicker}
+                            onPhotoDelete={handlePhotoDelete}
+                        />
                     </>
                 ) : (
                     <p>매치 상세 정보가 없습니다.</p>
@@ -389,6 +457,13 @@ function MatchDetailsEdit() {
                 onConfirm={handleConfirmSubmit}
                 onCancel={handleCancel}
             />
+            {showCropper && (
+                <ImageCropper
+                    file={selectedFile}
+                    onCrop={handleCroppedImage}
+                    onClose={() => setShowCropper(false)}
+                />
+            )}
         </div>
     );
 }

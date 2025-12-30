@@ -9,9 +9,8 @@ const EditResultForm = ({
     errors,
     watch,
     onSubmit,
-    control, 
-    positions,    
-    
+    control,
+    positions,
 }) => {
     // const winningPoint = watch("winning_point");
     // const losingPoint = watch("losing_point");
@@ -177,22 +176,22 @@ const EditResultForm = ({
                                     menuPortal: (base) => ({ ...base, zIndex: 99999 }),
                                     option: (base) => ({
                                       ...base,
-                                      fontSize: "16px",  
+                                      fontSize: "16px",
                                       textAlign: "center",
                                     }),
                                     menu: (base) => ({
                                       ...base,
-                                      fontSize: "16px",  
+                                      fontSize: "16px",
                                     }),
                                 }}
-                            />                              
+                            />
                             )}
                         />
                         {errors.main_tactics && (
                             <p className="result-error-message">{errors.main_tactics.message}</p>
                         )}
                     </div>
-                </div>                
+                </div>
             </div>
         </form>
     );

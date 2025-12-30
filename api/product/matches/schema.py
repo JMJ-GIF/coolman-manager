@@ -16,6 +16,8 @@ class Match(BaseModel):
     num_players: int
     main_tactics: str = Field(..., max_length=255)
     status: str = Field(..., max_length=50)
+    photo_url: Optional[str] = None
+    video_url: Optional[str] = None
     created_at: datetime
 
 class Quarter(BaseModel):
@@ -88,6 +90,7 @@ class MatchCreate(BaseModel):
     weather: str
     num_players: int
     main_tactics: str
+    video_url: Optional[str] = None
     quarters: Optional[List[QuarterCreate]] = []
 
 class GoalUpdate(BaseModel):
@@ -126,4 +129,5 @@ class MatchUpdate(BaseModel):
     weather: str
     num_players: int
     main_tactics: str
+    video_url: Optional[str] = None
     quarters: Optional[List[QuarterUpdate]] = []

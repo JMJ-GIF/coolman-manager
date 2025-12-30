@@ -6,6 +6,8 @@ import { useAlert } from "../../context/AlertContext";
 import FloatingBar from "../../components/FloatingBar";
 import NavigationBar from "../../components/NavigationBar";
 import location_svg from "../../assets/icons/location.svg";
+import photo_svg from "../../assets/icons/photo.svg";
+import video_svg from "../../assets/icons/video.svg";
 import LoadingSpinner from "../../components/LoadingSpinner";
 
 function Matches() {
@@ -169,23 +171,35 @@ function Matches() {
                         >
                         <div className='flag-info' data-result={card.result}>
                             <p>{card.dt}</p>
-                            <p>{card.result}</p> 
+                            <p>{card.result}</p>
                         </div>
                         <div>
                             <p>vs</p>
-                        </div>                                
-                        <div className='team-info'>                                                                    
+                        </div>
+                        <div className='team-info'>
                             <p>{card.opposing_team}</p>
                         </div>
                         <div className="score-info" data-result={card.result}>
-                            <p>{card.winning_point}</p> 
-                            <p>:</p> 
-                            <p>{card.losing_point}</p>                                    
-                        </div> 
+                            <p>{card.winning_point}</p>
+                            <p>:</p>
+                            <p>{card.losing_point}</p>
+                        </div>
                         <div className='location-info'>
                             <img src={location_svg} alt="Location" />
-                            <p>{card.location}</p>  
-                        </div>                                                                                                                              
+                            <p>{card.location}</p>
+                        </div>
+                        <div className='media-icons'>
+                            {card.photo_url && card.video_url ? (
+                                <>
+                                    <img src={photo_svg} alt="Photo" className="media-icon" />
+                                    <img src={video_svg} alt="Video" className="media-icon" />
+                                </>
+                            ) : card.photo_url ? (
+                                <img src={photo_svg} alt="Photo" className="media-icon" />
+                            ) : card.video_url ? (
+                                <img src={video_svg} alt="Video" className="media-icon" />
+                            ) : null}
+                        </div>
                         </div>
                     </div>
                     ))

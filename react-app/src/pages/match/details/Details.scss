@@ -287,6 +287,7 @@
     background-color: #fff;    
     padding: 10px;  
     border-radius: 2%; 
+    margin-bottom: 20px;
 
     .header-card {
         display: flex;
@@ -1064,7 +1065,7 @@
     margin: 20px auto 0; 
     transition: background-color 0.3s ease, transform 0.2s ease;
     width: 100%; 
-    margin-bottom: 200px;  
+    margin-bottom: 50px;  
 
     &:hover {
         background-color: #2980b9; 
@@ -1086,11 +1087,239 @@
     }
 }
 
-.result-error-message {    
+.result-error-message {
     padding: 10px; /* 내부 여백 */
     font-size: 0.5em; /* 폰트 크기 */
     font-weight: bold; /* 굵은 텍스트 */
     text-align: center; /* 텍스트 중앙 정렬 */
-    margin-top: 20px; /* 메시지 위에 10px 여백 추가 */        
+    margin-top: 20px; /* 메시지 위에 10px 여백 추가 */
     border-radius: 4px; /* 둥근 모서리 */
+}
+
+// Photo Upload Card Styles
+.photo-upload-card {
+    margin-bottom: 20px;
+    
+    span {
+        font-size: 0.5em; 
+        color: #888;
+        margin-bottom: 15px;
+    }
+    .photo-upload-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .photo-upload-container {
+            flex: 1;            
+            min-height: 300px; 
+            min-width: 200px;           
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f8f8;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;            
+
+            &:hover {
+                border-color: var(--background-win-color);
+                background-color: #f0f0f0;
+            }
+
+            .match-photo-preview {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 6px;
+            }
+
+            .photo-placeholder {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                color: #888;
+
+                .upload-icon {
+                    width: 40px;
+                    height: 40px;
+                    opacity: 0.5;
+                }
+
+                p {
+                    font-size: 0.9em;
+                    font-weight: normal;
+                    margin: 0;
+                }
+            }
+        }
+
+        .delete-photo-button {
+            background-color: #e74c3c;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            height: 44px;
+
+            img {
+                width: 20px;
+                height: 20px;
+                filter: invert(1);
+            }
+
+            &:hover {
+                background-color: #c0392b;
+                transform: scale(1.05);
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+    }
+}
+
+// Match Materials Section
+.match-materials {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 2%;
+    margin-bottom: 20px;
+
+    .header-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+
+        h2 {
+            margin: 0;
+            margin-bottom: 20px;
+        }
+    }
+
+    .materials-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 20px;        
+
+        .material-item {
+            h3 {
+                font-size: 1em;
+                color: #888;
+                margin-bottom: 10px;
+            }
+
+            .match-photo {
+                width: 100%;
+                max-width: 600px;
+                height: auto;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .video-button {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 24px;
+                background-color: var(--background-win-color);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+                .video-icon {
+                    width: 20px;
+                    height: 20px;
+                    filter: invert(1);
+                }
+
+                &:hover {
+                    background-color: darken(#4CAF50, 10%);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    transform: translateY(-2px);
+                }
+            }
+        }
+    }
+}
+
+.video-upload-card {
+                
+    min-width: 0;
+    
+    &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    }
+
+    span {
+        font-size: 0.5em; 
+        color: #888;
+        margin-bottom: 15px;
+    }
+                
+    .text-input {
+        width: 100%;
+        padding-bottom: 8px;
+        padding-top: 8px;
+        padding-left: 0px;
+        padding-right: 0px;
+        font-size: 16px;
+        background-color: #f8f8f8;
+        border: none;
+        border-bottom: 2px solid #ccc; 
+        border-radius: 4px;
+        outline: none;
+        transition: all 0.3s ease;
+        text-align: center;      
+        appearance: none; 
+        -webkit-appearance: none;
+        -moz-appearance: none;   
+        font-weight: normal;                   
+    
+        &:focus {
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            border-color: #007bff;
+        }
+
+        &.error {
+            border: 2px solid red; /* 테두리 빨간색 */
+            background-color: #ffe6e6;
+        }
+    }
+
+}
+
+
+
+// Match Materials Edit Section
+.match-materials-edit {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 2%;
+    margin-bottom: 20px;
+
+    .header-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+
+        h2 {
+            margin: 0;
+        }
+    }
 }

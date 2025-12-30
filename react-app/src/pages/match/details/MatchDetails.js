@@ -6,6 +6,7 @@ import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import football_ball from "../../../assets/icons/football_ball.svg";
+import video_svg from "../../../assets/icons/video.svg";
 import coolman_logo from "../../../assets/images/coolman-logo-transparent.png"; 
 
 function formatTime(isoString) {
@@ -336,20 +337,54 @@ function MatchDetails() {
                 <div className="card">
                     <span>메인전술</span>
                     <p>{matchDetails.main_tactics}</p>
-                </div>    
-            </div>                                                                    
+                </div>
+            </div>
         </div>
     </>
+    }
+
+    const renderMaterials = () => {
+        if (!matchDetails.photo_url && !matchDetails.video_url) {
+            return null;
+        }
+
+        return (
+            <div className="match-materials">
+                <div className="header-card">
+                    <h2>경기자료</h2>
+                </div>
+                <div className="materials-content">
+                    {matchDetails.photo_url && (
+                        <div className="material-item">                    
+                            <img src={matchDetails.photo_url} alt="경기 사진" className="match-photo" />
+                        </div>
+                    )}
+                    {matchDetails.video_url && (
+                        <div className="material-item">                       
+                            <a
+                                href={matchDetails.video_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="video-button"
+                            >
+                                <img src={video_svg} alt="Video" className="video-icon" />
+                                <span>영상 보러가기</span>
+                            </a>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className="gray-background">
             <NavigationBar />
-            <div className="content">                
+            <div className="content">
                 {loading ? (
                     <LoadingSpinner />
                 ) : matchDetails ? (
-                    <>                        
+                    <>
                         {renderResult()}
                         <div className="match-details">
                             <div className="header-card">
@@ -371,6 +406,7 @@ function MatchDetails() {
                             </div>
                             {renderContent()}
                         </div>
+                        {renderMaterials()}
                     </>
                 ) : (
                     <p>매치 상세 정보가 없습니다.</p>
