@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.sql import text
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Query
 
 from db import get_db
 from product.rank.router import router
@@ -11,8 +11,14 @@ from product.rank.schema import (
 )
 
 @router.get("", response_model=List[UserAllStats])
-def get_user_all_stats(db: Session = Depends(get_db)):
-    sql = """
+def get_user_all_stats(
+    year: Optional[int] = Query(None, description="연도 필터 (예: 2025)"),
+    db: Session = Depends(get_db)
+):
+    # 연도 필터 조건 생성
+    year_filter = f"AND EXTRACT(YEAR FROM m.dt) = {year}" if year else ""
+
+    sql = f"""
         select
                 a.user_idx,
                 a.name,
@@ -25,23 +31,24 @@ def get_user_all_stats(db: Session = Depends(get_db)):
                 coalesce(b.match_cnt, 0) as match_cnt,
                 case when coalesce(b.match_cnt, 0) >= max_match_cnt then 1
                      when coalesce(b.match_cnt, 0) = 0 then 0
-                     else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,                
+                     else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,
                 coalesce(c.goal_cnt, 0) as goal_cnt,
                 coalesce(d.assist_cnt, 0) as assist_cnt,
                 coalesce(b.quarter_cnt, 0) as quarter_cnt
         from
         (
-            select 
+            select
                     u.user_idx,
                     u.name,
                     u.back_number,
                     u.position,
                     u.role,
-                    u.image_url,                    
+                    u.image_url,
                     count(distinct m.match_idx) as max_match_cnt
-            from users u  	 	 	
+            from users u
                 left join matches m on m.dt >= DATE(u.join_date)
-            group by 1,2,3,4,5,6            
+            WHERE 1=1 {year_filter}
+            group by 1,2,3,4,5,6
 
         ) a
         left join
@@ -51,67 +58,74 @@ def get_user_all_stats(db: Session = Depends(get_db)):
                     count(distinct m.match_idx) as match_cnt,
                     count(distinct ql.quarter_idx) as quarter_cnt
             from matches m
-                join quarters q on m.match_idx = q.match_idx 
+                join quarters q on m.match_idx = q.match_idx
                 join quarters_lineup ql on ql.quarter_idx = q.quarter_idx
+            WHERE 1=1 {year_filter}
             group by 1
         ) b on a.user_idx = b.user_idx
-        left join 
+        left join
         (
-            select  	
-                    goal_player_id as user_idx,
+            select
+                    g.goal_player_id as user_idx,
                     count(1) as goal_cnt
-            from goals g 
-            where goal_type = '득점'
+            from goals g
+                join quarters q on g.quarter_idx = q.quarter_idx
+                join matches m on q.match_idx = m.match_idx
+            where g.goal_type = '득점'
+                {year_filter}
             group by 1
         ) c on a.user_idx = c.user_idx
-        left join 
+        left join
         (
-            select  	
-                    assist_player_id as user_idx,
+            select
+                    g.assist_player_id as user_idx,
                     count(1) as assist_cnt
-            from goals g 
-            where goal_type = '득점'
+            from goals g
+                join quarters q on g.quarter_idx = q.quarter_idx
+                join matches m on q.match_idx = m.match_idx
+            where g.goal_type = '득점'
+                {year_filter}
             group by 1
         ) d on a.user_idx = d.user_idx
     """
-    
+
     result = db.execute(text(sql)).mappings().all()
 
     if not result:
         raise HTTPException(status_code=404, detail="No user statistics found.")
-    
+
     return result
 
 @router.get("/{user_idx}/participation", response_model=List[UserParticipation])
 def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
     sql = f"""
         select
-                u.user_idx,                
+                u.user_idx,
                 a.dt,
                 a.is_participation,
                 a.quarter_cnt
-                
+
         from
         (
-            select 
-                    
+            select
+
                     coalesce(ql.player_idx, {user_idx}) as user_idx,
                     m.dt,
                     MAX(case when ql.player_idx is null then 0 else 1 end) as is_participation,
                     sum(case when ql.quarter_idx is null then 0 else 1 end) as quarter_cnt
             from matches m
-                join quarters q on m.match_idx = q.match_idx 
-                left join 
+                join quarters q on m.match_idx = q.match_idx
+                left join
                 (
-                    select 
+                    select
                             ql.quarter_idx,
-                            ql.player_idx    			
+                            ql.player_idx
                     from quarters_lineup ql
-                    where player_idx = {user_idx}    
+                    where player_idx = {user_idx}
                 ) ql on ql.quarter_idx = q.quarter_idx
             group by 1,2
         ) a
-        join users u on a.user_idx = u.user_idx         
+        join users u on a.user_idx = u.user_idx
     """
 
     result = db.execute(text(sql)).mappings().all()
@@ -131,36 +145,36 @@ def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)
             coalesce(SUM(goal_cnt), 0) as goal_cnt,
             coalesce(SUM(assist_cnt), 0) as assist_cnt,
             count(distinct a.match_idx) as match_cnt
-            
+
         from
         (
             select
                     m.match_idx,
                     m.opposing_team,
-                    ql.player_idx			
+                    ql.player_idx
             from matches m
-                join quarters q on m.match_idx = q.match_idx 
+                join quarters q on m.match_idx = q.match_idx
                 join quarters_lineup ql on q.quarter_idx = ql.quarter_idx
             where ql.player_idx = {user_idx}
             group by 1,2,3
         ) a
         left join
         (
-            select  	
+            select
                     match_idx,
                     count(1) as goal_cnt
-            from goals g 
+            from goals g
             where goal_type = '득점'
                 and goal_player_id = {user_idx}
             group by 1
-            
+
         ) b on a.match_idx = b.match_idx
         left join
         (
-            select  	
+            select
                     match_idx,
                     count(1) as assist_cnt
-            from goals g 
+            from goals g
             where goal_type = '득점'
                 and assist_player_id = {user_idx}
             group by 1
@@ -178,20 +192,20 @@ def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)
 @router.get("/{user_idx}/position", response_model=List[UserStatsPosition])
 def get_user_stats_by_position(user_idx: int, db: Session = Depends(get_db)):
     sql = f"""
-        select 
+        select
                 {user_idx} as user_idx,
                 p.tactics,
-                p.name as position_name,				
+                p.name as position_name,
                 sum(case when goal_player_id = {user_idx} and goal_type = '득점' then 1 else 0 end) as goal_cnt,
                 sum(case when assist_player_id = {user_idx} and goal_type = '득점' then 1 else 0 end) as assist_cnt,
                 count(distinct ql.quarter_idx) as quarter_cnt
         from matches m
-            join quarters q on m.match_idx = q.match_idx 
+            join quarters q on m.match_idx = q.match_idx
             join quarters_lineup ql on q.quarter_idx = ql.quarter_idx
             left join goals g on g.quarter_idx = q.quarter_idx
-            join positions p on ql.position_idx = p.position_idx 
+            join positions p on ql.position_idx = p.position_idx
         where
-            ql.player_idx = {user_idx}            
+            ql.player_idx = {user_idx}
         group by 1,2,3
     """
 
@@ -203,9 +217,15 @@ def get_user_stats_by_position(user_idx: int, db: Session = Depends(get_db)):
     return result
 
 @router.get("/opposing_team", response_model=List[OpposingTeamAllStats])
-def get_opposing_team_all_stat(db: Session = Depends(get_db)):
+def get_opposing_team_all_stat(
+    year: Optional[int] = Query(None, description="연도 필터 (예: 2025)"),
+    db: Session = Depends(get_db)
+):
+    # 연도 필터 조건 생성
+    year_filter = f"WHERE EXTRACT(YEAR FROM m.dt) = {year}" if year else ""
+
     sql = f"""
-        select 
+        select
                 m.opposing_team,
                 sum(case when "result" = '승리' then 1 else 0 end) as win_match,
                 sum(case when "result" = '패배' then 1 else 0 end) as lose_match,
@@ -213,6 +233,7 @@ def get_opposing_team_all_stat(db: Session = Depends(get_db)):
                 sum(winning_point) as winning_point,
                 sum(losing_point) as losing_point
         from matches m
+        {year_filter}
         group by 1
     """
 

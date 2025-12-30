@@ -15,14 +15,19 @@ function Records() {
     const [loading, setLoading] = useState(false);
     const [sortConfig, setSortConfig] = useState({ key: 'goal_cnt', direction: 'desc' });
     const [teamSortConfig, setTeamSortConfig] = useState({ key: 'win_match', direction: 'desc' });
-    
+    const [selectedSeason, setSelectedSeason] = useState('2026'); // 기본값: 25시즌
+
     const API_URL = process.env.REACT_APP_API_URL;
 
-    const fetchData = async () => {
+    const fetchData = async (year) => {
         setLoading(true);
         try {
-            const userStatsResponse = await axios.get(`${API_URL}/rank`);
-            const OpposingTeamStatsResponse = await axios.get(`${API_URL}/rank/opposing_team`);
+            const userStatsResponse = await axios.get(`${API_URL}/rank`, {
+                params: { year }
+            });
+            const OpposingTeamStatsResponse = await axios.get(`${API_URL}/rank/opposing_team`, {
+                params: { year }
+            });
             setUserStats(userStatsResponse.data);
             setOpposingTeamStats(OpposingTeamStatsResponse.data)
         } catch (error) {
@@ -35,8 +40,12 @@ function Records() {
     };
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        fetchData(selectedSeason);
+    }, [selectedSeason]);
+
+    const handleSeasonChange = (event) => {
+        setSelectedSeason(event.target.value);
+    };
 
     const handleSort = (key, setSortConfig, currentConfig) => {
         let direction = 'asc';
@@ -68,12 +77,12 @@ function Records() {
             });
     };
 
-    const sortedUserStats = processData(userStats, sortConfig, 
+    const sortedUserStats = processData(userStats, sortConfig,
         user => !(user.name === "용병" && user.back_number === 999),
         item => ({ totalPoints: item.goal_cnt + item.assist_cnt })
     );
 
-    const sortedOpposingTeamStats = processData(opposingTeamStats, teamSortConfig, 
+    const sortedOpposingTeamStats = processData(opposingTeamStats, teamSortConfig,
         () => true,
         item => ({ totalMatches: item.win_match})
     );
@@ -83,7 +92,7 @@ function Records() {
             case 1: return <img src={gold_svg} alt="gold" />;
             case 2: return <img src={silver_svg} alt="silver" />;
             case 3: return <img src={bronze_svg} alt="bronze" />;
-            default: return rank; 
+            default: return rank;
         }
     };
 
@@ -105,6 +114,21 @@ function Records() {
             <NavigationBar />
             <div className="content">
                 {loading && <LoadingSpinner />}
+
+                {/* 시즌 선택 드롭다운 */}
+                <div className="season-filter">
+                    <label htmlFor="season-select">시즌 선택: </label>
+                    <select
+                        id="season-select"
+                        value={selectedSeason}
+                        onChange={handleSeasonChange}
+                        className="season-select"
+                    >
+                        <option value="2025">25시즌</option>
+                        <option value="2026">26시즌</option>
+                    </select>
+                </div>
+
                 <div className='user-stat'>
                     <div className='header'>
                         <h2>🥇 유저 랭킹</h2>
@@ -114,11 +138,11 @@ function Records() {
                             <thead>
                                 <tr>
                                     <th>순위</th>
-                                    <th>유저</th>                                    
+                                    <th>유저</th>
                                     <th className={`sortable ${sortConfig.key === 'goal_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('goal_cnt', setSortConfig, sortConfig)}>골</th>
                                     <th className={`sortable ${sortConfig.key === 'assist_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('assist_cnt', setSortConfig, sortConfig)}>어시</th>
                                     <th className={`sortable ${sortConfig.key === 'quarter_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('quarter_cnt', setSortConfig, sortConfig)}>쿼터</th>
-                                    <th className={`sortable ${sortConfig.key === 'match_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('match_cnt', setSortConfig, sortConfig)}>경기</th>                                    
+                                    <th className={`sortable ${sortConfig.key === 'match_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('match_cnt', setSortConfig, sortConfig)}>경기</th>
                                     <th className={`sortable ${sortConfig.key === 'max_match_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('max_match_cnt', setSortConfig, sortConfig)}>최대</th>
                                     {/* <th className={`sortable ${sortConfig.key === 'ratio' ? sortConfig.direction : ''}`} onClick={() => handleSort('ratio')}>출석</th> */}
                                 </tr>
@@ -129,7 +153,7 @@ function Records() {
                                         <td>{getRankIcon(index + 1)}</td>
                                         <td>{user.name}</td>
                                         <td>{user.goal_cnt}</td>
-                                        <td>{user.assist_cnt}</td>                                        
+                                        <td>{user.assist_cnt}</td>
                                         <td>{user.quarter_cnt}</td>
                                         <td>{user.match_cnt}</td>
                                         <td>{user.max_match_cnt}</td>
@@ -159,12 +183,12 @@ function Records() {
                             <thead>
                                 <tr>
                                     <th>순위</th>
-                                    <th>팀</th>                                                                       
+                                    <th>팀</th>
                                     <th className={`sortable ${teamSortConfig.key === 'win_match' ? teamSortConfig.direction : ''}`} onClick={() => handleSort('win_match', setTeamSortConfig, teamSortConfig)}>승</th>
                                     <th className={`sortable ${teamSortConfig.key === 'lose_match' ? teamSortConfig.direction : ''}`} onClick={() => handleSort('lose_match', setTeamSortConfig, teamSortConfig)}>패</th>
                                     <th className={`sortable ${teamSortConfig.key === 'draw_match' ? teamSortConfig.direction : ''}`} onClick={() => handleSort('draw_match', setTeamSortConfig, teamSortConfig)}>무</th>
-                                    <th className={`sortable ${teamSortConfig.key === 'winning_point' ? teamSortConfig.direction : ''}`} onClick={() => handleSort('winning_point', setTeamSortConfig, teamSortConfig)}>득</th>                                    
-                                    <th className={`sortable ${teamSortConfig.key === 'losing_point' ? teamSortConfig.direction : ''}`} onClick={() => handleSort('losing_point', setTeamSortConfig, teamSortConfig)}>실</th>                                    
+                                    <th className={`sortable ${teamSortConfig.key === 'winning_point' ? teamSortConfig.direction : ''}`} onClick={() => handleSort('winning_point', setTeamSortConfig, teamSortConfig)}>득</th>
+                                    <th className={`sortable ${teamSortConfig.key === 'losing_point' ? teamSortConfig.direction : ''}`} onClick={() => handleSort('losing_point', setTeamSortConfig, teamSortConfig)}>실</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -174,9 +198,9 @@ function Records() {
                                         <td>{team.opposing_team}</td>
                                         <td>{team.win_match}</td>
                                         <td>{team.lose_match}</td>
-                                        <td>{team.draw_match}</td>                                        
+                                        <td>{team.draw_match}</td>
                                         <td>{team.winning_point}</td>
-                                        <td>{team.losing_point}</td>                                                                                
+                                        <td>{team.losing_point}</td>
                                     </tr>
                                 ))}
                                 <tr className="total-row">
@@ -193,7 +217,7 @@ function Records() {
                         <p className="no-data">유저 골/어시스트 정보가 없습니다!</p>
                     )}
                 </div>
-            </div>            
+            </div>
         </div>
     );
 }
