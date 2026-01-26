@@ -16,6 +16,7 @@ function Records() {
     const [sortConfig, setSortConfig] = useState({ key: 'goal_cnt', direction: 'desc' });
     const [teamSortConfig, setTeamSortConfig] = useState({ key: 'win_match', direction: 'desc' });
     const [selectedSeason, setSelectedSeason] = useState('2026'); // 기본값: 25시즌
+    const [hasMvpData, setHasMvpData] = useState(false);
 
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -28,12 +29,17 @@ function Records() {
             const OpposingTeamStatsResponse = await axios.get(`${API_URL}/rank/opposing_team`, {
                 params: { year }
             });
+            const mvpCheckResponse = await axios.get(`${API_URL}/mvp/check`, {
+                params: { year }
+            });
             setUserStats(userStatsResponse.data);
-            setOpposingTeamStats(OpposingTeamStatsResponse.data)
+            setOpposingTeamStats(OpposingTeamStatsResponse.data);
+            setHasMvpData(mvpCheckResponse.data.has_data);
         } catch (error) {
             console.error("Error fetching Users:", error);
             setUserStats([]);
             setOpposingTeamStats([]);
+            setHasMvpData(false);
         } finally {
             setLoading(false);
         }
@@ -128,6 +134,41 @@ function Records() {
                         <option value="2026">26시즌</option>
                     </select>
                 </div>
+
+                {/* MVP 진입점 */}
+                {hasMvpData && (
+                    <div className='mvp-section'>
+                        <div className='header'>
+                            <h2>👑 MVP</h2>
+                        </div>
+                        <div className='mvp-entry-points'>
+                            <button
+                                className='mvp-entry-button'
+                                onClick={() => navigate(`/records/mvp/키퍼/${selectedSeason}`)}
+                            >
+                                키퍼
+                            </button>
+                            <button
+                                className='mvp-entry-button'
+                                onClick={() => navigate(`/records/mvp/수비/${selectedSeason}`)}
+                            >
+                                수비
+                            </button>
+                            <button
+                                className='mvp-entry-button'
+                                onClick={() => navigate(`/records/mvp/미드/${selectedSeason}`)}
+                            >
+                                미드
+                            </button>
+                            <button
+                                className='mvp-entry-button'
+                                onClick={() => navigate(`/records/mvp/공격/${selectedSeason}`)}
+                            >
+                                공격
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className='user-stat'>
                     <div className='header'>

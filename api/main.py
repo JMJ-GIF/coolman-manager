@@ -6,6 +6,7 @@ from product.rank.router import router as rank_router
 from product.users.router import router as users_router
 from product.matches.router import router as matches_router
 from product.positions.router import router as position_router
+from product.mvp.router import router as mvp_router
 
 app = FastAPI()
 
@@ -22,4 +23,5 @@ app.include_router(matches_router, prefix="/matches", tags=["Matches"])
 app.include_router(users_router, prefix="/users", tags=["Users"])
 app.include_router(position_router, prefix="/positions", tags=["Positions"])
 app.include_router(rank_router, prefix='/rank', tags=["Rank"])
+app.include_router(mvp_router, prefix='/mvp', tags=["MVP"])
 app.include_router(auth_router, prefix='/auth', tags=["oAuth"]) 

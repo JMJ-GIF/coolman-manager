@@ -88,6 +88,26 @@ CREATE TABLE IF NOT EXISTS quarters_lineup (
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS mvp (
+	mvp_idx SERIAL PRIMARY KEY,
+	year INT NOT NULL,
+	player_idx INT NOT NULL,
+	position_type VARCHAR(255) NOT NULL,
+    mvp_image_url TEXT NULL,
+	main_title TEXT NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS mvp_comment (
+	comment_idx SERIAL PRIMARY KEY,
+	mvp_idx INT NOT NULL,
+	description TEXT NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+	FOREIGN KEY (mvp_idx) REFERENCES mvp (mvp_idx) ON DELETE CASCADE
+);
+
 INSERT INTO users (name, position, back_number, join_date, role, social_uuid, image_url) VALUES
 ('용병','GK', 999, '2023-11-02 15:15:00', '용병', '12', NULL);
 
@@ -218,6 +238,14 @@ CREATE TRIGGER trigger_update_quarters_lineup
 BEFORE UPDATE ON quarters_lineup
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
+CREATE TRIGGER trigger_update_mvp
+BEFORE UPDATE ON mvp
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trigger_update_mvp_comment
+BEFORE UPDATE ON mvp_comment
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
 -- 데이터베이스 접속
 \c demo
 
@@ -300,6 +328,26 @@ CREATE TABLE IF NOT EXISTS quarters_lineup (
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS mvp (
+	mvp_idx SERIAL PRIMARY KEY,
+	year INT NOT NULL,
+	player_idx INT NOT NULL,
+	position_type VARCHAR(255) NOT NULL,
+    mvp_image_url TEXT NULL,
+    main_title TEXT NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS mvp_comment (
+	comment_idx SERIAL PRIMARY KEY,
+	mvp_idx INT NOT NULL,
+	description TEXT NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+	FOREIGN KEY (mvp_idx) REFERENCES mvp (mvp_idx) ON DELETE CASCADE
+);
+
 -- 기본 데이터 삽입
 INSERT INTO users (name, position, back_number, join_date, role, social_uuid, image_url) VALUES
 ('홍길동','GK', 9, '2022-01-10 10:00:00', '선수', '1', 'https://kr.object.ncloudstorage.com/coolman-storage/prod/demo/1.png'),
@@ -318,27 +366,27 @@ INSERT INTO users (name, position, back_number, join_date, role, social_uuid, im
 
 INSERT INTO matches (dt, result, winning_point, losing_point, opposing_team, location, start_time, end_time, weather, num_players, main_tactics, status)
 VALUES 
-('2024-12-01', '승리', 3, 1, '라이벌 FC', '국립 경기장', '2024-12-01 15:00:00', '2024-12-01 16:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
-('2024-12-02', '패배', 2, 3, '승리 클럽', '시티 아레나', '2024-12-02 18:00:00', '2024-12-02 19:45:00', '비', 22, '4-4-2', 'Confirmed'),
-('2024-12-03', '무승부', 2, 2, '레전드 FC', '메트로 스타디움', '2024-12-03 20:00:00', '2024-12-03 21:45:00', '구름', 22, '3-5-2', 'Confirmed'),
-('2024-12-04', '승리', 4, 0, '라이벌 FC', '중앙 공원 필드', '2024-12-04 14:00:00', '2024-12-04 15:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
-('2024-12-05', '패배', 1, 2, '라이벌 FC', '해안 스타디움', '2024-12-05 19:00:00', '2024-12-05 20:45:00', '바람', 22, '4-4-2', 'Confirmed'),
-('2024-12-06', '승리', 3, 1, '내맘대로 FC', '그랜드 아레나', '2024-12-06 16:00:00', '2024-12-06 17:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
-('2024-12-07', '승리', 2, 1, '이글스 클럽', '이스트사이드 필드', '2024-12-07 17:00:00', '2024-12-07 18:45:00', '맑음', 22, '3-4-3', 'Confirmed'),
-('2024-12-08', '무승부', 1, 1, '내맘대로 FC', '구시가지 스타디움', '2024-12-08 15:00:00', '2024-12-08 16:45:00', '구름', 22, '5-3-2', 'Confirmed'),
-('2024-12-09', '패배', 1, 2, '워리어스 FC', '노스사이드 아레나', '2024-12-09 18:00:00', '2024-12-09 19:45:00', '비', 22, '4-4-2', 'Confirmed'),
-('2024-12-10', '승리', 5, 3, '샤크스 팀', '코스탈 필드', '2024-12-10 16:00:00', '2024-12-10 17:45:00', '바람', 22, '3-5-2', 'Confirmed'),
-('2024-12-11', '승리', 2, 0, '돌핀스 FC', '아일랜드 아레나', '2024-12-11 14:00:00', '2024-12-11 15:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
-('2024-12-12', '패배', 0, 3, '워리어스 FC', '마운틴 필드', '2024-12-12 19:00:00', '2024-12-12 20:45:00', '비', 22, '4-4-2', 'Confirmed'),
-('2024-12-13', '승리', 4, 2, '드래곤즈 FC', '리버프론트 스타디움', '2024-12-13 18:00:00', '2024-12-13 19:45:00', '맑음', 22, '3-4-3', 'Confirmed'),
-('2024-12-14', '무승부', 3, 3, '워리어스 FC', '그랜드 아레나', '2024-12-14 20:00:00', '2024-12-14 21:45:00', '구름', 22, '4-2-3-1', 'Confirmed'),
-('2024-12-15', '패배', 1, 2, '나이츠 FC', '중앙 스타디움', '2024-12-15 15:00:00', '2024-12-15 16:45:00', '비', 22, '4-3-3', 'Confirmed'),
-('2024-12-16', '승리', 3, 1, '워리어스 FC', '국립 경기장', '2024-12-16 17:00:00', '2024-12-16 18:45:00', '맑음', 22, '4-4-2', 'Confirmed'),
-('2024-12-17', '패배', 0, 1, '타이탄스 FC', '시티 아레나', '2024-12-17 18:00:00', '2024-12-17 19:45:00', '구름', 22, '3-5-2', 'Confirmed'),
-('2024-12-18', '승리', 5, 2, '내맘대로 FC', '코스탈 필드', '2024-12-18 16:00:00', '2024-12-18 17:45:00', '바람', 22, '4-3-3', 'Confirmed'),
-('2024-12-19', '무승부', 0, 0, '불스 클럽', '해안 스타디움', '2024-12-19 19:00:00', '2024-12-19 20:45:00', '비', 22, '5-4-1', 'Confirmed'),
-('2024-12-20', '승리', 4, 1, '내맘대로 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed'),
-('2024-12-21', '승리', 4, 1, '내맘대로 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed');
+('2025-12-01', '승리', 3, 1, '라이벌 FC', '국립 경기장', '2024-12-01 15:00:00', '2024-12-01 16:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
+('2025-12-02', '패배', 2, 3, '승리 클럽', '시티 아레나', '2024-12-02 18:00:00', '2024-12-02 19:45:00', '비', 22, '4-4-2', 'Confirmed'),
+('2025-12-03', '무승부', 2, 2, '레전드 FC', '메트로 스타디움', '2024-12-03 20:00:00', '2024-12-03 21:45:00', '구름', 22, '3-5-2', 'Confirmed'),
+('2025-12-04', '승리', 4, 0, '라이벌 FC', '중앙 공원 필드', '2024-12-04 14:00:00', '2024-12-04 15:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
+('2025-12-05', '패배', 1, 2, '라이벌 FC', '해안 스타디움', '2024-12-05 19:00:00', '2024-12-05 20:45:00', '바람', 22, '4-4-2', 'Confirmed'),
+('2025-12-06', '승리', 3, 1, '내맘대로 FC', '그랜드 아레나', '2024-12-06 16:00:00', '2024-12-06 17:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
+('2025-12-07', '승리', 2, 1, '이글스 클럽', '이스트사이드 필드', '2024-12-07 17:00:00', '2024-12-07 18:45:00', '맑음', 22, '3-4-3', 'Confirmed'),
+('2025-12-08', '무승부', 1, 1, '내맘대로 FC', '구시가지 스타디움', '2024-12-08 15:00:00', '2024-12-08 16:45:00', '구름', 22, '5-3-2', 'Confirmed'),
+('2025-12-09', '패배', 1, 2, '워리어스 FC', '노스사이드 아레나', '2024-12-09 18:00:00', '2024-12-09 19:45:00', '비', 22, '4-4-2', 'Confirmed'),
+('2025-12-10', '승리', 5, 3, '샤크스 팀', '코스탈 필드', '2024-12-10 16:00:00', '2024-12-10 17:45:00', '바람', 22, '3-5-2', 'Confirmed'),
+('2025-12-11', '승리', 2, 0, '돌핀스 FC', '아일랜드 아레나', '2024-12-11 14:00:00', '2024-12-11 15:45:00', '맑음', 22, '4-3-3', 'Confirmed'),
+('2025-12-12', '패배', 0, 3, '워리어스 FC', '마운틴 필드', '2024-12-12 19:00:00', '2024-12-12 20:45:00', '비', 22, '4-4-2', 'Confirmed'),
+('2025-12-13', '승리', 4, 2, '드래곤즈 FC', '리버프론트 스타디움', '2024-12-13 18:00:00', '2024-12-13 19:45:00', '맑음', 22, '3-4-3', 'Confirmed'),
+('2025-12-14', '무승부', 3, 3, '워리어스 FC', '그랜드 아레나', '2024-12-14 20:00:00', '2024-12-14 21:45:00', '구름', 22, '4-2-3-1', 'Confirmed'),
+('2025-12-15', '패배', 1, 2, '나이츠 FC', '중앙 스타디움', '2024-12-15 15:00:00', '2024-12-15 16:45:00', '비', 22, '4-3-3', 'Confirmed'),
+('2025-12-16', '승리', 3, 1, '워리어스 FC', '국립 경기장', '2024-12-16 17:00:00', '2024-12-16 18:45:00', '맑음', 22, '4-4-2', 'Confirmed'),
+('2025-12-17', '패배', 0, 1, '타이탄스 FC', '시티 아레나', '2024-12-17 18:00:00', '2024-12-17 19:45:00', '구름', 22, '3-5-2', 'Confirmed'),
+('2025-12-18', '승리', 5, 2, '내맘대로 FC', '코스탈 필드', '2024-12-18 16:00:00', '2024-12-18 17:45:00', '바람', 22, '4-3-3', 'Confirmed'),
+('2025-12-19', '무승부', 0, 0, '불스 클럽', '해안 스타디움', '2024-12-19 19:00:00', '2024-12-19 20:45:00', '비', 22, '5-4-1', 'Confirmed'),
+('2025-12-20', '승리', 4, 1, '내맘대로 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed'),
+('2025-12-21', '승리', 4, 1, '내맘대로 FC', '그랜드 아레나', '2024-12-20 14:00:00', '2024-12-20 15:45:00', '맑음', 22, '4-2-3-1', 'Confirmed');
 
 INSERT INTO quarters (match_idx, quarter_number, tactics) VALUES
 (1, 1, '3-4-3'),
@@ -709,6 +757,33 @@ JOIN
 ) t2 on t1.row_num = t2.row_num
 order by quarter_idx, player_idx;
 
+INSERT INTO mvp (mvp_idx, year, player_idx, position_type, mvp_image_url, main_title) VALUES
+(1, 2025, 1, '키퍼', 'https://kr.object.ncloudstorage.com/coolman-storage/prod/demo/mvp/2025/1.png', '황금손'),
+(2, 2025, 2, '수비', 'https://kr.object.ncloudstorage.com/coolman-storage/prod/demo/mvp/2025/2.png', '굉장한 수비수'),
+(3, 2025, 3, '미드', 'https://kr.object.ncloudstorage.com/coolman-storage/prod/demo/mvp/2025/3.png', 'GOAT'),
+(4, 2025, 4, '공격', 'https://kr.object.ncloudstorage.com/coolman-storage/prod/demo/mvp/2025/4.png', '아트사커');
+
+INSERT INTO mvp_comment (comment_idx, mvp_idx, description) VALUES
+(1, 1, '항상 든든한 우리 키퍼'),
+(2, 1, '다이빙이 멋져요'),
+(3, 1, '군대 잘다녀와'),
+(4, 1, '멋지다 멋져'),
+
+(5, 2, '항상 든든한 우리 수비'),
+(6, 2, '킥이 매서워요'),
+(7, 2, '군대 잘다녀와'),
+(8, 2, '더 잘좀해봐'),
+
+(9, 3, '항상 든든한 우리 미드'),
+(10, 3, '패스가 매서워요'),
+(11, 3, '군대 잘다녀와'),
+(12, 3, '잘하고있어'),
+
+(13, 4, '항상 든든한 우리 공격'),
+(14, 4, '슈팅이 매서워요'),
+(15, 4, '군대 잘다녀와'),
+(16, 4, '골좀 더 넣어줘');
+
 -- 🔹 updated_at 자동 갱신 함수 (업데이트 발생 시 항상 NOW() 적용)
 CREATE OR REPLACE FUNCTION update_timestamp()
 RETURNS TRIGGER AS $$
@@ -741,4 +816,12 @@ FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
 CREATE TRIGGER trigger_update_quarters_lineup
 BEFORE UPDATE ON quarters_lineup
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trigger_update_mvp
+BEFORE UPDATE ON mvp
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trigger_update_mvp_comment
+BEFORE UPDATE ON mvp_comment
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();

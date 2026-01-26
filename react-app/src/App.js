@@ -5,6 +5,7 @@ import SignupPage from "./pages/Signup";
 import LoginPage from "./pages/login/Login";
 import Matches from "./pages/match/Matches";
 import Records from "./pages/record/Records";
+import MVP from "./pages/record/MVP";
 import Players from "./pages/player/Players";
 import Profile from "./pages/profile/Profile";
 import ProfileEdit from "./pages/profile/ProfileEdit";
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/players" element={<Players />} />
               <Route path="/players/:user_idx/:cardClass" element={<PlayerDetails />}/>
               <Route path="/records" element={<Records />} />
+              <Route path="/records/mvp/:positionType/:year" element={<MVP />} />
               <Route path="/matches/add" element={<MatchDetailsAdd />} />
               <Route path="/matches/:match_idx/edit" element={<MatchDetailsEdit />}/>
             </Route>

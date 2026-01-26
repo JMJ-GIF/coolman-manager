@@ -1,0 +1,209 @@
+@import '../../assets/styles/variables.scss';
+
+.mvp-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    gap: 30px;
+}
+
+.mvp-card {
+    position: relative;
+    width: 100%;
+    min-width: 300px;
+    max-width: 400px;
+    height: auto;
+    min-height: 600px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 4px solid #FFD700;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    // 배경 연도 (투명 회색, 볼드)
+    .mvp-year-background {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 300px;
+        font-weight: bold;
+        color: rgba(128, 128, 128, 0.5);
+        z-index: 0;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    // 좌측 섹션 (스타, 포지션, 이름, 타이틀)
+    .mvp-left-section {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 20px;
+
+        // 골든 스타 (좌측 상단, 둘러싸는 요소 없음)
+        .mvp-golden-star {
+            width: 45px;
+            height: 45px;
+            background: transparent;
+            background-color: transparent;
+            // filter: drop-shadow(0 3px 6px rgba(255, 215, 0, 0.6));
+            margin-bottom: 5px;
+        }
+
+        // 메인 포지션
+        .mvp-main-position {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        // 플레이어 이름 (큰 텍스트)
+        .mvp-player-name {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFFFFF;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
+        }
+
+        // 메인 타이틀 (둥근 사각형, 작은 텍스트)
+        .mvp-main-title {
+            background: rgba(255, 255, 255, 0.25);
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 220px;
+            line-height: 1.4;
+            margin-top: 5px;
+        }
+    }
+
+    // 우측 프로필 이미지 (큰 사이즈, 둘러싸는 요소 없음)
+    .mvp-image-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 300px;
+        height: 500px;
+        z-index: 1;
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+
+        .mvp-profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            // border-radius: 12px;
+            // box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .mvp-profile-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+
+            span {
+                font-size: 56px;
+                font-weight: bold;
+                color: rgba(255, 255, 255, 0.9);
+            }
+        }
+    }
+
+    // 통계 섹션
+    .mvp-stats {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 20px;
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+
+            .stat-label {
+                font-size: 14px;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 0.9);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .stat-value {
+                font-size: 18px;
+                font-weight: bold;
+                color: #FFFFFF;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            }
+        }
+    }
+}
+
+// 댓글 섹션 (카드 외부)
+.mvp-comments-section {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+    h3 {
+        font-size: 22px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+    }
+
+    .comment-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #667eea;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    }
+}

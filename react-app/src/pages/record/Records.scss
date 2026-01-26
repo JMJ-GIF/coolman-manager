@@ -38,6 +38,59 @@
     }
 }
 
+.mvp-section {
+    background: white;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    .header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        width: 100%;
+        margin-bottom: 15px;
+
+        h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+    }
+
+    .mvp-entry-points {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        flex-wrap: wrap;
+
+        .mvp-entry-button {
+            flex: 1;
+            min-width: 70px;
+            padding: 15px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+        }
+    }
+}
+
 .user-stat, .team-stat {
     background: white;
     display: flex;
