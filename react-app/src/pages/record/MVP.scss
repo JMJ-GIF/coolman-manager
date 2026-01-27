@@ -91,24 +91,23 @@
         }
     }
 
-    // 우측 프로필 이미지 (큰 사이즈, 둘러싸는 요소 없음)
+    // 프로필 이미지 (카드 중앙, left-section과 겹침 허용)
     .mvp-image-container {
         position: absolute;
-        top: 20px;
-        right: 20px;
-        width: 300px;
-        height: 500px;
-        z-index: 1;
-        align-items: center;
+        top: 0;
+        left: 0px;
+        right: 0;
+        bottom: 0px;
         display: flex;
-        justify-content: space-between;
+        align-items: center;
+        justify-content: center;
+        z-index: 0;
+        pointer-events: none;
 
         .mvp-profile-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            // border-radius: 12px;
-            // box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
 
         .mvp-profile-image-placeholder {
