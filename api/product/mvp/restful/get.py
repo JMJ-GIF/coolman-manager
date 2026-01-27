@@ -145,8 +145,8 @@ def get_mvp_player_stats(
     try:
         stats_query = text(f"""
             SELECT
-                COUNT(DISTINCT CASE WHEN g.goal_type = '득점' THEN g.goal_idx END) AS total_goals,
-                COUNT(DISTINCT CASE WHEN g.assist_player_id = :player_idx THEN g.goal_idx END) AS total_assists,
+                COALESCE(goal_cnt.total_goals, 0) AS total_goals,
+                COALESCE(assist_cnt.total_assists, 0) AS total_assists,
                 COUNT(DISTINCT ql.quarter_idx) AS total_quarters,
                 COUNT(DISTINCT m.match_idx) AS total_matches,
                 ROUND(
@@ -160,9 +160,25 @@ def get_mvp_player_stats(
             LEFT JOIN quarters_lineup ql ON u.user_idx = ql.player_idx
             LEFT JOIN quarters q ON ql.quarter_idx = q.quarter_idx
             LEFT JOIN matches m ON q.match_idx = m.match_idx AND EXTRACT(YEAR FROM m.dt) = {year}
-            LEFT JOIN goals g ON g.goal_player_id = u.user_idx AND g.match_idx = m.match_idx
+            LEFT JOIN LATERAL (
+                SELECT COUNT(*) AS total_goals
+                FROM goals g
+                WHERE g.goal_player_id = u.user_idx
+                  AND g.goal_type = '득점'
+                  AND g.match_idx IN (
+                      SELECT mm.match_idx FROM matches mm WHERE EXTRACT(YEAR FROM mm.dt) = {year}
+                  )
+            ) goal_cnt ON true
+            LEFT JOIN LATERAL (
+                SELECT COUNT(*) AS total_assists
+                FROM goals g
+                WHERE g.assist_player_id = u.user_idx
+                  AND g.match_idx IN (
+                      SELECT mm.match_idx FROM matches mm WHERE EXTRACT(YEAR FROM mm.dt) = {year}
+                  )
+            ) assist_cnt ON true
             WHERE u.user_idx = :player_idx
-            GROUP BY u.user_idx
+            GROUP BY u.user_idx, goal_cnt.total_goals, assist_cnt.total_assists
         """)
 
         stats_result = db.execute(stats_query, {"player_idx": player_idx}).fetchone()
