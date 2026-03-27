@@ -21,7 +21,7 @@ brew install mkcert
 mkcert -install
 
 -- 인증서 발급
-mkcert 127.0.0.1 localhost
+mkcert 127.0.0.1 localhost 
 ```
 
 ## .env 파일 서버에서도 생성해주기
