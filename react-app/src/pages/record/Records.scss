@@ -113,6 +113,12 @@
         }
 
     }
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .stats-table {
         width: 100%;
         border-collapse: collapse;
@@ -121,6 +127,7 @@
         border-radius: 10px;
         overflow: hidden;
         margin-bottom: 40px;
+        white-space: nowrap;
 
         tr {
 

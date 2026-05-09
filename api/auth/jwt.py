@@ -1,14 +1,13 @@
 import os
-import secrets
 from dotenv import load_dotenv
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 load_dotenv()
 
-AUTH_SECRET_KEY = secrets.token_hex(32)  
+AUTH_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 AUTH_ALGORITHM = 'HS256'
-AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = 30
+AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = 480
 AUTH_REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 def create_access_token(user_idx: int, session_type: str = "member"):

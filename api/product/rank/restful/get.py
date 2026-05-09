@@ -34,7 +34,8 @@ def get_user_all_stats(
                      else cast(b.match_cnt as float) / a.max_match_cnt end as ratio,
                 coalesce(c.goal_cnt, 0) as goal_cnt,
                 coalesce(d.assist_cnt, 0) as assist_cnt,
-                coalesce(b.quarter_cnt, 0) as quarter_cnt
+                coalesce(b.quarter_cnt, 0) as quarter_cnt,
+                coalesce(e.clean_cnt, 0) as clean_cnt
         from
         (
             select
@@ -87,6 +88,27 @@ def get_user_all_stats(
                 {year_filter}
             group by 1
         ) d on a.user_idx = d.user_idx
+        left join
+        (
+            select
+                    ql.player_idx as user_idx,
+                    count(distinct ql.quarter_idx) as clean_cnt
+            from quarters_lineup ql
+                join quarters q on ql.quarter_idx = q.quarter_idx
+                join matches m on q.match_idx = m.match_idx
+                join positions p on ql.position_idx = p.position_idx
+            where (
+                (p.name = 'GK' or p.name like '%B')
+                or (q.tactics in ('4-1-2-3', '4-2-3-1', '4-1-4-1') and p.name in ('CDM', 'LCDM', 'RCDM'))
+            )
+            and not exists (
+                select 1 from goals g
+                where g.quarter_idx = q.quarter_idx
+                and g.goal_type in ('실점', '자살골')
+            )
+            {year_filter}
+            group by 1
+        ) e on a.user_idx = e.user_idx
     """
 
     result = db.execute(text(sql)).mappings().all()
@@ -140,46 +162,67 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
 def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)):
     sql = f"""
         select
-            a.opposing_team,
-            a.player_idx as user_idx,
-            coalesce(SUM(goal_cnt), 0) as goal_cnt,
-            coalesce(SUM(assist_cnt), 0) as assist_cnt,
-            count(distinct a.match_idx) as match_cnt
+            base.opposing_team,
+            {user_idx} as user_idx,
+            coalesce(goal.goal_cnt, 0) as goal_cnt,
+            coalesce(assist.assist_cnt, 0) as assist_cnt,
+            base.match_cnt,
+            coalesce(clean.clean_cnt, 0) as clean_cnt
 
         from
         (
             select
-                    m.match_idx,
                     m.opposing_team,
-                    ql.player_idx
+                    count(distinct m.match_idx) as match_cnt
             from matches m
                 join quarters q on m.match_idx = q.match_idx
                 join quarters_lineup ql on q.quarter_idx = ql.quarter_idx
             where ql.player_idx = {user_idx}
-            group by 1,2,3
-        ) a
+            group by 1
+        ) base
         left join
         (
             select
-                    match_idx,
+                    m.opposing_team,
                     count(1) as goal_cnt
             from goals g
-            where goal_type = '득점'
-                and goal_player_id = {user_idx}
+                join matches m on g.match_idx = m.match_idx
+            where g.goal_type = '득점'
+                and g.goal_player_id = {user_idx}
             group by 1
-
-        ) b on a.match_idx = b.match_idx
+        ) goal on base.opposing_team = goal.opposing_team
         left join
         (
             select
-                    match_idx,
+                    m.opposing_team,
                     count(1) as assist_cnt
             from goals g
-            where goal_type = '득점'
-                and assist_player_id = {user_idx}
+                join matches m on g.match_idx = m.match_idx
+            where g.goal_type = '득점'
+                and g.assist_player_id = {user_idx}
             group by 1
-        ) c on a.match_idx = c.match_idx
-        group by 1,2
+        ) assist on base.opposing_team = assist.opposing_team
+        left join
+        (
+            select
+                    m.opposing_team,
+                    count(distinct ql.quarter_idx) as clean_cnt
+            from quarters_lineup ql
+                join quarters q on ql.quarter_idx = q.quarter_idx
+                join matches m on q.match_idx = m.match_idx
+                join positions p on ql.position_idx = p.position_idx
+            where ql.player_idx = {user_idx}
+                and (
+                    (p.name = 'GK' or p.name like '%B')
+                    or (q.tactics in ('4-1-2-3', '4-2-3-1', '4-1-4-1') and p.name in ('CDM', 'LCDM', 'RCDM'))
+                )
+                and not exists (
+                    select 1 from goals g
+                    where g.quarter_idx = q.quarter_idx
+                    and g.goal_type in ('실점', '자살골')
+                )
+            group by 1
+        ) clean on base.opposing_team = clean.opposing_team
     """
 
     result = db.execute(text(sql)).mappings().all()
@@ -187,6 +230,56 @@ def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)
     if not result:
         raise HTTPException(status_code=404, detail=f"No opposing team stats found for user {user_idx}.")
 
+    return result
+
+@router.get("/{user_idx}/clean")
+def get_user_clean_cnt(user_idx: int, db: Session = Depends(get_db)):
+    sql = f"""
+        select count(distinct ql.quarter_idx) as clean_cnt
+        from quarters_lineup ql
+            join quarters q on ql.quarter_idx = q.quarter_idx
+            join matches m on q.match_idx = m.match_idx
+            join positions p on ql.position_idx = p.position_idx
+        where ql.player_idx = {user_idx}
+            and (
+                (p.name = 'GK' or p.name like '%B')
+                or (q.tactics in ('4-1-2-3', '4-2-3-1', '4-1-4-1') and p.name in ('CDM', 'LCDM', 'RCDM'))
+            )
+            and not exists (
+                select 1 from goals g2
+                where g2.quarter_idx = q.quarter_idx
+                and g2.goal_type in ('실점', '자살골')
+            )
+    """
+    result = db.execute(text(sql)).mappings().first()
+    return {"clean_cnt": result["clean_cnt"] if result else 0}
+
+@router.get("/{user_idx}/clean_matches")
+def get_user_clean_matches(user_idx: int, db: Session = Depends(get_db)):
+    sql = f"""
+        select
+            m.match_idx,
+            m.dt,
+            m.opposing_team,
+            string_agg(q.quarter_number::text, ',' order by q.quarter_number) as quarter_info
+        from quarters_lineup ql
+            join quarters q on ql.quarter_idx = q.quarter_idx
+            join matches m on q.match_idx = m.match_idx
+            join positions p on ql.position_idx = p.position_idx
+        where ql.player_idx = {user_idx}
+            and (
+                (p.name = 'GK' or p.name like '%B')
+                or (q.tactics in ('4-1-2-3', '4-2-3-1', '4-1-4-1') and p.name in ('CDM', 'LCDM', 'RCDM'))
+            )
+            and not exists (
+                select 1 from goals g2
+                where g2.quarter_idx = q.quarter_idx
+                and g2.goal_type in ('실점', '자살골')
+            )
+        group by m.match_idx, m.dt, m.opposing_team
+        order by m.dt desc
+    """
+    result = db.execute(text(sql)).mappings().all()
     return result
 
 @router.get("/{user_idx}/position", response_model=List[UserStatsPosition])

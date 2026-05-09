@@ -30,17 +30,19 @@ function PlayerDetails() {
     const [validImageUrl, setValidImageUrl] = useState(coolman_logo);
     
         
-    const [matchCnt, setMatchCnt] = useState(0);        
+    const [matchCnt, setMatchCnt] = useState(0);
     const [maxMatchCnt, setMaxMatchCnt] = useState(0);
     const [quarterCnt, setQuarterCnt] = useState(0);
     const [goalCnt, setGoalCnt] = useState(0);
-    const [assistCnt, setAssistCnt] = useState(0);      
+    const [assistCnt, setAssistCnt] = useState(0);
+    const [cleanCnt, setCleanCnt] = useState(0);
     
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());    
     const [lastDay, setLastDay] = useState(0);
     const [firstDayWeekday, setFirstDayWeekday] = useState(0);    
     const [selectedTable, setSelectedTable] = useState("opposingTeam");
+    const [userCleanMatches, setUserCleanMatches] = useState([]);
 
     const checkImageExists = (url) => {
         return new Promise((resolve) => {
@@ -110,18 +112,35 @@ function PlayerDetails() {
             if (opposingTeamResponse.data.length > 0) {
                 const totalGoalCnt = opposingTeamResponse.data.reduce((sum, item) => sum + (item.goal_cnt || 0), 0);
                 const totalAssistCnt = opposingTeamResponse.data.reduce((sum, item) => sum + (item.assist_cnt || 0), 0);
-    
+
                 setGoalCnt(totalGoalCnt);
                 setAssistCnt(totalAssistCnt);
-            } 
-    
+            }
+
         } catch (error) {
             console.error("Error fetching opposing team stats:", error);
             setUserStatsOpposingTeam([]);
             setGoalCnt(0);
             setAssistCnt(0);
+            setCleanCnt(0);
         }
     
+        try {
+            const cleanResponse = await axios.get(`${API_URL}/rank/${user_idx}/clean`);
+            setCleanCnt(cleanResponse.data.clean_cnt ?? 0);
+        } catch (error) {
+            console.error("Error fetching clean cnt:", error);
+            setCleanCnt(0);
+        }
+
+        try {
+            const cleanMatchesResponse = await axios.get(`${API_URL}/rank/${user_idx}/clean_matches`);
+            setUserCleanMatches(cleanMatchesResponse.data);
+        } catch (error) {
+            console.error("Error fetching clean matches:", error);
+            setUserCleanMatches([]);
+        }
+
         try {
             const positionResponse = await axios.get(`${API_URL}/rank/${user_idx}/position`);
             setUserPosition(positionResponse.data);
@@ -248,6 +267,7 @@ function PlayerDetails() {
                                         <th>쿼터</th>
                                         <th>골</th>
                                         <th>어시</th>
+                                        <th>클린</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -256,6 +276,7 @@ function PlayerDetails() {
                                         <td>{quarterCnt}</td>
                                         <td>{goalCnt}</td>
                                         <td>{assistCnt}</td>
+                                        <td>{cleanCnt}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -316,22 +337,29 @@ function PlayerDetails() {
                         >
                             팀별
                         </button>
-                        <button 
+                        <button
                             className={selectedTable === "positionStats" ? "active" : ""}
                             onClick={() => setSelectedTable("positionStats")}
                         >
                             포지션별
                         </button>
-                    </div>                        
+                        <button
+                            className={selectedTable === "cleanMatches" ? "active" : ""}
+                            onClick={() => setSelectedTable("cleanMatches")}
+                        >
+                            클린시트
+                        </button>
+                    </div>
                     {selectedTable === "opposingTeam" && (
                         userStatOpposingTeam && userStatOpposingTeam.length > 0 ? (
-                            <table className="stats-table">
+                            <div className="table-wrapper"><table className="stats-table">
                                 <thead>
                                     <tr>
                                         <th>순위</th>
-                                        <th>상대 팀</th>                                        
+                                        <th>상대 팀</th>
                                         <th>골</th>
                                         <th>어시</th>
+                                        <th>클린</th>
                                         <th>경기</th>
                                     </tr>
                                 </thead>
@@ -342,18 +370,19 @@ function PlayerDetails() {
                                             <td>{stat.opposing_team}</td>                                            
                                             <td>{stat.goal_cnt}</td>
                                             <td>{stat.assist_cnt}</td>
+                                            <td>{stat.clean_cnt ?? 0}</td>
                                             <td>{stat.match_cnt}</td>
                                         </tr>
                                     ))}
                                 </tbody>
-                            </table>
+                            </table></div>
                         ) : (
                             <p className="no-data">팀별 골/어시스트 정보가 없습니다!</p>
                         )
                     )}
                     {selectedTable === "positionStats" && (
                         userPosition && userPosition.length > 0 ? (
-                            <table className="stats-table">
+                            <div className="table-wrapper"><table className="stats-table">
                                 <thead>
                                     <tr>
                                         <th>순위</th>
@@ -376,9 +405,33 @@ function PlayerDetails() {
                                         </tr>
                                     ))}
                                 </tbody>
-                            </table>
+                            </table></div>
                         ) : (
                             <p className="no-data">포지션별 골/어시스트 정보가 없습니다!</p>
+                        )
+                    )}
+                    {selectedTable === "cleanMatches" && (
+                        userCleanMatches && userCleanMatches.length > 0 ? (
+                            <div className="table-wrapper"><table className="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>경기일자</th>
+                                        <th>상대팀</th>
+                                        <th>쿼터정보</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {userCleanMatches.map((match, index) => (
+                                        <tr key={index} onClick={() => navigate(`/matches/${match.match_idx}`)} style={{ cursor: "pointer" }}>
+                                            <td>{formatDate(match.dt)}</td>
+                                            <td>{match.opposing_team}</td>
+                                            <td>{match.quarter_info}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table></div>
+                        ) : (
+                            <p className="no-data">클린시트 기록이 없습니다!</p>
                         )
                     )}                                                            
                 </div>                             

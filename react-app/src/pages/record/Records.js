@@ -1,6 +1,6 @@
 import './Records.scss';
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import NavigationBar from "../../components/NavigationBar";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -10,13 +10,15 @@ import bronze_svg from "../../assets/icons/bronze.svg"
 
 function Records() {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [userStats, setUserStats] = useState([]);
     const [opposingTeamStats, setOpposingTeamStats] = useState([]);
     const [loading, setLoading] = useState(false);
     const [sortConfig, setSortConfig] = useState({ key: 'goal_cnt', direction: 'desc' });
     const [teamSortConfig, setTeamSortConfig] = useState({ key: 'win_match', direction: 'desc' });
-    const [selectedSeason, setSelectedSeason] = useState('2026'); // 기본값: 25시즌
     const [hasMvpData, setHasMvpData] = useState(false);
+
+    const selectedSeason = searchParams.get('season') || '2026';
 
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -50,7 +52,7 @@ function Records() {
     }, [selectedSeason]);
 
     const handleSeasonChange = (event) => {
-        setSelectedSeason(event.target.value);
+        setSearchParams({ season: event.target.value });
     };
 
     const handleSort = (key, setSortConfig, currentConfig) => {
@@ -175,13 +177,15 @@ function Records() {
                         <h2>🥇 유저 랭킹</h2>
                     </div>
                     {sortedUserStats.length > 0 ? (
-                        <table className="stats-table">
+                        <div className="table-wrapper"><table className="stats-table">
                             <thead>
                                 <tr>
                                     <th>순위</th>
                                     <th>유저</th>
                                     <th className={`sortable ${sortConfig.key === 'goal_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('goal_cnt', setSortConfig, sortConfig)}>골</th>
                                     <th className={`sortable ${sortConfig.key === 'assist_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('assist_cnt', setSortConfig, sortConfig)}>어시</th>
+                                    <th className={`sortable ${sortConfig.key === 'totalPoints' ? sortConfig.direction : ''}`} onClick={() => handleSort('totalPoints', setSortConfig, sortConfig)}>합산</th>
+                                    <th className={`sortable ${sortConfig.key === 'clean_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('clean_cnt', setSortConfig, sortConfig)}>클린</th>
                                     <th className={`sortable ${sortConfig.key === 'quarter_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('quarter_cnt', setSortConfig, sortConfig)}>쿼터</th>
                                     <th className={`sortable ${sortConfig.key === 'match_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('match_cnt', setSortConfig, sortConfig)}>경기</th>
                                     <th className={`sortable ${sortConfig.key === 'max_match_cnt' ? sortConfig.direction : ''}`} onClick={() => handleSort('max_match_cnt', setSortConfig, sortConfig)}>최대</th>
@@ -195,6 +199,8 @@ function Records() {
                                         <td>{user.name}</td>
                                         <td>{user.goal_cnt}</td>
                                         <td>{user.assist_cnt}</td>
+                                        <td>{user.totalPoints}</td>
+                                        <td>{user.clean_cnt}</td>
                                         <td>{user.quarter_cnt}</td>
                                         <td>{user.match_cnt}</td>
                                         <td>{user.max_match_cnt}</td>
@@ -205,12 +211,13 @@ function Records() {
                                     <td colSpan="2">합계</td>
                                     <td>{sortedUserStats.reduce((sum, user) => sum + user.goal_cnt, 0)}</td>
                                     <td>{sortedUserStats.reduce((sum, user) => sum + user.assist_cnt, 0)}</td>
+                                    <td>{sortedUserStats.reduce((sum, user) => sum + user.totalPoints, 0)}</td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </table></div>
                     ) : (
                         <p className="no-data">유저 골/어시스트 정보가 없습니다!</p>
                     )}
@@ -220,7 +227,7 @@ function Records() {
                         <h2>⚽ 팀 전적</h2>
                     </div>
                     {sortedOpposingTeamStats.length > 0 ? (
-                        <table className="stats-table">
+                        <div className="table-wrapper"><table className="stats-table">
                             <thead>
                                 <tr>
                                     <th>순위</th>
@@ -253,7 +260,7 @@ function Records() {
                                     <td>{sortedOpposingTeamStats.reduce((sum, team) => sum + team.losing_point, 0)}</td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </table></div>
                     ) : (
                         <p className="no-data">유저 골/어시스트 정보가 없습니다!</p>
                     )}

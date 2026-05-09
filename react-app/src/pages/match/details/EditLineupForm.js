@@ -50,9 +50,8 @@ const EditLineupForm = ({
     useEffect(() => {
         if (filteredQuarter && filteredQuarter.tactics) {
             setSelectedTactics(filteredQuarter.tactics);
-            updateLineups(filteredQuarter.tactics);
         }
-    }, [filteredQuarter]);
+    }, [selectedQuarter]);
 
     useEffect(() => {
         const checkDuplicates = (lineups) => {
@@ -113,13 +112,14 @@ const EditLineupForm = ({
      
     
     const updateLineups = (newTactics) => {
-        if (!filteredQuarter) return; 
-                
-        const filteredPositions = positions.filter((position) => position.tactics === newTactics);        
-            
-        const updatedLineups = filteredLineups.map((lineup, index) => {            
+        if (!filteredQuarter) return;
+
+        const filteredPositions = positions.filter((position) => position.tactics === newTactics);
+
+        let startingIdx = 0;
+        const updatedLineups = filteredLineups.map((lineup) => {
             if (lineup.lineup_status === "선발") {
-                const position = filteredPositions[index];
+                const position = filteredPositions[startingIdx++];
                 return {
                     ...lineup,
                     tactics: newTactics,
@@ -130,11 +130,11 @@ const EditLineupForm = ({
                 };
             }
             return lineup;
-        });       
-        
+        });
+
         setValue(`${filteredQuarterPath}.lineups`, updatedLineups);
         setValue(`${filteredQuarterPath}.tactics`, newTactics);
-        
+
     };
     
     

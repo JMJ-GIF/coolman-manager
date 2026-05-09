@@ -16,6 +16,7 @@ class UserAllStats(BaseModel):
     goal_cnt: int
     assist_cnt: int
     quarter_cnt: int
+    clean_cnt: int
 
 class UserParticipation(BaseModel):
     user_idx: int    
@@ -29,6 +30,7 @@ class UserStatsOpposingTeam(BaseModel):
     goal_cnt: Optional[int]
     assist_cnt: Optional[int]
     match_cnt: Optional[int]
+    clean_cnt: Optional[int]
 
 class UserStatsPosition(BaseModel):
     user_idx: Optional[int]

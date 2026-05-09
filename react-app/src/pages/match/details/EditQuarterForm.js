@@ -1,5 +1,5 @@
 import './Details.scss';
-import React from "react";
+import React, { useMemo } from "react";
 import Select from "react-select";
 import { useParams } from "react-router-dom";
 import { useFieldArray } from "react-hook-form";
@@ -25,6 +25,11 @@ const EditQuarterForm = ({
         name: "quarters",
     });
     
+    const sortedUsers = useMemo(
+        () => [...users].sort((a, b) => (a.name || "").localeCompare(b.name || "", "ko")),
+        [users]
+    );
+
     const goalTypeOptions = [
         { value: "득점", label: "득점" },
         { value: "실점", label: "실점" },
@@ -200,7 +205,7 @@ const EditQuarterForm = ({
                                                   fontSize: "12px",  
                                                 }),
                                               }}
-                                            value={users
+                                            value={sortedUsers
                                                 .map((u) => ({
                                                 label: `${u.name} (${u.back_number})`,
                                                 value: u.user_idx,
@@ -208,7 +213,7 @@ const EditQuarterForm = ({
                                                 back_number: u.back_number,
                                                 }))
                                                 .find((opt) => opt.value === watch(`${goalsPath}.${goalIndex}.goal_player_id`)) || null}
-                                            options={users.map((u) => ({
+                                            options={sortedUsers.map((u) => ({
                                                 label: `${u.name} (${u.back_number})`,
                                                 value: u.user_idx,
                                                 name: u.name,
@@ -262,7 +267,7 @@ const EditQuarterForm = ({
                                                 }),
                                               }}
                                             value={
-                                                users
+                                                sortedUsers
                                                 .map((u) => ({
                                                     label: `${u.name} (${u.back_number})`,
                                                     value: u.user_idx,
@@ -274,7 +279,7 @@ const EditQuarterForm = ({
                                                     opt.value === watch(`${goalsPath}.${goalIndex}.assist_player_id`)
                                                 ) || null
                                             }
-                                            options={users.map((u) => ({
+                                            options={sortedUsers.map((u) => ({
                                                 label: `${u.name} (${u.back_number})`,
                                                 value: u.user_idx,
                                                 name: u.name,

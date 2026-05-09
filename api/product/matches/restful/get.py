@@ -62,6 +62,7 @@ def get_lineups_in_match(match_idx: int, db: Session = Depends(get_db)):
     LEFT JOIN positions p ON l.position_idx = p.position_idx
     JOIN users u ON l.player_idx = u.user_idx
     WHERE q.match_idx = :match_idx
+    ORDER BY l.lineup_status ASC, l.lineup_idx ASC
     """
         
     result = db.execute(text(sql), {"match_idx": match_idx}).mappings().all()
