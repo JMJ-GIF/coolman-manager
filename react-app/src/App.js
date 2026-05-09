@@ -17,6 +17,8 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import MatchDetails from "./pages/match/details/MatchDetails";
 import MatchDetailsAdd from "./pages/match/details/MatchDetailsAdd";
 import MatchDetailsEdit from "./pages/match/details/MatchDetailsEdit";
+import Accounting from "./pages/accounting/Accounting";
+import AccountingDetail from "./pages/accounting/AccountingDetail";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 export default function App() {
@@ -40,6 +42,8 @@ export default function App() {
               <Route path="/records/mvp/:positionType/:year" element={<MVP />} />
               <Route path="/matches/add" element={<MatchDetailsAdd />} />
               <Route path="/matches/:match_idx/edit" element={<MatchDetailsEdit />}/>
+              <Route path="/accounting" element={<Accounting />} />
+              <Route path="/accounting/:user_idx" element={<AccountingDetail />} />
             </Route>
           </Routes>
         </Router>

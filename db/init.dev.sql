@@ -599,6 +599,67 @@ CREATE TRIGGER trigger_update_mvp_comment
 BEFORE UPDATE ON mvp_comment
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
+-- Accounting tables
+CREATE TABLE IF NOT EXISTS member_types (
+    type_idx    SERIAL PRIMARY KEY,
+    user_idx    INT NOT NULL REFERENCES users(user_idx) ON DELETE CASCADE,
+    year        INT NOT NULL,
+    month       INT NOT NULL,
+    member_type VARCHAR(20) NOT NULL CHECK (member_type IN ('정회원','월회원','휴회원','탈퇴회원')),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL,
+    UNIQUE (user_idx, year, month)
+);
+
+CREATE TABLE IF NOT EXISTS accounting_records (
+    record_idx  SERIAL PRIMARY KEY,
+    user_idx    INT NOT NULL REFERENCES users(user_idx) ON DELETE CASCADE,
+    dt          DATE NOT NULL,
+    fee_type    VARCHAR(20) NOT NULL CHECK (fee_type IN ('분기회비','월회비','휴회비','휴회경기참가비')),
+    amount      INT NOT NULL DEFAULT 0,
+    paid_amount INT NOT NULL DEFAULT 0,
+    note        TEXT NULL,
+    match_idx   INT NULL REFERENCES matches(match_idx) ON DELETE SET NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL
+);
+
+CREATE TRIGGER trigger_update_member_types
+BEFORE UPDATE ON member_types
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trigger_update_accounting_records
+BEFORE UPDATE ON accounting_records
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+-- Sample member_types for 2026 Q1 and Q2
+INSERT INTO member_types (user_idx, year, month, member_type) VALUES
+(1, 2026, 1, '정회원'), (1, 2026, 2, '정회원'), (1, 2026, 3, '정회원'),
+(1, 2026, 4, '정회원'), (1, 2026, 5, '정회원'), (1, 2026, 6, '정회원'),
+(2, 2026, 1, '정회원'), (2, 2026, 2, '정회원'), (2, 2026, 3, '정회원'),
+(2, 2026, 4, '정회원'), (2, 2026, 5, '정회원'), (2, 2026, 6, '정회원'),
+(3, 2026, 1, '월회원'), (3, 2026, 2, '월회원'), (3, 2026, 3, '월회원'),
+(3, 2026, 4, '월회원'), (3, 2026, 5, '월회원'), (3, 2026, 6, '월회원'),
+(4, 2026, 1, '휴회원'), (4, 2026, 2, '휴회원'), (4, 2026, 3, '휴회원'),
+(4, 2026, 4, '휴회원'), (4, 2026, 5, '휴회원'), (4, 2026, 6, '휴회원'),
+(5, 2026, 1, '정회원'), (5, 2026, 2, '정회원'), (5, 2026, 3, '정회원'),
+(5, 2026, 4, '정회원'), (5, 2026, 5, '정회원'), (5, 2026, 6, '정회원'),
+(6, 2026, 1, '정회원'), (6, 2026, 2, '정회원'), (6, 2026, 3, '정회원'),
+(6, 2026, 4, '정회원'), (6, 2026, 5, '정회원'), (6, 2026, 6, '정회원'),
+(7, 2026, 1, '정회원'), (7, 2026, 2, '정회원'), (7, 2026, 3, '정회원'),
+(7, 2026, 4, '정회원'), (7, 2026, 5, '정회원'), (7, 2026, 6, '정회원'),
+(8, 2026, 1, '정회원'), (8, 2026, 2, '정회원'), (8, 2026, 3, '정회원'),
+(8, 2026, 4, '정회원'), (8, 2026, 5, '정회원'), (8, 2026, 6, '정회원'),
+(9, 2026, 1, '정회원'), (9, 2026, 2, '정회원'), (9, 2026, 3, '정회원'),
+(9, 2026, 4, '정회원'), (9, 2026, 5, '정회원'), (9, 2026, 6, '정회원'),
+(10, 2026, 1, '정회원'), (10, 2026, 2, '정회원'), (10, 2026, 3, '정회원'),
+(10, 2026, 4, '정회원'), (10, 2026, 5, '정회원'), (10, 2026, 6, '정회원'),
+(11, 2026, 1, '정회원'), (11, 2026, 2, '정회원'), (11, 2026, 3, '정회원'),
+(11, 2026, 4, '정회원'), (11, 2026, 5, '정회원'), (11, 2026, 6, '정회원'),
+(12, 2026, 1, '정회원'), (12, 2026, 2, '정회원'), (12, 2026, 3, '정회원'),
+(12, 2026, 4, '정회원'), (12, 2026, 5, '정회원'), (12, 2026, 6, '정회원')
+ON CONFLICT DO NOTHING;
+
 \c demo
 
 -- 테이블 생성

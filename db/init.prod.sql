@@ -246,6 +246,39 @@ CREATE TRIGGER trigger_update_mvp_comment
 BEFORE UPDATE ON mvp_comment
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
+-- Accounting tables
+CREATE TABLE IF NOT EXISTS member_types (
+    type_idx    SERIAL PRIMARY KEY,
+    user_idx    INT NOT NULL REFERENCES users(user_idx) ON DELETE CASCADE,
+    year        INT NOT NULL,
+    month       INT NOT NULL,
+    member_type VARCHAR(20) NOT NULL CHECK (member_type IN ('정회원','월회원','휴회원','탈퇴회원')),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL,
+    UNIQUE (user_idx, year, month)
+);
+
+CREATE TABLE IF NOT EXISTS accounting_records (
+    record_idx  SERIAL PRIMARY KEY,
+    user_idx    INT NOT NULL REFERENCES users(user_idx) ON DELETE CASCADE,
+    dt          DATE NOT NULL,
+    fee_type    VARCHAR(20) NOT NULL CHECK (fee_type IN ('분기회비','월회비','휴회비','휴회경기참가비')),
+    amount      INT NOT NULL DEFAULT 0,
+    paid_amount INT NOT NULL DEFAULT 0,
+    note        TEXT NULL,
+    match_idx   INT NULL REFERENCES matches(match_idx) ON DELETE SET NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL
+);
+
+CREATE TRIGGER trigger_update_member_types
+BEFORE UPDATE ON member_types
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trigger_update_accounting_records
+BEFORE UPDATE ON accounting_records
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
 -- 데이터베이스 접속
 \c demo
 
@@ -856,4 +889,37 @@ FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
 CREATE TRIGGER trigger_update_mvp_comment
 BEFORE UPDATE ON mvp_comment
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+-- Accounting tables
+CREATE TABLE IF NOT EXISTS member_types (
+    type_idx    SERIAL PRIMARY KEY,
+    user_idx    INT NOT NULL REFERENCES users(user_idx) ON DELETE CASCADE,
+    year        INT NOT NULL,
+    month       INT NOT NULL,
+    member_type VARCHAR(20) NOT NULL CHECK (member_type IN ('정회원','월회원','휴회원','탈퇴회원')),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL,
+    UNIQUE (user_idx, year, month)
+);
+
+CREATE TABLE IF NOT EXISTS accounting_records (
+    record_idx  SERIAL PRIMARY KEY,
+    user_idx    INT NOT NULL REFERENCES users(user_idx) ON DELETE CASCADE,
+    dt          DATE NOT NULL,
+    fee_type    VARCHAR(20) NOT NULL CHECK (fee_type IN ('분기회비','월회비','휴회비','휴회경기참가비')),
+    amount      INT NOT NULL DEFAULT 0,
+    paid_amount INT NOT NULL DEFAULT 0,
+    note        TEXT NULL,
+    match_idx   INT NULL REFERENCES matches(match_idx) ON DELETE SET NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL
+);
+
+CREATE TRIGGER trigger_update_member_types
+BEFORE UPDATE ON member_types
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trigger_update_accounting_records
+BEFORE UPDATE ON accounting_records
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();

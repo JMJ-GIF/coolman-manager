@@ -5,7 +5,7 @@ import add_square_svg from "../assets/icons/add_square.svg";
 import delete_svg from "../assets/icons/delete.svg";
 import edit_svg from "../assets/icons/edit.svg";
 
-function FloatingBar({ mode, onEdit, onConfirm, onCancel }) {
+function FloatingBar({ mode, onEdit, onConfirm, onCancel, onSave }) {
     const navigate = useNavigate();
 
     const handleAdd = (e) => {
@@ -31,6 +31,19 @@ function FloatingBar({ mode, onEdit, onConfirm, onCancel }) {
                 </button>
                 <button className="action-button confirm" onClick={onConfirm}>
                     확인
+                </button>
+            </div>
+        );
+    }
+
+    if (mode === "save_cancel") {
+        return (
+            <div className="floating-bar">
+                <button className="action-button cancel" onClick={onCancel}>
+                    취소
+                </button>
+                <button className="action-button confirm" onClick={onSave}>
+                    저장
                 </button>
             </div>
         );

@@ -17,10 +17,11 @@ function NavigationBar() {
     const lastScrollY = useRef(0);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
-    const menuItems = [        
+    const menuItems = [
         { label: "Matches", route: "/matches" },
         { label: "Players", route: "/players" },
-        { label: "Records", route: "/records" },        
+        { label: "Records", route: "/records" },
+        { label: "Accounting", route: "/accounting" },
     ];
 
     const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));    
