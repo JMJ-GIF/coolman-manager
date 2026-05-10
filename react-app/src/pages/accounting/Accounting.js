@@ -166,6 +166,14 @@ export default function Accounting() {
         navigate(`/accounting/${userIdx}?year=${selectedYear}&quarter=${selectedQ}`);
     };
 
+    const sortedData = [...data].sort((a, b) => {
+        const ti = FEE_TYPES.indexOf(a.member_type ?? '');
+        const tj = FEE_TYPES.indexOf(b.member_type ?? '');
+        const typeOrder = (ti === -1 ? 999 : ti) - (tj === -1 ? 999 : tj);
+        if (typeOrder !== 0) return typeOrder;
+        return a.name.localeCompare(b.name, 'ko');
+    });
+
     const summary = (() => {
         const map = {};
         FEE_TYPES.forEach(t => { map[t] = { count: 0, amount: 0, paid: 0 }; });
@@ -245,7 +253,7 @@ export default function Accounting() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.map(row => {
+                                {sortedData.map(row => {
                                     const status = getStatus(row.total_amount, row.total_paid);
                                     const ed = editData[row.user_idx] || {};
                                     return (
