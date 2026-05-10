@@ -144,6 +144,13 @@
         color: #555;
     }
 
+    &.summary-table tfoot .summary-total-row {
+        background: #f0f4ff;
+        font-weight: bold;
+
+        td { border-top: 2px solid var(--background-win-color); }
+    }
+
     select {
         border: 1px solid #ccc;
         border-radius: 4px;

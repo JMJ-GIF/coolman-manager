@@ -166,6 +166,29 @@ export default function Accounting() {
         navigate(`/accounting/${userIdx}?year=${selectedYear}&quarter=${selectedQ}`);
     };
 
+    const summary = (() => {
+        const map = {};
+        FEE_TYPES.forEach(t => { map[t] = { count: 0, amount: 0, paid: 0 }; });
+        data.forEach(row => {
+            const t = row.member_type;
+            if (t && map[t]) {
+                map[t].count++;
+                map[t].amount += row.total_amount;
+                map[t].paid += row.total_paid;
+            }
+        });
+        return map;
+    })();
+
+    const summaryTotal = FEE_TYPES.reduce(
+        (acc, t) => ({
+            count: acc.count + summary[t].count,
+            amount: acc.amount + summary[t].amount,
+            paid: acc.paid + summary[t].paid,
+        }),
+        { count: 0, amount: 0, paid: 0 }
+    );
+
     return (
         <div className="gray-background">
             <NavigationBar />
@@ -281,6 +304,44 @@ export default function Accounting() {
                         </table>
                     </div>
                 </div>
+
+                {/* 집계 표 */}
+                {data.length > 0 && (
+                    <div className="accounting-section">
+                        <div className="table-wrapper">
+                            <table className="accounting-table summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>타입</th>
+                                        <th>인원수</th>
+                                        <th>회비총액</th>
+                                        <th>납입금총액</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {FEE_TYPES.map(t => (
+                                        <tr key={t}>
+                                            <td>
+                                                <span className={`type-badge type-${t}`}>{t}</span>
+                                            </td>
+                                            <td>{summary[t].count}명</td>
+                                            <td>{summary[t].amount.toLocaleString()}원</td>
+                                            <td>{summary[t].paid.toLocaleString()}원</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot>
+                                    <tr className="summary-total-row">
+                                        <td>합계</td>
+                                        <td>{summaryTotal.count}명</td>
+                                        <td>{summaryTotal.amount.toLocaleString()}원</td>
+                                        <td>{summaryTotal.paid.toLocaleString()}원</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                )}
 
                 <FloatingBar
                     mode={editMode ? 'save_cancel' : 'edit'}
