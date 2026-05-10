@@ -80,6 +80,7 @@
     margin-bottom: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
 }
 
 .table-wrapper {
@@ -144,11 +145,15 @@
         color: #555;
     }
 
-    &.summary-table tfoot .summary-total-row {
-        background: #f0f4ff;
-        font-weight: bold;
+    &.summary-table {
+        .type-cell { border-right: 2px solid #ddd; }
 
-        td { border-top: 2px solid var(--background-win-color); }
+        tfoot .summary-total-row {
+            background: #f0f4ff;
+            font-weight: bold;
+
+            td { border-top: 2px solid var(--background-win-color); }
+        }
     }
 
     select {

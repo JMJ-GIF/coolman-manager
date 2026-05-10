@@ -29,6 +29,7 @@ function quarterLabel(year, quarter) {
 }
 
 function getStatus(total_amount, total_paid) {
+    if (total_amount === 0 && total_paid === 0) return '납부완료';
     if (total_amount === 0) return null;
     return total_paid >= total_amount ? '납부완료' : '납부필요';
 }
@@ -188,14 +189,32 @@ export default function Accounting() {
         return map;
     })();
 
-    const summaryTotal = FEE_TYPES.reduce(
-        (acc, t) => ({
-            count: acc.count + summary[t].count,
-            amount: acc.amount + summary[t].amount,
-            paid: acc.paid + summary[t].paid,
-        }),
-        { count: 0, amount: 0, paid: 0 }
-    );
+    const STATUSES = ['납부완료', '납부필요'];
+
+    const crossSummary = (() => {
+        const map = {};
+        FEE_TYPES.forEach(t => {
+            map[t] = {};
+            STATUSES.forEach(s => { map[t][s] = { count: 0, amount: 0, paid: 0 }; });
+        });
+        data.forEach(row => {
+            const t = row.member_type;
+            const s = getStatus(row.total_amount, row.total_paid);
+            if (t && map[t] && s && map[t][s]) {
+                map[t][s].count++;
+                map[t][s].amount += row.total_amount;
+                map[t][s].paid += row.total_paid;
+            }
+        });
+        return map;
+    })();
+
+    const summaryTotal = { count: 0, amount: 0, paid: 0 };
+    FEE_TYPES.forEach(t => STATUSES.forEach(s => {
+        summaryTotal.count += crossSummary[t][s].count;
+        summaryTotal.amount += crossSummary[t][s].amount;
+        summaryTotal.paid += crossSummary[t][s].paid;
+    }));
 
     return (
         <div className="gray-background">
@@ -309,6 +328,7 @@ export default function Accounting() {
                                 <thead>
                                     <tr>
                                         <th>타입</th>
+                                        <th>상태</th>
                                         <th>인원수</th>
                                         <th>회비총액</th>
                                         <th>납입금총액</th>
@@ -316,19 +336,26 @@ export default function Accounting() {
                                 </thead>
                                 <tbody>
                                     {FEE_TYPES.map(t => (
-                                        <tr key={t}>
-                                            <td>
-                                                <span className={`type-badge type-${t}`}>{t}</span>
-                                            </td>
-                                            <td>{summary[t].count}명</td>
-                                            <td>{summary[t].amount.toLocaleString()}원</td>
-                                            <td>{summary[t].paid.toLocaleString()}원</td>
-                                        </tr>
+                                        STATUSES.map((s, si) => (
+                                            <tr key={`${t}-${s}`}>
+                                                {si === 0 && (
+                                                    <td rowSpan={STATUSES.length} className="type-cell">
+                                                        <span className={`type-badge type-${t}`}>{t}</span>
+                                                    </td>
+                                                )}
+                                                <td>
+                                                    <span className={`status-badge ${s === '납부완료' ? 'paid' : 'unpaid'}`}>{s}</span>
+                                                </td>
+                                                <td>{crossSummary[t][s].count}명</td>
+                                                <td>{crossSummary[t][s].amount.toLocaleString()}원</td>
+                                                <td>{crossSummary[t][s].paid.toLocaleString()}원</td>
+                                            </tr>
+                                        ))
                                     ))}
                                 </tbody>
                                 <tfoot>
                                     <tr className="summary-total-row">
-                                        <td>합계</td>
+                                        <td colSpan={2}>합계</td>
                                         <td>{summaryTotal.count}명</td>
                                         <td>{summaryTotal.amount.toLocaleString()}원</td>
                                         <td>{summaryTotal.paid.toLocaleString()}원</td>
