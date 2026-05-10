@@ -290,20 +290,8 @@ export default function Accounting() {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td onClick={e => editMode && e.stopPropagation()}>
-                                                {editMode ? (
-                                                    <input
-                                                        type="text"
-                                                        value={ed.note || ''}
-                                                        placeholder="비고"
-                                                        onChange={e => setEditData(prev => ({
-                                                            ...prev,
-                                                            [row.user_idx]: { ...prev[row.user_idx], note: e.target.value }
-                                                        }))}
-                                                    />
-                                                ) : (
-                                                    <span className="note-text">{buildNote(row)}</span>
-                                                )}
+                                            <td>
+                                                <span className="note-text">{buildNote(row)}</span>
                                             </td>
                                         </tr>
                                     );
