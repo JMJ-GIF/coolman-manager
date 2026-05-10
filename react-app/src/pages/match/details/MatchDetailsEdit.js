@@ -7,6 +7,7 @@ import EditQuarterForm from "./EditQuarterForm";
 import EditMaterialsForm from "./EditMaterialsForm";
 import React, { useState, useEffect } from "react";
 import { useAlert } from "../../../context/AlertContext";
+import { useAuth } from "../../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import FloatingBar from "../../../components/FloatingBar";
 import NavigationBar from "../../../components/NavigationBar";
@@ -47,7 +48,16 @@ function MatchDetailsEdit() {
     // Config
     const navigate = useNavigate();
     const { showAlert } = useAlert();
+    const { authUser } = useAuth();
     const { match_idx } = useParams();
+
+    const checkDirector = () => {
+        if (authUser?.role !== '감독') {
+            showAlert('warning', '⚠️ 수정 권한이 없습니다. 감독만 가능합니다.');
+            return false;
+        }
+        return true;
+    };
     const API_URL = process.env.REACT_APP_API_URL;
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('goals');
@@ -375,6 +385,7 @@ function MatchDetailsEdit() {
     });
 
     const handleConfirmSubmit = () => {
+        if (!checkDirector()) return;
         showAlert("confirm", "매치 정보를 수정하시겠습니까?", async () => {
             await handleFormSubmit();
         });

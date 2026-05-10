@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import './Matches.scss';
 import { useAlert } from "../../context/AlertContext";
+import { useAuth } from "../../context/AuthContext";
 import FloatingBar from "../../components/FloatingBar";
 import NavigationBar from "../../components/NavigationBar";
 import location_svg from "../../assets/icons/location.svg";
@@ -16,6 +17,16 @@ function Matches() {
     const API_URL = process.env.REACT_APP_API_URL;
 
     const { showAlert } = useAlert();
+    const { authUser } = useAuth();
+    const isDirector = authUser?.role === '감독';
+
+    const checkDirector = () => {
+        if (!isDirector) {
+            showAlert('warning', '⚠️ 수정 권한이 없습니다. 감독만 가능합니다.');
+            return false;
+        }
+        return true;
+    };
     const [loading, setLoading] = useState(false);        
     const [lastItemId, setLastItemId] = useState(null);
     const [lastItemDt, setLastItemDt] = useState(null);    
@@ -76,6 +87,7 @@ function Matches() {
     }, [handleScroll]);
     
     const enterEditMode = () => {
+        if (!checkDirector()) return;
         setIsEditMode(true);
         setSelectedCards([]);
     };
@@ -122,6 +134,7 @@ function Matches() {
     };
 
     const handleConfirmDelete = () => {
+        if (!checkDirector()) return;
         showAlert("confirm", "매치를 삭제하겠습니까? 정보는 복원할 수 없습니다.", async () => {
             await confirmDelete();
         });

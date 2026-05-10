@@ -6,6 +6,8 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import back_arrow from '../../assets/icons/back_arrow.svg';
 import delete_svg from '../../assets/icons/delete.svg';
 import plus_svg from '../../assets/icons/plus.svg';
+import { useAlert } from '../../context/AlertContext';
+import { useAuth } from '../../context/AuthContext';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -51,6 +53,17 @@ export default function AccountingDetail() {
     const { user_idx } = useParams();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
+    const { authUser } = useAuth();
+    const isDirector = authUser?.role === '감독';
+
+    const checkDirector = () => {
+        if (!isDirector) {
+            showAlert('warning', '⚠️ 수정 권한이 없습니다. 감독만 가능합니다.');
+            return false;
+        }
+        return true;
+    };
 
     const year = parseInt(searchParams.get('year'));
     const quarter = parseInt(searchParams.get('quarter'));
@@ -94,6 +107,7 @@ export default function AccountingDetail() {
     };
 
     const addRow = () => {
+        if (!checkDirector()) return;
         const m1 = (quarter - 1) * 3 + 1;
         const defaultDt = `${year}-${String(m1).padStart(2, '0')}-01`;
         setRecords(prev => [...prev, {
@@ -112,6 +126,7 @@ export default function AccountingDetail() {
     };
 
     const markDeleted = (id) => {
+        if (!checkDirector()) return;
         if (id < 0) {
             setRecords(prev => prev.filter(r => r.record_idx !== id));
         } else {
@@ -120,6 +135,7 @@ export default function AccountingDetail() {
     };
 
     const handleSave = async () => {
+        if (!checkDirector()) return;
         setSaving(true);
         try {
             const ops = [];

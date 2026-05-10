@@ -101,9 +101,13 @@ async def get_user_data(request: Request, db: Session = Depends(get_db)):
         if not user_exists:
             print(f"❌ 사용자가 데이터베이스에 존재하지 않음: user_idx = {user['user_idx']}")
             raise HTTPException(status_code=401, detail="User does not exist")
-        
+
+        user_row = db.execute(text("SELECT role FROM users WHERE user_idx = :user_idx"),
+                              {"user_idx": user["user_idx"]}).fetchone()
+        role = user_row[0] if user_row else None
+
         print(f"✅ 사용자 확인 성공: user_idx = {user['user_idx']}")
-        return {"user_idx": user["user_idx"], "session_type": "member"}
+        return {"user_idx": user["user_idx"], "session_type": "member", "role": role}
     except Exception as e:
         print(f"❌ 데이터베이스 오류: {e}")
         raise HTTPException(status_code=500, detail="Database error")

@@ -6,6 +6,7 @@ import NavigationBar from '../../components/NavigationBar';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import FloatingBar from '../../components/FloatingBar';
 import { useAlert } from '../../context/AlertContext';
+import { useAuth } from '../../context/AuthContext';
 
 const API_URL = process.env.REACT_APP_API_URL;
 const FEE_TYPES = ['정회원', '월회원', '휴회원', '탈퇴회원'];
@@ -45,6 +46,16 @@ export default function Accounting() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const { showAlert } = useAlert();
+    const { authUser } = useAuth();
+    const isDirector = authUser?.role === '감독';
+
+    const checkDirector = () => {
+        if (!isDirector) {
+            showAlert('warning', '⚠️ 수정 권한이 없습니다. 감독만 가능합니다.');
+            return false;
+        }
+        return true;
+    };
     const quarters = generateQuarters();
 
     const lastQ = quarters[quarters.length - 1];
@@ -94,6 +105,7 @@ export default function Accounting() {
     useEffect(() => { fetchData(); }, [fetchData]);
 
     const handleGenerate = async () => {
+        if (!checkDirector()) return;
         setGenerating(true);
         try {
             const res = await axios.post(`${API_URL}/accounting/generate`, null, {
@@ -109,6 +121,7 @@ export default function Accounting() {
     };
 
     const handleReset = () => {
+        if (!checkDirector()) return;
         showAlert(
             'confirm',
             `${quarterLabel(selectedYear, selectedQ)} 회비를 초기화하시겠습니까?\n회비 기록과 유저 타입이 모두 삭제됩니다.`,
@@ -368,7 +381,7 @@ export default function Accounting() {
 
                 <FloatingBar
                     mode={editMode ? 'save_cancel' : 'edit'}
-                    onEdit={() => setEditMode(true)}
+                    onEdit={() => { if (checkDirector()) setEditMode(true); }}
                     onSave={handleSave}
                     onCancel={handleCancel}
                 />
