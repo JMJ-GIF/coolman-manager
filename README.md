@@ -91,7 +91,7 @@ aws s3 cp backup_2025_03_31.sql s3://coolman-storage/db-backup/backup_2025_03_31
 
 4. backup-postgres.sh 만들기
 
-5. cron 등록
+5. cron 등록 
 
 
 
