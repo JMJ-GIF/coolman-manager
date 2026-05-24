@@ -18,10 +18,11 @@ function NavigationBar() {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const menuItems = [
-        { label: "Matches", route: "/matches" },
-        { label: "Players", route: "/players" },
-        { label: "Records", route: "/records" },
-        { label: "Accounting", route: "/accounting" },
+        { label: "경기", route: "/matches" },
+        { label: "선수", route: "/players" },
+        { label: "기록", route: "/records" },
+        { label: "회비", route: "/accounting" },
+        { label: "운동장", route: "/playfield" },
     ];
 
     const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.route));    

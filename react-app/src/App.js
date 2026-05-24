@@ -19,6 +19,7 @@ import MatchDetailsAdd from "./pages/match/details/MatchDetailsAdd";
 import MatchDetailsEdit from "./pages/match/details/MatchDetailsEdit";
 import Accounting from "./pages/accounting/Accounting";
 import AccountingDetail from "./pages/accounting/AccountingDetail";
+import Playfield from "./pages/playfield/Playfield";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="/matches/:match_idx/edit" element={<MatchDetailsEdit />}/>
               <Route path="/accounting" element={<Accounting />} />
               <Route path="/accounting/:user_idx" element={<AccountingDetail />} />
+              <Route path="/playfield" element={<Playfield />} />
             </Route>
           </Routes>
         </Router>

@@ -632,6 +632,35 @@ CREATE TRIGGER trigger_update_accounting_records
 BEFORE UPDATE ON accounting_records
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
+-- Playfield announcements
+CREATE TABLE IF NOT EXISTS playground_announcements (
+    id          SERIAL PRIMARY KEY,
+    school_name VARCHAR(100) NOT NULL,
+    title       VARCHAR(500) NOT NULL,
+    upload_date VARCHAR(50) NOT NULL DEFAULT '',
+    link        TEXT NOT NULL,
+    is_new      BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL,
+    UNIQUE (school_name, title, upload_date)
+);
+
+CREATE TRIGGER trigger_update_playground_announcements
+BEFORE UPDATE ON playground_announcements
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TABLE IF NOT EXISTS playground_reads (
+    user_idx        INTEGER NOT NULL,
+    announcement_id INTEGER NOT NULL REFERENCES playground_announcements(id) ON DELETE CASCADE,
+    read_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_idx, announcement_id)
+);
+
+CREATE TABLE IF NOT EXISTS crawler_metadata (
+    key   VARCHAR(100) PRIMARY KEY,
+    value TEXT
+);
+
 -- Sample member_types for 2026 Q1 and Q2
 INSERT INTO member_types (user_idx, year, month, member_type) VALUES
 (1, 2026, 1, '정회원'), (1, 2026, 2, '정회원'), (1, 2026, 3, '정회원'),
@@ -1252,3 +1281,31 @@ FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trigger_update_mvp_comment
 BEFORE UPDATE ON mvp_comment
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+-- Playfield announcements (demo)
+CREATE TABLE IF NOT EXISTS playground_announcements (
+    id          SERIAL PRIMARY KEY,
+    school_name VARCHAR(100) NOT NULL,
+    title       VARCHAR(500) NOT NULL,
+    upload_date VARCHAR(50) NOT NULL DEFAULT '',
+    link        TEXT NOT NULL,
+    is_new      BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL,
+    UNIQUE (school_name, title, upload_date)
+);
+
+CREATE TRIGGER trigger_update_playground_announcements
+BEFORE UPDATE ON playground_announcements
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TABLE IF NOT EXISTS playground_reads (
+    user_idx        INTEGER NOT NULL,
+    announcement_id INTEGER NOT NULL REFERENCES playground_announcements(id) ON DELETE CASCADE,
+    read_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_idx, announcement_id)
+);
+
+CREATE TABLE IF NOT EXISTS crawler_metadata (
+    key   VARCHAR(100) PRIMARY KEY,
+    value TEXT
+);

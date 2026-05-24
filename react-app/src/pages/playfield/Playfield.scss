@@ -1,0 +1,183 @@
+@import '../../assets/styles/variables.scss';
+
+.playfield-top-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    margin-bottom: 16px;
+}
+
+.playfield-header {
+    margin-bottom: 16px;
+
+    .playfield-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+
+    .playfield-title {
+        font-size: 1.4em;
+        font-weight: 700;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+
+    .new-count-badge {
+        font-size: 0.6em;
+        background-color: var(--background-lose-color);
+        color: white;
+        border-radius: 12px;
+        padding: 2px 10px;
+        font-weight: 600;
+    }
+
+    .mark-all-btn {
+        font-size: 0.78em;
+        font-weight: 600;
+        color: var(--background-lose-color);
+        background: rgba(220, 53, 69, 0.08);
+        border: 1.5px solid rgba(220, 53, 69, 0.3);
+        border-radius: 8px;
+        padding: 4px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+
+        &:hover {
+            background: var(--background-lose-color);
+            color: white;
+            border-color: var(--background-lose-color);
+        }
+    }
+
+    .playfield-subtitle {
+        font-size: 0.85em;
+        color: #888;
+        margin: 0 0 2px 0;
+    }
+
+    .crawled-at {
+        font-size: 0.75em;
+        color: #bbb;
+        margin: 0;
+    }
+}
+
+.school-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 0;
+
+    .filter-btn {
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1.5px solid #ddd;
+        background: white;
+        font-size: 0.82em;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        color: #555;
+
+        &:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        &.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #aaa;
+
+    p {
+        margin: 4px 0;
+        font-size: 1em;
+    }
+
+    .empty-hint {
+        font-size: 0.82em;
+        color: #ccc;
+        margin-top: 8px;
+    }
+}
+
+.announcement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.announcement-card {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+    border-left: 3px solid transparent;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-1px);
+    }
+
+    &.is-new {
+        border-left-color: var(--background-lose-color);
+    }
+
+    .card-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .school-tag {
+        font-size: 0.78em;
+        font-weight: 600;
+        color: var(--primary-color);
+        background-color: rgba(13, 91, 191, 0.08);
+        border-radius: 4px;
+        padding: 2px 8px;
+    }
+
+    .new-badge {
+        font-size: 0.72em;
+        font-weight: 700;
+        color: white;
+        background-color: var(--background-lose-color);
+        border-radius: 4px;
+        padding: 2px 6px;
+        letter-spacing: 0.5px;
+    }
+
+    .card-title {
+        font-size: 0.95em;
+        font-weight: 500;
+        color: var(--text-color);
+        margin: 0 0 6px 0;
+        line-height: 1.4;
+    }
+
+    .card-date {
+        font-size: 0.78em;
+        color: #aaa;
+        margin: 0;
+    }
+}
