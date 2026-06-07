@@ -26,6 +26,8 @@ class UserParticipation(BaseModel):
 
 class UserStatsOpposingTeam(BaseModel):
     opposing_team: Optional[str]
+    team_a_name: Optional[str]
+    match_nature: Optional[str]
     user_idx: Optional[int]
     goal_cnt: Optional[int]
     assist_cnt: Optional[int]

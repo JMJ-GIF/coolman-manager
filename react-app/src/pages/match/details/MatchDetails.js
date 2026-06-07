@@ -28,6 +28,7 @@ function MatchDetails() {
     const [lineups, setLineups] = useState([]);     
     const [selectedQuarter, setSelectedQuarter] = useState(1);
     const [validPlayerImages, setValidPlayerImages] = useState({});
+    const [selectedTeam, setSelectedTeam] = useState('A');
     
     const checkImageExists = (url) => {
         return new Promise((resolve) => {
@@ -111,66 +112,74 @@ function MatchDetails() {
         if (quarters.length === 0) {
             return <p>쿼터 정보가 없습니다.</p>;
         }
-    
-        let totalHomeScore = 0; 
-        let totalAwayScore = 0; 
-    
+
+        const isNaeJeon = matchDetails.match_nature === '내전';
+        let totalHomeScore = 0;
+        let totalAwayScore = 0;
+
         const quartersWithGoals = quarters.map((quarter) => {
             const goalsInQuarter = goals.filter((goal) => goal.quarter_idx === quarter.quarter_idx);
-                
-            const quarterHomeScore = goalsInQuarter.filter((goal) => goal.goal_type === "득점").length;
-            const quarterAwayScore = goalsInQuarter.filter(
-                (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
-            ).length;
-    
-            return {
-                ...quarter,
-                goals: goalsInQuarter,
-                quarterHomeScore,
-                quarterAwayScore,
-            };
+
+            const quarterHomeScore = isNaeJeon
+                ? goalsInQuarter.filter((g) => g.scoring_team === 'A').length
+                : goalsInQuarter.filter((g) => g.goal_type === "득점").length;
+            const quarterAwayScore = isNaeJeon
+                ? goalsInQuarter.filter((g) => g.scoring_team === 'B').length
+                : goalsInQuarter.filter((g) => g.goal_type === "실점" || g.goal_type === "자살골").length;
+
+            return { ...quarter, goals: goalsInQuarter, quarterHomeScore, quarterAwayScore };
         });
-    
+
         return quartersWithGoals.map((quarter) => (
             <div key={quarter.quarter_idx} className="quarter-group">
                 <div className="quarter-header">
                     <h4>쿼터 {quarter.quarter_number}</h4>
-                    <p>
-                       ({quarter.quarterHomeScore} : {quarter.quarterAwayScore})
-                    </p>
+                    <p>({quarter.quarterHomeScore} : {quarter.quarterAwayScore})</p>
                 </div>
                 {quarter.goals.length > 0 ? (
                     <ul className="goal-list">
                         {quarter.goals.map((goal) => {
-                            
-                            if (goal.goal_type === "득점") {
-                                totalHomeScore += 1; 
-                            } else if (goal.goal_type === "실점" || goal.goal_type === "자살골") {
-                                totalAwayScore += 1; 
+                            if (isNaeJeon) {
+                                if (goal.scoring_team === 'A') totalHomeScore += 1;
+                                else totalAwayScore += 1;
+
+                                const isATeam = goal.scoring_team === 'A';
+                                const teamLabel = isATeam
+                                    ? (matchDetails.team_a_name || 'A팀')
+                                    : (matchDetails.team_b_name || 'B팀');
+
+                                return (
+                                    <li key={goal.goal_idx} className={`goal-item ${isATeam ? 'goal-left' : 'goal-right'}`}>
+                                        <div className="goal-score-container">
+                                            <img src={football_ball} alt="Football" className="goal-icon" />
+                                            <span className="goal-score">{totalHomeScore} : {totalAwayScore}</span>
+                                        </div>
+                                        <div className="goal-description">
+                                            <p className="goal-player" data-result={isATeam ? '득점' : '실점'}>
+                                                [{teamLabel}] {goal.goal_player_name || 'N/A'}
+                                            </p>
+                                            {goal.assist_player_name && (
+                                                <p className="assist-player">({goal.assist_player_name})</p>
+                                            )}
+                                        </div>
+                                    </li>
+                                );
                             }
-                                
-                            let playerName = "N/A";
-                            let assistName = "N/A";
-    
-                            if (goal.goal_type === "득점") {
-                                playerName = goal.goal_player_name                                    
-                                assistName = goal.assist_player_name                                    
-                            } else if (goal.goal_type == "자살골") {
-                                playerName = goal.goal_player_name                                    
-                            }
-    
+
+                            if (goal.goal_type === "득점") totalHomeScore += 1;
+                            else if (goal.goal_type === "실점" || goal.goal_type === "자살골") totalAwayScore += 1;
+
+                            const playerName = goal.goal_type !== "실점" ? goal.goal_player_name || "N/A" : null;
+                            const assistName = goal.goal_type === "득점" ? goal.assist_player_name : null;
+
                             return (
                                 <li
                                     key={goal.goal_idx}
-                                    className={`goal-item ${
-                                        goal.goal_type === "득점" ? "goal-left" : "goal-right"
-                                    }`}
+                                    className={`goal-item ${goal.goal_type === "득점" ? "goal-left" : "goal-right"}`}
                                 >
                                     <div className="goal-score-container">
                                         <img src={football_ball} alt="Football" className="goal-icon" />
-                                        <span className="goal-score">
-                                            {totalHomeScore} : {totalAwayScore}
-                                        </span>
+                                        <span className="goal-score">{totalHomeScore} : {totalAwayScore}</span>
                                     </div>
                                     <div className="goal-description">
                                         <p className="goal-player" data-result={goal.goal_type}>
@@ -178,9 +187,7 @@ function MatchDetails() {
                                                 : goal.goal_type === "자살골" ? `${playerName} (자살골)`
                                                 : "실점"}
                                         </p>
-                                        {assistName && goal.goal_type === "득점" && (
-                                            <p className="assist-player">({assistName})</p>
-                                        )}
+                                        {assistName && <p className="assist-player">({assistName})</p>}
                                     </div>
                                 </li>
                             );
@@ -197,14 +204,25 @@ function MatchDetails() {
         if (!quarters.length || !lineups.length) {
             return <p>라인업 정보가 없습니다.</p>;
         }
-    
+
+        const isNaeJeon = matchDetails.match_nature === '내전';
+
         const filteredLineups = lineups.filter(
             (lineup) => lineup.quarter_number === selectedQuarter
         );
-    
-        const startingPlayers = filteredLineups.filter(player => player.lineup_status === '선발');
-        const substitutePlayers = filteredLineups.filter(player => player.lineup_status === '후보');
-    
+
+        const teamLineups = isNaeJeon
+            ? filteredLineups.filter((l) => l.lineup_team === selectedTeam)
+            : filteredLineups;
+
+        const startingPlayers = teamLineups.filter(player => player.lineup_status === '선발');
+        const substitutePlayers = teamLineups.filter(player => player.lineup_status === '후보');
+
+        const currentQuarterData = quarters.find(q => q.quarter_number === selectedQuarter);
+        const displayTactics = isNaeJeon && selectedTeam === 'B'
+            ? (currentQuarterData?.team_b_tactics || startingPlayers[0]?.tactics)
+            : startingPlayers[0]?.tactics;
+
         return (
             <div className='lineup-group'>
                 <div className="quarter-buttons">
@@ -218,7 +236,23 @@ function MatchDetails() {
                         </button>
                     ))}
                 </div>
-                <div className="quarter-tactics">{startingPlayers[0]?.tactics}</div>
+                {isNaeJeon && (
+                    <div className="toggle-group" style={{ justifyContent: 'center', margin: '8px 0' }}>
+                        <button
+                            className={`toggle-btn ${selectedTeam === 'A' ? 'active' : ''}`}
+                            onClick={() => setSelectedTeam('A')}
+                        >
+                            {matchDetails.team_a_name || 'A팀'}
+                        </button>
+                        <button
+                            className={`toggle-btn ${selectedTeam === 'B' ? 'active' : ''}`}
+                            onClick={() => setSelectedTeam('B')}
+                        >
+                            {matchDetails.team_b_name || 'B팀'}
+                        </button>
+                    </div>
+                )}
+                <div className="quarter-tactics">{displayTactics}</div>
                 <div className="soccer-field">
                     {startingPlayers.map((player, index) => (
                         <div key={index} className="player-marker"
@@ -228,41 +262,16 @@ function MatchDetails() {
                             }}>
                             <div className="position-label">{player.position_name}</div>
                             <div
-                            className="player-circle"
-                            style={{
-                                backgroundImage: `url(${validPlayerImages[player.lineup_idx] || coolman_logo})`,
-                            }}
+                                className="player-circle"
+                                style={{
+                                    backgroundImage: `url(${validPlayerImages[player.lineup_idx] || coolman_logo})`,
+                                }}
                             ></div>
-                                
                             <div className="player-name">{player.user_name}</div>
                         </div>
                     ))}
-                </div>    
+                </div>
                 <div className="lineup-container">
-                    {/* <div className="lineup-section">
-                        <h3 className="section-title">선발</h3>
-                        <table className="lineup-table">
-                            <thead>
-                                <tr>
-                                    <th>포지션</th>
-                                    <th>등번호</th>
-                                    <th>사람</th>
-                                    <th>상태</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {startingPlayers.map((lineup) => (
-                                    <tr key={lineup.lineup_idx}>
-                                        <td>{lineup.position_name}</td>
-                                        <td>{lineup.back_number}</td>
-                                        <td>{lineup.user_name}</td>
-                                        <td className="starter">선발</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div> */}
-    
                     <div className="lineup-section">
                         <h3 className="section-title">후보</h3>
                         <table className="lineup-table">
@@ -299,6 +308,9 @@ function MatchDetails() {
     };
 
     const renderResult = () => {
+        const isNaeJeon = matchDetails.match_nature === '내전';
+        const teamAName = matchDetails.team_a_name || 'A팀';
+        const teamBName = matchDetails.team_b_name || 'B팀';
         return <>
         <div className="match-results">
             <div className="header-card" data-result={matchDetails.result}>
@@ -311,8 +323,8 @@ function MatchDetails() {
                     <p>{matchDetails.winning_point} : {matchDetails.losing_point}</p>
                 </div>
                 <div className="card">
-                    <span>상대</span>
-                    <p>{matchDetails.opposing_team}</p>
+                    <span>{isNaeJeon ? '팀' : '상대'}</span>
+                    <p>{isNaeJeon ? `${teamAName} vs ${teamBName}` : matchDetails.opposing_team}</p>
                 </div>
                 <div className="card">
                     <span>날짜</span>

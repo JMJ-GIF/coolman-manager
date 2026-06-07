@@ -52,7 +52,10 @@ def update_match(
                         losing_point = :losing_point, opposing_team = :opposing_team,
                         location = :location, start_time = :start_time, end_time = :end_time,
                         weather = :weather, num_players = :num_players, main_tactics = :main_tactics,
-                        video_url = :video_url, photo_url = :photo_url
+                        video_url = :video_url, photo_url = :photo_url,
+                        player_count = :player_count, match_nature = :match_nature,
+                        team_a_name = :team_a_name, team_b_name = :team_b_name,
+                        include_in_records = :include_in_records
                     WHERE match_idx = :match_idx
                 """
                 match_values = {
@@ -69,7 +72,12 @@ def update_match(
                     "num_players": match_data.num_players,
                     "main_tactics": match_data.main_tactics,
                     "video_url": match_data.video_url,
-                    "photo_url": photo_url
+                    "photo_url": photo_url,
+                    "player_count": match_data.player_count,
+                    "match_nature": match_data.match_nature,
+                    "team_a_name": match_data.team_a_name,
+                    "team_b_name": match_data.team_b_name,
+                    "include_in_records": match_data.include_in_records,
                 }
             else:
                 match_query = """
@@ -78,7 +86,10 @@ def update_match(
                         losing_point = :losing_point, opposing_team = :opposing_team,
                         location = :location, start_time = :start_time, end_time = :end_time,
                         weather = :weather, num_players = :num_players, main_tactics = :main_tactics,
-                        video_url = :video_url
+                        video_url = :video_url,
+                        player_count = :player_count, match_nature = :match_nature,
+                        team_a_name = :team_a_name, team_b_name = :team_b_name,
+                        include_in_records = :include_in_records
                     WHERE match_idx = :match_idx
                 """
                 match_values = {
@@ -94,7 +105,12 @@ def update_match(
                     "weather": match_data.weather,
                     "num_players": match_data.num_players,
                     "main_tactics": match_data.main_tactics,
-                    "video_url": match_data.video_url
+                    "video_url": match_data.video_url,
+                    "player_count": match_data.player_count,
+                    "match_nature": match_data.match_nature,
+                    "team_a_name": match_data.team_a_name,
+                    "team_b_name": match_data.team_b_name,
+                    "include_in_records": match_data.include_in_records,
                 }
 
             db.execute(text(match_query), match_values)
@@ -115,17 +131,17 @@ def update_match(
             quarter_map = {}
             for q_data in match_data.quarters:
                 q_data.match_idx = match_idx
-                if q_data.quarter_idx:  
+                if q_data.quarter_idx:
                     db.execute(text("""
                         UPDATE quarters
-                        SET quarter_number = :quarter_number, tactics = :tactics
+                        SET quarter_number = :quarter_number, tactics = :tactics, team_b_tactics = :team_b_tactics
                         WHERE quarter_idx = :quarter_idx
                     """), q_data.dict())
                     quarter_map[q_data.quarter_number] = q_data.quarter_idx
-                else: 
+                else:
                     result = db.execute(text("""
-                        INSERT INTO quarters (match_idx, quarter_number, tactics) 
-                        VALUES (:match_idx, :quarter_number, :tactics) RETURNING quarter_idx
+                        INSERT INTO quarters (match_idx, quarter_number, tactics, team_b_tactics)
+                        VALUES (:match_idx, :quarter_number, :tactics, :team_b_tactics) RETURNING quarter_idx
                     """), q_data.dict())
                     new_quarter_idx = result.fetchone()[0]
                     quarter_map[q_data.quarter_number] = new_quarter_idx
@@ -151,16 +167,17 @@ def update_match(
                 for l_data in q_data.lineups:
                     l_data.quarter_idx = quarter_idx
                     
-                    if l_data.lineup_idx:                          
+                    if l_data.lineup_idx:
                         db.execute(text("""
                             UPDATE quarters_lineup
-                            SET player_idx = :user_idx, position_idx = :position_idx, lineup_status = :lineup_status
+                            SET player_idx = :user_idx, position_idx = :position_idx,
+                                lineup_status = :lineup_status, lineup_team = :lineup_team
                             WHERE lineup_idx = :lineup_idx
                         """), l_data.dict())
-                    else:  
+                    else:
                         db.execute(text("""
-                            INSERT INTO quarters_lineup (quarter_idx, player_idx, position_idx, lineup_status)
-                            VALUES (:quarter_idx, :user_idx, :position_idx, :lineup_status)
+                            INSERT INTO quarters_lineup (quarter_idx, player_idx, position_idx, lineup_status, lineup_team)
+                            VALUES (:quarter_idx, :user_idx, :position_idx, :lineup_status, :lineup_team)
                         """), l_data.dict())
 
                 # 🔹 기존 Goals 가져오기
@@ -183,13 +200,14 @@ def update_match(
                     if g_data.goal_idx:  # UPDATE
                         db.execute(text("""
                             UPDATE goals
-                            SET goal_player_id = :goal_player_id, assist_player_id = :assist_player_id, goal_type = :goal_type
+                            SET goal_player_id = :goal_player_id, assist_player_id = :assist_player_id,
+                                goal_type = :goal_type, scoring_team = :scoring_team
                             WHERE goal_idx = :goal_idx
                         """), g_data.dict())
                     else:  # INSERT
                         db.execute(text("""
-                            INSERT INTO goals (quarter_idx, match_idx, goal_player_id, assist_player_id, goal_type)
-                            VALUES (:quarter_idx, :match_idx, :goal_player_id, :assist_player_id, :goal_type)
+                            INSERT INTO goals (quarter_idx, match_idx, goal_player_id, assist_player_id, goal_type, scoring_team)
+                            VALUES (:quarter_idx, :match_idx, :goal_player_id, :assist_player_id, :goal_type, :scoring_team)
                         """), g_data.dict())
         
         return {"message": "Match successfully updated", "match_idx": match_idx}

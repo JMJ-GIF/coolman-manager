@@ -18,6 +18,11 @@ class Match(BaseModel):
     status: str = Field(..., max_length=50)
     photo_url: Optional[str] = None
     video_url: Optional[str] = None
+    player_count: str = Field(default='11v11', max_length=10)
+    match_nature: str = Field(default='경기', max_length=20)
+    team_a_name: Optional[str] = None
+    team_b_name: Optional[str] = None
+    include_in_records: bool = True
     created_at: datetime
 
 class Quarter(BaseModel):
@@ -25,6 +30,7 @@ class Quarter(BaseModel):
     match_idx: int = Field(..., description="Matches 테이블의 외래 키")
     quarter_number: int = Field(..., description="경기의 몇 번째 쿼터인지 (e.g., 1, 2, 3, 4)")
     tactics: str = Field(..., max_length=255, description="쿼터에 사용된 전술 정보")
+    team_b_tactics: Optional[str] = Field(None, max_length=255, description="내전 B팀 전술")
     created_at: Optional[datetime] = Field(None, description="쿼터가 생성된 시간 (기본값: 현재 시간)")
 
 class GoalDetail(BaseModel):
@@ -38,8 +44,9 @@ class GoalDetail(BaseModel):
     assist_player_name: Optional[str] = Field(None, description="도움을 준 선수 이름")
     assist_player_back_number: Optional[int] = Field(None, description="도움을 준 선수 등번호")
     created_at: Optional[datetime] = Field(None, description="골이 생성된 시간 (기본값: 현재 시간)")
-    goal_type: str = Field(..., max_length=50, description="골의 종류") 
-       
+    goal_type: str = Field(..., max_length=50, description="골의 종류")
+    scoring_team: Optional[str] = Field(None, description="내전 시 득점 팀 (A 또는 B)")
+
 class LineupDetail(BaseModel):
     lineup_idx: int
     match_idx: int
@@ -48,33 +55,33 @@ class LineupDetail(BaseModel):
     tactics: str
     lineup_idx: int
     position_idx: Optional[int] = None
-    position_name: Optional[str] = None 
+    position_name: Optional[str] = None
     user_name: str
     user_idx: int
     back_number: int
     lineup_status: str
-    top_coordinate: Optional[int] = None 
+    lineup_team: Optional[str] = None
+    top_coordinate: Optional[int] = None
     left_coordinate: Optional[int] = None
     image_url: Optional[str] = None
     role: str
 
 class GoalCreate(BaseModel):
-    # match_idx: int
-    # quarter_idx: int
-    goal_player_id: Optional[int]  = None
-    assist_player_id: Optional[int]  = None
+    goal_player_id: Optional[int] = None
+    assist_player_id: Optional[int] = None
     goal_type: str
+    scoring_team: Optional[str] = None
 
 class LineupCreate(BaseModel):
     user_idx: int
-    # quarter_idx: int
     position_idx: Optional[int] = None
     lineup_status: str
+    lineup_team: Optional[str] = None
 
 class QuarterCreate(BaseModel):
-    # match_idx: int
     quarter_number: int
     tactics: str
+    team_b_tactics: Optional[str] = None
     goals: Optional[List[GoalCreate]] = []
     lineups: Optional[List[LineupCreate]] = []
 
@@ -91,28 +98,36 @@ class MatchCreate(BaseModel):
     num_players: int
     main_tactics: str
     video_url: Optional[str] = None
+    player_count: str = '11v11'
+    match_nature: str = '경기'
+    team_a_name: Optional[str] = None
+    team_b_name: Optional[str] = None
+    include_in_records: bool = True
     quarters: Optional[List[QuarterCreate]] = []
 
 class GoalUpdate(BaseModel):
-    goal_idx : Optional[int] = None # 골 생성이 될 수도 있어서 Optional
-    quarter_idx: Optional[int] = None # 쿼터 생성이 될 수도 있어서 Optional
+    goal_idx: Optional[int] = None
+    quarter_idx: Optional[int] = None
     match_idx: Optional[int] = None
     goal_player_id: Optional[int] = None
     assist_player_id: Optional[int] = None
     goal_type: str
+    scoring_team: Optional[str] = None
 
 class LineupUpdate(BaseModel):
-    lineup_idx: Optional[int] = None # 라인업 생성이 될 수도 있어서 Optional
+    lineup_idx: Optional[int] = None
     user_idx: int
-    quarter_idx: Optional[int] = None # 쿼터 생성이 될 수도 있어서 Optional
+    quarter_idx: Optional[int] = None
     position_idx: Optional[int] = None
     lineup_status: str
+    lineup_team: Optional[str] = None
 
-class QuarterUpdate(BaseModel):    
-    quarter_idx: Optional[int] = None # 쿼터 생성이 될 수도 있어서 Optional
+class QuarterUpdate(BaseModel):
+    quarter_idx: Optional[int] = None
     match_idx: Optional[int] = None
     quarter_number: int
     tactics: str
+    team_b_tactics: Optional[str] = None
     goals: Optional[List[GoalUpdate]] = []
     lineups: Optional[List[LineupUpdate]] = []
 
@@ -130,4 +145,9 @@ class MatchUpdate(BaseModel):
     num_players: int
     main_tactics: str
     video_url: Optional[str] = None
+    player_count: str = '11v11'
+    match_nature: str = '경기'
+    team_a_name: Optional[str] = None
+    team_b_name: Optional[str] = None
+    include_in_records: bool = True
     quarters: Optional[List[QuarterUpdate]] = []

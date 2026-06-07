@@ -25,23 +25,16 @@ function Records() {
     const fetchData = async (year) => {
         setLoading(true);
         try {
-            const userStatsResponse = await axios.get(`${API_URL}/rank`, {
-                params: { year }
-            });
-            const OpposingTeamStatsResponse = await axios.get(`${API_URL}/rank/opposing_team`, {
-                params: { year }
-            });
-            const mvpCheckResponse = await axios.get(`${API_URL}/mvp/check`, {
-                params: { year }
-            });
-            setUserStats(userStatsResponse.data);
-            setOpposingTeamStats(OpposingTeamStatsResponse.data);
-            setHasMvpData(mvpCheckResponse.data.has_data);
+            const [userStatsRes, opposingTeamRes, mvpCheckRes] = await Promise.allSettled([
+                axios.get(`${API_URL}/rank`, { params: { year } }),
+                axios.get(`${API_URL}/rank/opposing_team`, { params: { year } }),
+                axios.get(`${API_URL}/mvp/check`, { params: { year } }),
+            ]);
+            setUserStats(userStatsRes.status === 'fulfilled' ? userStatsRes.value.data : []);
+            setOpposingTeamStats(opposingTeamRes.status === 'fulfilled' ? opposingTeamRes.value.data : []);
+            setHasMvpData(mvpCheckRes.status === 'fulfilled' ? mvpCheckRes.value.data.has_data : false);
         } catch (error) {
-            console.error("Error fetching Users:", error);
-            setUserStats([]);
-            setOpposingTeamStats([]);
-            setHasMvpData(false);
+            console.error("Error fetching records:", error);
         } finally {
             setLoading(false);
         }

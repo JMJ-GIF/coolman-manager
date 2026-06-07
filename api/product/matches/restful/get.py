@@ -31,11 +31,11 @@ def get_quarters_in_match(match_idx: int, db: Session = Depends(get_db)):
 @router.get("/{match_idx}/goals", response_model=List[GoalDetail])
 def get_goals_in_match(match_idx: int, db: Session = Depends(get_db)):
     sql = """
-    SELECT 
-        g.goal_idx, g.match_idx, g.quarter_idx, 
+    SELECT
+        g.goal_idx, g.match_idx, g.quarter_idx,
         g.goal_player_id, goal_user.name AS goal_player_name, goal_user.back_number AS goal_player_back_number,
         g.assist_player_id, assist_user.name AS assist_player_name, assist_user.back_number AS assist_player_back_number,
-        g.goal_type, g.created_at
+        g.goal_type, g.scoring_team, g.created_at
     FROM goals g
     LEFT JOIN users goal_user ON g.goal_player_id = goal_user.user_idx
     LEFT JOIN users assist_user ON g.assist_player_id = assist_user.user_idx
@@ -52,11 +52,11 @@ def get_goals_in_match(match_idx: int, db: Session = Depends(get_db)):
 @router.get("/{match_idx}/lineups", response_model=List[LineupDetail])
 def get_lineups_in_match(match_idx: int, db: Session = Depends(get_db)):
     sql = """
-    SELECT 
+    SELECT
         l.lineup_idx,
-        q.match_idx, q.quarter_idx, q.quarter_number, q.tactics, 
-        l.lineup_idx, p.name AS position_name, p.position_idx, p.top_coordinate, p.left_coordinate, 
-        u.back_number, u.name AS user_name, u.user_idx, l.lineup_status, u.image_url, u.role
+        q.match_idx, q.quarter_idx, q.quarter_number, q.tactics,
+        l.lineup_idx, p.name AS position_name, p.position_idx, p.top_coordinate, p.left_coordinate,
+        u.back_number, u.name AS user_name, u.user_idx, l.lineup_status, l.lineup_team, u.image_url, u.role
     FROM quarters q
     JOIN quarters_lineup l ON q.quarter_idx = l.quarter_idx
     LEFT JOIN positions p ON l.position_idx = p.position_idx

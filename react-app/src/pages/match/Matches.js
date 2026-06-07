@@ -190,7 +190,9 @@ function Matches() {
                             <p>vs</p>
                         </div>
                         <div className='team-info'>
-                            <p>{card.opposing_team}</p>
+                            <p>{card.match_nature === '내전'
+                                ? `${card.team_a_name || 'A팀'}, ${card.team_b_name || 'B팀'}`
+                                : card.opposing_team}</p>
                         </div>
                         <div className="score-info" data-result={card.result}>
                             <p>{card.winning_point}</p>

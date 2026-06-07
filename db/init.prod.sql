@@ -39,40 +39,47 @@ CREATE TABLE IF NOT EXISTS matches (
     photo_url TEXT NULL,
     video_url TEXT NULL,
     status VARCHAR(50) DEFAULT 'Confirmed' NOT NULL,
+    player_count VARCHAR(10) DEFAULT '11v11' NOT NULL,
+    match_nature VARCHAR(20) DEFAULT '경기' NOT NULL,
+    team_a_name VARCHAR(255) NULL,
+    team_b_name VARCHAR(255) NULL,
+    include_in_records BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL
 );
 
 CREATE TABLE IF NOT EXISTS quarters (
-    quarter_idx SERIAL PRIMARY KEY,          
-    match_idx INT NOT NULL,                  
+    quarter_idx SERIAL PRIMARY KEY,
+    match_idx INT NOT NULL,
     quarter_number INT NOT NULL,
     tactics VARCHAR(255) NOT NULL,
+    team_b_tactics VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,             
+    updated_at TIMESTAMP NULL,
     FOREIGN KEY (match_idx) REFERENCES matches (match_idx) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS goals (
-    goal_idx SERIAL PRIMARY KEY,               
-    match_idx INT NOT NULL,   
-    quarter_idx INT NOT NULL,                 
-    goal_player_id INT,               
-    assist_player_id INT,  
-    goal_type VARCHAR(50) NOT NULL,                                    
+    goal_idx SERIAL PRIMARY KEY,
+    match_idx INT NOT NULL,
+    quarter_idx INT NOT NULL,
+    goal_player_id INT,
+    assist_player_id INT,
+    goal_type VARCHAR(50) NOT NULL,
+    scoring_team CHAR(1) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL, 
+    updated_at TIMESTAMP NULL,
     FOREIGN KEY (match_idx) REFERENCES matches (match_idx) ON DELETE CASCADE,
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS positions (
-    position_idx SERIAL PRIMARY KEY,               
+    position_idx SERIAL PRIMARY KEY,
     tactics VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     top_coordinate INT NOT NULL,
-    left_coordinate INT NOT NULL,   
+    left_coordinate INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL
 );
@@ -80,9 +87,10 @@ CREATE TABLE IF NOT EXISTS positions (
 CREATE TABLE IF NOT EXISTS quarters_lineup (
     lineup_idx SERIAL PRIMARY KEY,
     player_idx INT NOT NULL,
-    quarter_idx INT NOT NULL, 
+    quarter_idx INT NOT NULL,
     position_idx INT NULL,
-    lineup_status VARCHAR(20) NOT NULL CHECK (lineup_status IN ('선발', '후보')),   
+    lineup_status VARCHAR(20) NOT NULL CHECK (lineup_status IN ('선발', '후보')),
+    lineup_team CHAR(1) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
@@ -192,8 +200,8 @@ VALUES
 ('5-4-1', 'ST', 'Striker', 20, 50),
 
 -- 5-3-2 Formation
-('5-3-2', 'GK', 'Goalkeeper', 90, 50), 
-('5-3-2', 'LB', 'Left Back', 70, 15), 
+('5-3-2', 'GK', 'Goalkeeper', 90, 50),
+('5-3-2', 'LB', 'Left Back', 70, 15),
 ('5-3-2', 'LCB', 'Left Center Back', 70, 31),
 ('5-3-2', 'CCB', 'Center Center Back', 70, 49),
 ('5-3-2', 'RCB', 'Right Center Back', 70, 67),
@@ -202,7 +210,76 @@ VALUES
 ('5-3-2', 'CM', 'Central Midfielder', 45, 50),
 ('5-3-2', 'RCM', 'Right Central Midfielder', 45, 80),
 ('5-3-2', 'LST', 'Left Striker', 20, 35),
-('5-3-2', 'RST', 'Right Striker', 20, 65);
+('5-3-2', 'RST', 'Right Striker', 20, 65),
+
+-- 3-3-2 Formation (9v9)
+('3-3-2', 'GK', 'Goalkeeper', 90, 50),
+('3-3-2', 'LB', 'Left Back', 70, 20),
+('3-3-2', 'CCB', 'Center Back', 70, 50),
+('3-3-2', 'RB', 'Right Back', 70, 80),
+('3-3-2', 'LM', 'Left Midfielder', 45, 20),
+('3-3-2', 'CM', 'Central Midfielder', 45, 50),
+('3-3-2', 'RM', 'Right Midfielder', 45, 80),
+('3-3-2', 'LST', 'Left Striker', 15, 35),
+('3-3-2', 'RST', 'Right Striker', 15, 65),
+
+-- 3-2-3 Formation (9v9)
+('3-2-3', 'GK', 'Goalkeeper', 90, 50),
+('3-2-3', 'LB', 'Left Back', 70, 20),
+('3-2-3', 'CCB', 'Center Back', 70, 50),
+('3-2-3', 'RB', 'Right Back', 70, 80),
+('3-2-3', 'LCM', 'Left Central Midfielder', 45, 35),
+('3-2-3', 'RCM', 'Right Central Midfielder', 45, 65),
+('3-2-3', 'LW', 'Left Winger', 15, 20),
+('3-2-3', 'CF', 'Center Forward', 15, 50),
+('3-2-3', 'RW', 'Right Winger', 15, 80),
+
+-- 2-3-3 Formation (9v9)
+('2-3-3', 'GK', 'Goalkeeper', 90, 50),
+('2-3-3', 'LCB', 'Left Center Back', 70, 33),
+('2-3-3', 'RCB', 'Right Center Back', 70, 67),
+('2-3-3', 'LM', 'Left Midfielder', 50, 20),
+('2-3-3', 'CM', 'Central Midfielder', 50, 50),
+('2-3-3', 'RM', 'Right Midfielder', 50, 80),
+('2-3-3', 'LW', 'Left Winger', 15, 20),
+('2-3-3', 'CF', 'Center Forward', 15, 50),
+('2-3-3', 'RW', 'Right Winger', 15, 80),
+
+-- 4-3-2 Formation (10v10)
+('4-3-2', 'GK', 'Goalkeeper', 90, 50),
+('4-3-2', 'LB', 'Left Back', 70, 15),
+('4-3-2', 'LCB', 'Left Center Back', 70, 37),
+('4-3-2', 'RCB', 'Right Center Back', 70, 63),
+('4-3-2', 'RB', 'Right Back', 70, 85),
+('4-3-2', 'LM', 'Left Midfielder', 45, 20),
+('4-3-2', 'CM', 'Central Midfielder', 45, 50),
+('4-3-2', 'RM', 'Right Midfielder', 45, 80),
+('4-3-2', 'LST', 'Left Striker', 15, 35),
+('4-3-2', 'RST', 'Right Striker', 15, 65),
+
+-- 3-4-2 Formation (10v10)
+('3-4-2', 'GK', 'Goalkeeper', 90, 50),
+('3-4-2', 'LCB', 'Left Center Back', 70, 20),
+('3-4-2', 'CCB', 'Center Back', 70, 50),
+('3-4-2', 'RCB', 'Right Center Back', 70, 80),
+('3-4-2', 'LM', 'Left Midfielder', 45, 15),
+('3-4-2', 'LCM', 'Left Central Midfielder', 45, 38),
+('3-4-2', 'RCM', 'Right Central Midfielder', 45, 63),
+('3-4-2', 'RM', 'Right Midfielder', 45, 85),
+('3-4-2', 'LST', 'Left Striker', 15, 35),
+('3-4-2', 'RST', 'Right Striker', 15, 65),
+
+-- 3-3-3 Formation (10v10)
+('3-3-3', 'GK', 'Goalkeeper', 90, 50),
+('3-3-3', 'LCB', 'Left Center Back', 70, 20),
+('3-3-3', 'CCB', 'Center Back', 70, 50),
+('3-3-3', 'RCB', 'Right Center Back', 70, 80),
+('3-3-3', 'LM', 'Left Midfielder', 45, 20),
+('3-3-3', 'CM', 'Central Midfielder', 45, 50),
+('3-3-3', 'RM', 'Right Midfielder', 45, 80),
+('3-3-3', 'LW', 'Left Winger', 15, 20),
+('3-3-3', 'CF', 'Center Forward', 15, 50),
+('3-3-3', 'RW', 'Right Winger', 15, 80);
 
 -- 🔹 updated_at 자동 갱신 함수 (업데이트 발생 시 항상 NOW() 적용)
 CREATE OR REPLACE FUNCTION update_timestamp()
@@ -341,40 +418,47 @@ CREATE TABLE IF NOT EXISTS matches (
     photo_url TEXT NULL,
     video_url TEXT NULL,
     status VARCHAR(50) DEFAULT 'Confirmed' NOT NULL,
+    player_count VARCHAR(10) DEFAULT '11v11' NOT NULL,
+    match_nature VARCHAR(20) DEFAULT '경기' NOT NULL,
+    team_a_name VARCHAR(255) NULL,
+    team_b_name VARCHAR(255) NULL,
+    include_in_records BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL
 );
 
 CREATE TABLE IF NOT EXISTS quarters (
-    quarter_idx SERIAL PRIMARY KEY,          
-    match_idx INT NOT NULL,                  
+    quarter_idx SERIAL PRIMARY KEY,
+    match_idx INT NOT NULL,
     quarter_number INT NOT NULL,
     tactics VARCHAR(255) NOT NULL,
+    team_b_tactics VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,             
+    updated_at TIMESTAMP NULL,
     FOREIGN KEY (match_idx) REFERENCES matches (match_idx) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS goals (
-    goal_idx SERIAL PRIMARY KEY,               
-    match_idx INT NOT NULL,   
-    quarter_idx INT NOT NULL,                 
-    goal_player_id INT,               
-    assist_player_id INT,  
-    goal_type VARCHAR(50) NOT NULL,                                    
+    goal_idx SERIAL PRIMARY KEY,
+    match_idx INT NOT NULL,
+    quarter_idx INT NOT NULL,
+    goal_player_id INT,
+    assist_player_id INT,
+    goal_type VARCHAR(50) NOT NULL,
+    scoring_team CHAR(1) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL, 
+    updated_at TIMESTAMP NULL,
     FOREIGN KEY (match_idx) REFERENCES matches (match_idx) ON DELETE CASCADE,
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS positions (
-    position_idx SERIAL PRIMARY KEY,               
+    position_idx SERIAL PRIMARY KEY,
     tactics VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     top_coordinate INT NOT NULL,
-    left_coordinate INT NOT NULL,   
+    left_coordinate INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL
 );
@@ -382,9 +466,10 @@ CREATE TABLE IF NOT EXISTS positions (
 CREATE TABLE IF NOT EXISTS quarters_lineup (
     lineup_idx SERIAL PRIMARY KEY,
     player_idx INT NOT NULL,
-    quarter_idx INT NOT NULL, 
+    quarter_idx INT NOT NULL,
     position_idx INT NULL,
-    lineup_status VARCHAR(20) NOT NULL CHECK (lineup_status IN ('선발', '후보')),   
+    lineup_status VARCHAR(20) NOT NULL CHECK (lineup_status IN ('선발', '후보')),
+    lineup_team CHAR(1) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     FOREIGN KEY (quarter_idx) REFERENCES quarters (quarter_idx) ON DELETE CASCADE
@@ -709,8 +794,8 @@ VALUES
 ('5-4-1', 'ST', 'Striker', 20, 50),
 
 -- 5-3-2 Formation
-('5-3-2', 'GK', 'Goalkeeper', 90, 50), 
-('5-3-2', 'LB', 'Left Back', 70, 15), 
+('5-3-2', 'GK', 'Goalkeeper', 90, 50),
+('5-3-2', 'LB', 'Left Back', 70, 15),
 ('5-3-2', 'LCB', 'Left Center Back', 70, 31),
 ('5-3-2', 'CCB', 'Center Center Back', 70, 49),
 ('5-3-2', 'RCB', 'Right Center Back', 70, 67),
@@ -719,7 +804,76 @@ VALUES
 ('5-3-2', 'CM', 'Central Midfielder', 45, 50),
 ('5-3-2', 'RCM', 'Right Central Midfielder', 45, 80),
 ('5-3-2', 'LST', 'Left Striker', 20, 35),
-('5-3-2', 'RST', 'Right Striker', 20, 65);
+('5-3-2', 'RST', 'Right Striker', 20, 65),
+
+-- 3-3-2 Formation (9v9)
+('3-3-2', 'GK', 'Goalkeeper', 90, 50),
+('3-3-2', 'LB', 'Left Back', 70, 20),
+('3-3-2', 'CCB', 'Center Back', 70, 50),
+('3-3-2', 'RB', 'Right Back', 70, 80),
+('3-3-2', 'LM', 'Left Midfielder', 45, 20),
+('3-3-2', 'CM', 'Central Midfielder', 45, 50),
+('3-3-2', 'RM', 'Right Midfielder', 45, 80),
+('3-3-2', 'LST', 'Left Striker', 15, 35),
+('3-3-2', 'RST', 'Right Striker', 15, 65),
+
+-- 3-2-3 Formation (9v9)
+('3-2-3', 'GK', 'Goalkeeper', 90, 50),
+('3-2-3', 'LB', 'Left Back', 70, 20),
+('3-2-3', 'CCB', 'Center Back', 70, 50),
+('3-2-3', 'RB', 'Right Back', 70, 80),
+('3-2-3', 'LCM', 'Left Central Midfielder', 45, 35),
+('3-2-3', 'RCM', 'Right Central Midfielder', 45, 65),
+('3-2-3', 'LW', 'Left Winger', 15, 20),
+('3-2-3', 'CF', 'Center Forward', 15, 50),
+('3-2-3', 'RW', 'Right Winger', 15, 80),
+
+-- 2-3-3 Formation (9v9)
+('2-3-3', 'GK', 'Goalkeeper', 90, 50),
+('2-3-3', 'LCB', 'Left Center Back', 70, 33),
+('2-3-3', 'RCB', 'Right Center Back', 70, 67),
+('2-3-3', 'LM', 'Left Midfielder', 50, 20),
+('2-3-3', 'CM', 'Central Midfielder', 50, 50),
+('2-3-3', 'RM', 'Right Midfielder', 50, 80),
+('2-3-3', 'LW', 'Left Winger', 15, 20),
+('2-3-3', 'CF', 'Center Forward', 15, 50),
+('2-3-3', 'RW', 'Right Winger', 15, 80),
+
+-- 4-3-2 Formation (10v10)
+('4-3-2', 'GK', 'Goalkeeper', 90, 50),
+('4-3-2', 'LB', 'Left Back', 70, 15),
+('4-3-2', 'LCB', 'Left Center Back', 70, 37),
+('4-3-2', 'RCB', 'Right Center Back', 70, 63),
+('4-3-2', 'RB', 'Right Back', 70, 85),
+('4-3-2', 'LM', 'Left Midfielder', 45, 20),
+('4-3-2', 'CM', 'Central Midfielder', 45, 50),
+('4-3-2', 'RM', 'Right Midfielder', 45, 80),
+('4-3-2', 'LST', 'Left Striker', 15, 35),
+('4-3-2', 'RST', 'Right Striker', 15, 65),
+
+-- 3-4-2 Formation (10v10)
+('3-4-2', 'GK', 'Goalkeeper', 90, 50),
+('3-4-2', 'LCB', 'Left Center Back', 70, 20),
+('3-4-2', 'CCB', 'Center Back', 70, 50),
+('3-4-2', 'RCB', 'Right Center Back', 70, 80),
+('3-4-2', 'LM', 'Left Midfielder', 45, 15),
+('3-4-2', 'LCM', 'Left Central Midfielder', 45, 38),
+('3-4-2', 'RCM', 'Right Central Midfielder', 45, 63),
+('3-4-2', 'RM', 'Right Midfielder', 45, 85),
+('3-4-2', 'LST', 'Left Striker', 15, 35),
+('3-4-2', 'RST', 'Right Striker', 15, 65),
+
+-- 3-3-3 Formation (10v10)
+('3-3-3', 'GK', 'Goalkeeper', 90, 50),
+('3-3-3', 'LCB', 'Left Center Back', 70, 20),
+('3-3-3', 'CCB', 'Center Back', 70, 50),
+('3-3-3', 'RCB', 'Right Center Back', 70, 80),
+('3-3-3', 'LM', 'Left Midfielder', 45, 20),
+('3-3-3', 'CM', 'Central Midfielder', 45, 50),
+('3-3-3', 'RM', 'Right Midfielder', 45, 80),
+('3-3-3', 'LW', 'Left Winger', 15, 20),
+('3-3-3', 'CF', 'Center Forward', 15, 50),
+('3-3-3', 'RW', 'Right Winger', 15, 80);
 
 
 -- quarters_lineup 데이터 삽입

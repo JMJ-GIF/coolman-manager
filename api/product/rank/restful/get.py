@@ -17,6 +17,8 @@ def get_user_all_stats(
 ):
     # 연도 필터 조건 생성
     year_filter = f"AND EXTRACT(YEAR FROM m.dt) = {year}" if year else ""
+    # 개인 기록 필터: 기록제외 매치만 빠짐 (내전은 개인 기록에 포함)
+    indiv_filter = "AND m.include_in_records = TRUE"
 
     sql = f"""
         select
@@ -48,7 +50,9 @@ def get_user_all_stats(
                     count(distinct m.match_idx) as max_match_cnt
             from users u
                 left join matches m on m.dt >= DATE(u.join_date)
-            WHERE 1=1 {year_filter}
+                    AND m.include_in_records = TRUE
+                    {"AND EXTRACT(YEAR FROM m.dt) = " + str(year) if year else ""}
+            WHERE 1=1
             group by 1,2,3,4,5,6
 
         ) a
@@ -61,7 +65,7 @@ def get_user_all_stats(
             from matches m
                 join quarters q on m.match_idx = q.match_idx
                 join quarters_lineup ql on ql.quarter_idx = q.quarter_idx
-            WHERE 1=1 {year_filter}
+            WHERE 1=1 {indiv_filter} {year_filter}
             group by 1
         ) b on a.user_idx = b.user_idx
         left join
@@ -73,7 +77,7 @@ def get_user_all_stats(
                 join quarters q on g.quarter_idx = q.quarter_idx
                 join matches m on q.match_idx = m.match_idx
             where g.goal_type = '득점'
-                {year_filter}
+                {indiv_filter} {year_filter}
             group by 1
         ) c on a.user_idx = c.user_idx
         left join
@@ -85,7 +89,7 @@ def get_user_all_stats(
                 join quarters q on g.quarter_idx = q.quarter_idx
                 join matches m on q.match_idx = m.match_idx
             where g.goal_type = '득점'
-                {year_filter}
+                {indiv_filter} {year_filter}
             group by 1
         ) d on a.user_idx = d.user_idx
         left join
@@ -106,7 +110,7 @@ def get_user_all_stats(
                 where g.quarter_idx = q.quarter_idx
                 and g.goal_type in ('실점', '자살골')
             )
-            {year_filter}
+            {indiv_filter} {year_filter}
             group by 1
         ) e on a.user_idx = e.user_idx
     """
@@ -145,6 +149,7 @@ def get_user_participation(user_idx: int, db: Session = Depends(get_db)):
                     from quarters_lineup ql
                     where player_idx = {user_idx}
                 ) ql on ql.quarter_idx = q.quarter_idx
+            where m.include_in_records = TRUE
             group by 1,2
         ) a
         join users u on a.user_idx = u.user_idx
@@ -163,6 +168,8 @@ def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)
     sql = f"""
         select
             base.opposing_team,
+            base.team_a_name,
+            base.match_nature,
             {user_idx} as user_idx,
             coalesce(goal.goal_cnt, 0) as goal_cnt,
             coalesce(assist.assist_cnt, 0) as assist_cnt,
@@ -173,12 +180,15 @@ def get_user_stats_by_opposing_team(user_idx: int, db: Session = Depends(get_db)
         (
             select
                     m.opposing_team,
+                    m.team_a_name,
+                    m.match_nature,
                     count(distinct m.match_idx) as match_cnt
             from matches m
                 join quarters q on m.match_idx = q.match_idx
                 join quarters_lineup ql on q.quarter_idx = ql.quarter_idx
             where ql.player_idx = {user_idx}
-            group by 1
+                AND m.include_in_records = TRUE
+            group by 1, 2, 3
         ) base
         left join
         (
@@ -241,6 +251,7 @@ def get_user_clean_cnt(user_idx: int, db: Session = Depends(get_db)):
             join matches m on q.match_idx = m.match_idx
             join positions p on ql.position_idx = p.position_idx
         where ql.player_idx = {user_idx}
+            and m.include_in_records = TRUE
             and (
                 (p.name = 'GK' or p.name like '%B')
                 or (q.tactics in ('4-1-2-3', '4-2-3-1', '4-1-4-1') and p.name in ('CDM', 'LCDM', 'RCDM'))
@@ -267,6 +278,7 @@ def get_user_clean_matches(user_idx: int, db: Session = Depends(get_db)):
             join matches m on q.match_idx = m.match_idx
             join positions p on ql.position_idx = p.position_idx
         where ql.player_idx = {user_idx}
+            and m.include_in_records = TRUE
             and (
                 (p.name = 'GK' or p.name like '%B')
                 or (q.tactics in ('4-1-2-3', '4-2-3-1', '4-1-4-1') and p.name in ('CDM', 'LCDM', 'RCDM'))
@@ -299,6 +311,7 @@ def get_user_stats_by_position(user_idx: int, db: Session = Depends(get_db)):
             join positions p on ql.position_idx = p.position_idx
         where
             ql.player_idx = {user_idx}
+            AND m.include_in_records = TRUE
         group by 1,2,3
     """
 
@@ -314,8 +327,7 @@ def get_opposing_team_all_stat(
     year: Optional[int] = Query(None, description="연도 필터 (예: 2025)"),
     db: Session = Depends(get_db)
 ):
-    # 연도 필터 조건 생성
-    year_filter = f"WHERE EXTRACT(YEAR FROM m.dt) = {year}" if year else ""
+    year_cond = f"AND EXTRACT(YEAR FROM m.dt) = {year}" if year else ""
 
     sql = f"""
         select
@@ -326,13 +338,12 @@ def get_opposing_team_all_stat(
                 sum(winning_point) as winning_point,
                 sum(losing_point) as losing_point
         from matches m
-        {year_filter}
+        WHERE m.include_in_records = TRUE
+            AND m.match_nature != '내전'
+            {year_cond}
         group by 1
     """
 
     result = db.execute(text(sql)).mappings().all()
-
-    if not result:
-        raise HTTPException(status_code=404, detail="No opposing team statistics found.")
 
     return result

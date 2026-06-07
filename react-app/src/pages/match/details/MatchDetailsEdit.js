@@ -14,6 +14,12 @@ import NavigationBar from "../../../components/NavigationBar";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import ImageCropper from "../../../components/ImageCropper";
 
+const DEFAULT_TACTICS_BY_PLAYER_COUNT = {
+    '9v9':   '3-3-2',
+    '10v10': '4-3-2',
+    '11v11': '4-3-3',
+};
+
 const determineResult = (winningPoint, losingPoint) => {
     if (winningPoint > losingPoint) return "승리";
     if (winningPoint < losingPoint) return "패배";
@@ -194,27 +200,35 @@ function MatchDetailsEdit() {
     };
 
     const handleFormSubmit = handleSubmit(async (data) => {
-        const { dt, start_time, end_time, quarters } = data;
+        const { dt, start_time, end_time, quarters, match_nature, team_b_name } = data;
+        const isNaeJeon = match_nature === '내전';
 
         // 승리점수, 패배점수 계산하기
         const goals = quarters.flatMap((quarter) => quarter.goals || []);
-        const winning_point = goals.filter((goal) => goal.goal_type === "득점").length;
-        const losing_point = goals.filter(
-            (goal) => goal.goal_type === "실점" || goal.goal_type === "자살골"
-        ).length;
-        data.winning_point = winning_point
-        data.losing_point = losing_point
+
+        let winning_point, losing_point;
+        if (isNaeJeon) {
+            winning_point = goals.filter((g) => g.scoring_team === 'A').length;
+            losing_point  = goals.filter((g) => g.scoring_team === 'B').length;
+            data.result        = '내전';
+            data.opposing_team = team_b_name || '내전';
+        } else {
+            winning_point = goals.filter((goal) => goal.goal_type === "득점").length;
+            losing_point  = goals.filter((goal) => goal.goal_type === "실점" || goal.goal_type === "자살골").length;
+            data.result = determineResult(winning_point, losing_point);
+        }
+        data.winning_point = winning_point;
+        data.losing_point  = losing_point;
 
         // 인원수 계산하기
-        const allLineups = quarters.flatMap((quarter) => quarter.lineups || []);            
+        const allLineups = quarters.flatMap((quarter) => quarter.lineups || []);
         const uniquePlayers = new Set(
             allLineups
-                .filter(({ user_name, back_number }) => user_name !== "용병" && user_name && back_number) // "용병" 제외
-                .map(({ user_name, back_number }) => `${user_name}-${back_number}`) // 고유 키 생성
-        );         
-        const num_players = uniquePlayers.size;
-        data.num_players = num_players
-        
+                .filter(({ user_name, back_number }) => user_name !== "용병" && user_name && back_number)
+                .map(({ user_name, back_number }) => `${user_name}-${back_number}`)
+        );
+        data.num_players = uniquePlayers.size;
+
         // 시간 KST 로 포맷팅하기
         let formattedStart = formatDateTime(dt, start_time);
         let formattedEnd = formatDateTime(dt, end_time);
@@ -223,7 +237,7 @@ function MatchDetailsEdit() {
 
         if (startDate > endDate) {
             endDate.setDate(endDate.getDate() + 1);
-            
+
             const pad = (n) => String(n).padStart(2, "0");
             const yyyy = endDate.getFullYear();
             const MM = pad(endDate.getMonth() + 1);
@@ -233,18 +247,15 @@ function MatchDetailsEdit() {
 
             formattedEnd = `${yyyy}-${MM}-${dd}T${HH}:${mm}:00`;
         }
-        console.log('EDIT formattedStart', formattedStart)
-        console.log('EDIT formattedEnd', formattedEnd)
         data.start_time = formattedStart;
         data.end_time = formattedEnd;
 
-        // 결과값 입력하기
-        data.result = determineResult(winning_point, losing_point);
-    
-        // 0. 골 유형이 빈값인지 확인
+        // 0. 골 유형이 빈값인지 확인 (내전은 scoring_team으로 대체)
         const validateGoalTypes = () => {
             const allGoals = quarters.flatMap((quarter) => quarter.goals || []);
-    
+            if (isNaeJeon) {
+                return allGoals.every(g => g.scoring_team && g.goal_player_name);
+            }
             return allGoals.every(goal => goal.goal_type && goal.goal_type.trim() !== "");
         };
         
@@ -391,9 +402,57 @@ function MatchDetailsEdit() {
         });
     };
     
+    const handlePlayerCountChange = (newPlayerCount) => {
+        if (positions.length === 0) return;
+        const matchNature = watch("match_nature") || '경기';
+        const isNaeJeon = matchNature === '내전';
+        const newDefaultTactics = DEFAULT_TACTICS_BY_PLAYER_COUNT[newPlayerCount] || '4-3-3';
+
+        const filteredPositions = positions
+            .filter(p => p.tactics === newDefaultTactics)
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        const rebuildStarters = (oldStarters, team) =>
+            filteredPositions.map((pos, idx) => ({
+                ...(oldStarters[idx] || {}),
+                lineup_status: '선발',
+                lineup_team: isNaeJeon ? team : null,
+                position_name: pos.name,
+                position_idx: pos.position_idx,
+                top_coordinate: pos.top_coordinate,
+                left_coordinate: pos.left_coordinate,
+            }));
+
+        const currentQuarters = watch("quarters") || [];
+        const newQuarters = currentQuarters.map(quarter => {
+            const lineups = quarter.lineups || [];
+            if (isNaeJeon) {
+                const aStarters = lineups.filter(l => l.lineup_team === 'A' && l.lineup_status === '선발');
+                const bStarters = lineups.filter(l => l.lineup_team === 'B' && l.lineup_status === '선발');
+                const subs = lineups.filter(l => l.lineup_status === '후보');
+                return {
+                    ...quarter,
+                    tactics: newDefaultTactics,
+                    team_b_tactics: newDefaultTactics,
+                    lineups: [...rebuildStarters(aStarters, 'A'), ...rebuildStarters(bStarters, 'B'), ...subs],
+                };
+            } else {
+                const starters = lineups.filter(l => l.lineup_status === '선발');
+                const subs = lineups.filter(l => l.lineup_status === '후보');
+                return {
+                    ...quarter,
+                    tactics: newDefaultTactics,
+                    lineups: [...rebuildStarters(starters, null), ...subs],
+                };
+            }
+        });
+
+        setValue("quarters", newQuarters);
+    };
+
     const handleCancel = () => {
         navigate(`/matches/${match_idx}/`);
-    };    
+    };
 
     return (
         <div className="gray-background">
@@ -411,6 +470,8 @@ function MatchDetailsEdit() {
                             onSubmit={handleFormSubmit}
                             control={control}
                             positions={positions}
+                            onPlayerCountChange={handlePlayerCountChange}
+                            onMatchNatureChange={() => {}}
                         />
                         <div className="match-details">
                             <div className="header-card">
@@ -439,6 +500,7 @@ function MatchDetailsEdit() {
                                     users={users}
                                     positions={positions}
                                     onSubmit={handleFormSubmit}
+                                    matchNature={watch("match_nature")}
                                 />
                             ) : activeTab === "lineup" ? (
                                 <EditLineupForm
@@ -449,6 +511,9 @@ function MatchDetailsEdit() {
                                     users={users}
                                     positions={positions}
                                     onSubmit={handleFormSubmit}
+                                    matchNature={watch("match_nature")}
+                                    teamAName={watch("team_a_name") || "A팀"}
+                                    teamBName={watch("team_b_name") || "B팀"}
                                 />
                             ) : null}
                         </div>

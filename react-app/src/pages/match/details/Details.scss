@@ -1323,3 +1323,33 @@
         }
     }
 }
+// Toggle button group (player_count, match_nature)
+.toggle-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .toggle-btn {
+        padding: 6px 16px;
+        border: 1.5px solid #ccc;
+        border-radius: 20px;
+        background: #fff;
+        color: #555;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+
+        &:hover {
+            border-color: #007bff;
+            color: #007bff;
+        }
+
+        &.active {
+            background: #007bff;
+            border-color: #007bff;
+            color: #fff;
+            font-weight: 700;
+        }
+    }
+}

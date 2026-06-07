@@ -367,7 +367,7 @@ function PlayerDetails() {
                                     {rankData(userStatOpposingTeam).map((stat, index) => (
                                         <tr key={index} className={getRankClass(index + 1)}>
                                             <td>{getRankIcon(index + 1)}</td>
-                                            <td>{stat.opposing_team}</td>                                            
+                                            <td>{stat.match_nature === '내전' ? `${stat.team_a_name} vs ${stat.opposing_team}` : stat.opposing_team}</td>
                                             <td>{stat.goal_cnt}</td>
                                             <td>{stat.assist_cnt}</td>
                                             <td>{stat.clean_cnt ?? 0}</td>
